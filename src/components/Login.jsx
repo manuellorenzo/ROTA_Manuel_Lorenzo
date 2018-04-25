@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Input, Button, Grid, Form, Image } from 'semantic-ui-react'
 
+import history from '../history';
+
 class Login extends Component {
     constructor(props) {
         super(props);
@@ -10,7 +12,7 @@ class Login extends Component {
     }
 
     goToRoute(route) {
-        this.props.history.push(route);
+        history.push(route);
     }
 
     render() {

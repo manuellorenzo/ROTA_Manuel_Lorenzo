@@ -1,8 +1,12 @@
 import React, { Component } from 'react';
 import { Input, Button, Grid, Form, Image, Menu } from 'semantic-ui-react'
+
 import CalendarPage from './Calendar';
 import Login from './Login';
 import App from './App';
+import Workers from './Workers';
+
+import history from '../history';
 
 
 function BasicRouting(props) {
@@ -10,8 +14,12 @@ function BasicRouting(props) {
     console.log('activePage', activePage);
     if (activePage === 'home') {
         return <CalendarPage />;
+    } else if(activePage === 'workers'){
+        return <Workers />;
+    }else if(activePage === 'login'){
+        history.push("/login");
     }
-    return <Login />;
+    return <Workers />;
 }
 
 class HorizontalMenu extends Component {
@@ -25,12 +33,12 @@ class HorizontalMenu extends Component {
                     value: 'Home'
                 },
                 {
-                    section: 'teams',
-                    value: 'Teams'
+                    section: 'workers',
+                    value: 'Workers'
                 },
                 {
-                    section: 'configuration',
-                    value: 'Configuration'
+                    section: 'login',
+                    value: 'Login'
                 }
             ]
         };

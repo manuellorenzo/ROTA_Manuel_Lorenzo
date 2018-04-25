@@ -7,7 +7,7 @@ function Logged(props) {
     if (isLogged === true) {
         return <HorizontalMenu />;
     }
-    return <Login history={props.history} />;
+    return <Login />;
 }
 
 class App extends Component {
@@ -20,7 +20,7 @@ class App extends Component {
     render() {
         return (
             <div>
-                <Logged isLogged = {this.state.isLogged} history = {this.props.history}/>
+                <Logged isLogged = {this.state.isLogged}/>
             </div>
         )
     }
