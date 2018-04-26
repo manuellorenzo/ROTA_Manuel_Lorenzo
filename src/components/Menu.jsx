@@ -5,6 +5,7 @@ import CalendarPage from './Calendar';
 import Login from './Login';
 import App from './App';
 import Workers from './Workers';
+import ConfigurationPage from './ConfigurationPage';
 
 import history from '../history';
 
@@ -16,8 +17,11 @@ function BasicRouting(props) {
         return <CalendarPage />;
     } else if(activePage === 'workers'){
         return <Workers />;
-    }else if(activePage === 'login'){
+    }else if(activePage === 'logout'){
         history.push("/login");
+        return null;
+    }else if(activePage === 'confi'){
+        return <ConfigurationPage />
     }
     return <Workers />;
 }
@@ -37,8 +41,12 @@ class HorizontalMenu extends Component {
                     value: 'Workers'
                 },
                 {
-                    section: 'login',
-                    value: 'Login'
+                    section: 'confi',
+                    value: 'Configuration'
+                },
+                {
+                    section: 'logout',
+                    value: 'Logout'
                 }
             ]
         };
@@ -51,7 +59,7 @@ class HorizontalMenu extends Component {
 
         return (
             <div>
-                <Menu fixed="top" fluid widths={3} className="noScrollBar">
+                <Menu fixed="top" fluid widths={this.state.pages.length} className="noScrollBar">
                     {
                         this.state.pages.map((item, index) => (
                             <Menu.Item name={item.section} active={activeItem === item.section}

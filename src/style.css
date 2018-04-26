@@ -18,3 +18,8 @@
 .noScrollBar {
   overflow: hidden !important;
 }
+
+/*Align to center horizontally*/
+.centerContent{
+  margin: 0 auto !important;
+} 

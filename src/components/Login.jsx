@@ -26,14 +26,14 @@ class Login extends Component {
                     </Grid.Row>
                     <Grid.Row centered>
                         <Grid.Column mobile={14} tablet={7} computer={5}>
-                            <Form>
+                            <Form onSubmit={() => this.goToRoute("/menu")}>
                                 <Form.Field>
                                     <Form.Input label="Username" placeholder="Username" />
                                 </Form.Field>
                                 <Form.Field>
                                     <Form.Input label="Password" placeholder="Password" />
                                 </Form.Field>
-                                <Button fluid primary onClick={() => this.goToRoute("/menu")} type='submit'>Submit</Button>
+                                <Button fluid primary type='submit'>Submit</Button>
                             </Form>
                         </Grid.Column>
                     </Grid.Row>
