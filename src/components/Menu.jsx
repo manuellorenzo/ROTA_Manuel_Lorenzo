@@ -8,6 +8,7 @@ import Workers from './Workers';
 import ConfigurationPage from './ConfigurationPage';
 
 import history from '../history';
+import Reports from './Report';
 
 
 function BasicRouting(props) {
@@ -22,6 +23,8 @@ function BasicRouting(props) {
         return null;
     }else if(activePage === 'confi'){
         return <ConfigurationPage />
+    }else if(activePage === 'reports'){
+        return <Reports />;
     }
     return <Workers />;
 }
@@ -43,6 +46,10 @@ class HorizontalMenu extends Component {
                 {
                     section: 'confi',
                     value: 'Configuration'
+                },
+                {
+                    section: 'reports',
+                    value: 'Reports'
                 },
                 {
                     section: 'logout',

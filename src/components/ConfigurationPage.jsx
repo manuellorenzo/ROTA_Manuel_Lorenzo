@@ -9,12 +9,16 @@ class ConfigurationPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            time: '10:00'
+            time: '0'
         };
+        this.handleTimeChange = this.handleTimeChange.bind(this);
+
     }
 
-    onChange = time => this.setState({ time })
-
+    handleTimeChange(time) {
+        console.log(time);     // <- prints "3600" if "01:00" is picked
+        this.setState({ time });
+    }
     render() {
         return (
             <div>
@@ -82,10 +86,16 @@ class ConfigurationPage extends Component {
                                     <Grid>
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
-                                                <TimePicker start="10:00" end="21:00" step={1} />
+                                                <Form.Field>
+                                                    <label>Night Start Time</label>
+                                                    <TimePicker nChange={this.handleTimeChange} value={this.state.time} step={10} format={24} />
+                                                </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
-                                                <TimePicker start="10:00" end="21:00" step={30} />
+                                                <Form.Field>
+                                                    <label>Night End Time</label>
+                                                    <TimePicker onChange={this.handleTimeChange} value={this.state.time} step={10} format={24}/>
+                                                </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
                                         <Grid.Row>

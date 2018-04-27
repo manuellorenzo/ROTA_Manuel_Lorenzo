@@ -1,12 +1,18 @@
 import React, { Component } from "react";
+import { Grid, Button, Header, Icon, Modal, Container } from 'semantic-ui-react'
+import { DragDropContext } from 'react-dnd'
+
+import HTML5Backend from 'react-dnd-html5-backend'
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import Calendar from "react-big-calendar";
 import moment from "moment";
-import { Grid, Button, Header, Icon, Modal, Container } from 'semantic-ui-react'
 
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.less'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import '../style.css';
 
 Calendar.setLocalizer(Calendar.momentLocalizer(moment));
+const DragAndDropCalendar = withDragAndDrop(Calendar)
 
 class CalendarPage extends Component {
     constructor(props) {
@@ -21,9 +27,26 @@ class CalendarPage extends Component {
             ],
             open: false
         };
+        this.moveEvent = this.moveEvent.bind(this);
     }
 
     onClose = () => this.setState({ open: false });
+
+    moveEvent({ event, start, end }) {
+        const { events } = this.state
+    
+        const idx = events.indexOf(event)
+        const updatedEvent = { ...event, start, end }
+    
+        const nextEvents = [...events]
+        nextEvents.splice(idx, 1, updatedEvent)
+    
+        this.setState({
+          events: nextEvents,
+        })
+    
+        alert(`${event.title} was dropped onto ${event.start}`)
+      }
 
     render() {
         return (
@@ -38,11 +61,12 @@ class CalendarPage extends Component {
                         </Grid.Row>
                         <Grid.Row centered>
                             <Grid.Column>
-                                <Calendar
+                                <DragAndDropCalendar
                                     defaultDate={new Date()}
                                     defaultView="month"
                                     events={this.state.events}
                                     style={{ height: "100vh" }}
+                                    onEventDrop={this.moveEvent}
                                 />
                             </Grid.Column>
                         </Grid.Row>
