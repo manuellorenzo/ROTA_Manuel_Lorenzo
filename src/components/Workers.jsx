@@ -1,104 +1,18 @@
 import React, { Component } from 'react';
-import { List, Image, Grid, Table, Header, Button, Search, Container } from 'semantic-ui-react';
+import { connect } from 'react-redux';
+
+import { List, Image, Grid, Table, Header, Button, Search, Container, Divider } from 'semantic-ui-react';
 import _ from 'lodash'
 
+import * as workersActions from '../actions/workersActions';
 
-function GenericTable() {
-    return <Table celled>
-        <Table.Header>
-            <Table.Row>
-                <Table.HeaderCell>On Call Employees</Table.HeaderCell>
-            </Table.Row>
-        </Table.Header>
-        <Table.Body>
-            <Table.Row>
-                <Table.Cell>
-                    <Header as='h4' image>
-                        <Header.Content>
-                            Lena
-<Header.Subheader>Human Resources</Header.Subheader>
-                        </Header.Content>
-                    </Header>
-                    <Button floated="right">Remove from pool</Button>
-                </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-                <Table.Cell>
-                    <Header as='h4' image>
-                        <Header.Content>
-                            Matthew
-<Header.Subheader>Fabric Design</Header.Subheader>
-                        </Header.Content>
-                    </Header>
-                    <Button floated="right">Remove from pool</Button>
-                </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-                <Table.Cell>
-                    <Header as='h4' image>
-                        <Header.Content>
-                            Matthew
-                            <Header.Subheader>Fabric Design</Header.Subheader>
-                        </Header.Content>
-                    </Header>
-                    <Button floated="right">Remove from pool</Button>
-                </Table.Cell>
-            </Table.Row>
-            <Table.Row>
-                <Table.Cell>
-                    <Header as='h4' image>
-                        <Header.Content>
-                            Mark
-<Header.Subheader>Executive</Header.Subheader>
-                        </Header.Content>
-                    </Header>
-                    <Button floated="right">Remove from pool</Button>
-                </Table.Cell>
-            </Table.Row>
-        </Table.Body>
-    </Table>
-}
+import ReactTable from 'react-table';
+import "react-table/react-table.css";
 
-function GenericList() {
-    return <List divided verticalAlign='middle'>
-        <List.Item>
-            <List.Content floated='right'>
-                <Button>Add to On Call pool</Button>
-                <Button>Remove</Button>
-            </List.Content>
-            <List.Content>
-                Lena
-      </List.Content>
-        </List.Item>
-        <List.Item>
-            <List.Content floated='right'>
-                <Button>Add to On Call pool</Button>
-                <Button>Remove</Button>
-            </List.Content>
-            <List.Content>
-                Lindsay
-      </List.Content>
-        </List.Item>
-        <List.Item>
-            <List.Content floated='right'>
-                <Button>Add to On Call pool</Button>
-                <Button>Remove</Button>
-            </List.Content>
-            <List.Content>
-                Mark
-      </List.Content>
-        </List.Item>
-        <List.Item>
-            <List.Content floated='right'>
-                <Button>Add to On Call pool</Button>
-                <Button>Remove</Button>
-            </List.Content>
-            <List.Content>
-                Molly
-      </List.Content>
-        </List.Item>
-    </List>
-}
+import BootstrapTable from 'react-bootstrap-table-next';
+import paginationFactory from 'react-bootstrap-table2-paginator';
+
+import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 
 class Workers extends Component {
     constructor(props) {
@@ -107,25 +21,62 @@ class Workers extends Component {
             isLoading: false,
             results: []
         }
+        this.BootstrapTableWorkers = this.BootstrapTableWorkers.bind(this);
     }
 
+    BootstrapTableWorkers(props) {
+        console.log('props table', props)
+        const CaptionElement = () => <div><Header as="h2">{props.caption}</Header><Divider /></div>
+        return (
+            <BootstrapTable
+                keyField={props.keyField}
+                data={props.data}
+                columns={props.columns}
+                pagination={paginationFactory()}
+                noDataIndication="Table is Empty"
+                caption={<CaptionElement />}
+            />
+        )
+    }
     render() {
+        const columnsOnCall = [{
+            dataField: "worker.name",
+            text: 'Name',
+            style: {
+                'vertical-align': 'middle'
+            }
+        }, {
+            text: 'Actions',
+            formatter: () => <Button fluid onClick={() => this.props.removeWorker(worker)}>Remove from On Call Pool</Button>
+        }];
+
+        const columnsWorkers = [{
+            dataField: "worker.name",
+            text: 'Name',
+            style: {
+                'vertical-align': 'middle'
+            }
+        }, {
+            text: 'Actions',
+            formatter: () => <Button fluid>Add to On Call Pool</Button>
+        }];
+
         return (
             <div>
                 <Container>
                     <Grid centered columns='equal'>
                         <Grid.Row>
                             <Grid.Column>
-                                <Button floated="left">Auto-schelude</Button>
-                                <Button floated="right">Add employee</Button>
+                                <Button floated="left" onClick={() => console.log('workers', this.props.workers)}>Auto-schelude</Button>
+                                <Button floated="right" onClick={() => this.props.addWorker({ id: this.props.workers.length + 1, name: 'Manuel Lorenzo', role: 'Admin' })}>Add employee</Button>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column>
-                                <GenericTable />
+                                <this.BootstrapTableWorkers data={this.props.workers} keyField="workers.name" columns={columnsOnCall} caption={"On Call"} />
                             </Grid.Column>
                             <Grid.Column>
-                                <GenericList />
+                                <this.BootstrapTableWorkers data={this.props.workers} keyField="workers.name" columns={columnsWorkers} caption={"Workers"} />
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
@@ -134,4 +85,22 @@ class Workers extends Component {
         )
     }
 }
-export default Workers;
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        // You can now say this.props.workers
+        workers: state.workers
+    }
+};
+
+// Maps actions to props
+const mapDispatchToProps = (dispatch) => {
+    return {
+        // You can now say this.props.createBook
+        addWorker: worker => dispatch(workersActions.addWorker(worker)),
+        removeWorker: worker => dispatch(workersActions.removeWorker(worker)),
+
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Workers);

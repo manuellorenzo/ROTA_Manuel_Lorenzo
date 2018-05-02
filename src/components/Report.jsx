@@ -23,7 +23,7 @@ function GenericTable() {
                     </Header>
                 </Table.Cell>
                 <Table.Cell>
-                    <a className="floatRight">999999999</a>
+                    <strong>999999999</strong>
                 </Table.Cell>
             </Table.Row>
         </Table.Body>

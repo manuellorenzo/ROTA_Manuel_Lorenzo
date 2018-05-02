@@ -69,7 +69,7 @@ class HorizontalMenu extends Component {
                 <Menu fixed="top" fluid widths={this.state.pages.length} className="noScrollBar">
                     {
                         this.state.pages.map((item, index) => (
-                            <Menu.Item name={item.section} active={activeItem === item.section}
+                            <Menu.Item key={item.section.toString()} name={item.section} active={activeItem === item.section}
                                 onClick={this.handleItemClick}>{item.value}</Menu.Item>
                         )
                         )
