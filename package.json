@@ -5,6 +5,7 @@
   "dependencies": {
     "ajv": "^6.4.0",
     "ajv-keywords": "^3.2.0",
+    "griddle-react": "^1.0.0",
     "history": "^4.7.2",
     "moment": "^2.22.1",
     "momentjs": "^2.0.0",
@@ -23,9 +24,11 @@
     "react-scripts": "1.1.4",
     "react-table": "^6.8.2",
     "react-time-picker": "^2.3.2",
+    "reactable": "^0.14.1",
     "redux": "^4.0.0",
     "semantic-ui": "^2.3.1",
     "semantic-ui-react": "^0.79.1",
+    "sematable": "^1.9.1",
     "styled-components": "^3.2.6",
     "yarn": "^1.6.0"
   },

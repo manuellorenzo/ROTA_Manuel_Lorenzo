@@ -3,7 +3,7 @@ export const addWorker = worker => ({
     worker
   })
 
-  export const removeWorker = worker => ({
+  export const removeWorker = id => ({
     type: 'REMOVE_WORKER',
-    worker
+    id
   })
