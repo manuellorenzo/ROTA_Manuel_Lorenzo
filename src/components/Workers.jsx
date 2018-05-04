@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { List, Image, Grid, Table, Header, Button, Search, Container, Divider } from 'semantic-ui-react';
+import { List, Image, Grid, Table, Header, Button, Search, Container, Divider, Icon } from 'semantic-ui-react';
 import _ from 'lodash'
 
 import * as workersActions from '../actions/workersActions';
+import '../style.css';
 
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
@@ -12,7 +13,6 @@ import "react-table/react-table.css";
 import BootstrapTable from 'react-bootstrap-table-next';
 import paginationFactory from 'react-bootstrap-table2-paginator';
 
-import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 
 
 class Workers extends Component {
@@ -22,67 +22,28 @@ class Workers extends Component {
             isLoading: false,
             results: []
         }
-        this.BootstrapTableWorkers = this.BootstrapTableWorkers.bind(this);
         this.ReactTableWorkers = this.ReactTableWorkers.bind(this);
+        this.ButtonsTableWorkers = this.ButtonsTableWorkers.bind(this);
     }
 
-    BootstrapTableWorkers(props) {
-        console.log('props table', props)
-        const CaptionElement = () => <div><Header as="h2">{props.caption}</Header><Divider /></div>
-        const options = {
-            onSizePerPageChange: (sizePerPage, page) => {
-                console.log('Size per page change!!!');
-                console.log('Newest size per page:' + sizePerPage);
-                console.log('Newest page:' + page);
-            },
-            onPageChange: (page, sizePerPage) => {
-                console.log('Page change!!!');
-                console.log('Newest size per page:' + sizePerPage);
-                console.log('Newest page:' + page);
-            }
-        };
-        return (
-            <BootstrapTable
-                keyField={props.keyField}
-                data={props.data}
-                columns={props.columns}
-                noDataIndication="Table is Empty"
-                caption={<CaptionElement />}
-                height='120' scrollTop={'Bottom'}
-            />
-        )
-    }
-
-    ReactTableWorkers() {
+    ReactTableWorkers(props) {
         return (
             <div>
                 <ReactTable
-                    getTrProps={(state, rowInfo, column) => {
+                    getTdProps={(state, rowInfo, column) => {
                         return {
                             style: {
-                               "text-align": "center"
+                                "whiteSpace": "normal",
+                                "display": "flex",
+                                "alignItems": "center",
+                                "justifyContent": "center"
+
                             }
                         };
                     }}
-                    data={this.props.workers}
+                    data={props.data}
                     noDataText="No workers"
-                    columns={[
-                        {
-                            Header: "Name",
-                            id: "name",
-                            accessor: d => d.name,
-                        },
-                        {
-                            Header: "ID",
-                            id: "id",
-                            accessor: d => d.id,
-                        },
-                        {
-                            Cell: row => (
-                                <Button fluid onClick={() => this.props.removeWorker(row.row.id)} >Remove from the pool</Button>
-                            )
-                        }
-                    ]}
+                    columns={props.columns}
                     defaultPageSize={10}
                     className="-striped -highlight"
                 />
@@ -90,42 +51,67 @@ class Workers extends Component {
         )
     }
 
-    render() {
-        const columnsOnCall = [{
-            dataField: "name",
-            text: 'Name',
-            style: {
-                'verticalAlign': 'middle'
-            },
-        }, {
-            dataField: "id",
-            text: 'ID',
-            style: {
-                'verticalAlign': 'middle'
-            }
-        }, {
-            dataField: "actions",
-            text: 'Actions',
-            formatter: (cell, row) => <Button fluid onClick={() => this.props.removeWorker(row.id)}>Remove from On Call Pool</Button>
-        }];
+    ButtonsTableWorkers(props) {
+        console.log("ROW VALUE", props.row.row.id);
+        console.log("PROP PLS", this.props.onCall.map((item) => props.row.row.id === item.id));
+        if (this.props.onCall.map((item) => props.row.row.id === item.id).includes(true)) {
+            return (<div style={{ "width": "100%" }}>
+                <Button fluid className="flexboxCenterVerHor" icon='close' onClick={() => {
+                    this.props.removeWorker(props.row.row.id)
+                    this.props.removeFromOnCall(props.row.row.id)
+                }} />
+            </div>)
+        } else {
+            return (<div style={{ "width": "100%" }}>
+                <Button.Group widths='2'>
+                    <Button className="flexboxCenterVerHor" icon='bell' onClick={() => this.props.addToOnCall(props.row.row)} />
+                    <Button className="flexboxCenterVerHor" icon='close' onClick={() => {
+                        this.props.removeWorker(props.row.row.id)
+                        this.props.removeFromOnCall(props.row.row.id)
+                    }} />
+                </Button.Group>
+            </div>)
+        }
+    }
 
-        const columnsWorkers = [{
-            dataField: "name",
-            text: 'Name',
-            style: {
-                'verticalAlign': 'middle'
+    render() {
+        const columnOnCall = [
+            {
+                Header: "Name",
+                id: "name",
+                accessor: d => d.name,
+            },
+            {
+                Header: "ID",
+                id: "id",
+                accessor: d => d.id,
+            },
+            {
+                Cell: row => (
+                    <Button fluid icon='bell slash' onClick={() => this.props.removeFromOnCall(row.row.id)} />
+                )
             }
-        }, {
-            dataField: "id",
-            text: 'ID',
-            style: {
-                'verticalAlign': 'middle'
+        ]
+
+        const columnWorkers = [
+            {
+                Header: "Name",
+                id: "name",
+                accessor: d => d.name,
+            },
+            {
+                Header: "ID",
+                id: "id",
+                accessor: d => d.id,
+            },
+            {
+                Cell: row => (
+                    <div style={{ "width": "100%" }}>
+                        <this.ButtonsTableWorkers row={row} />
+                    </div>
+                )
             }
-        }, {
-            dataField: "actions",
-            text: 'Actions',
-            formatter: () => <Button fluid>Add to On Call Pool</Button>
-        }];
+        ]
 
         return (
             <div>
@@ -139,11 +125,15 @@ class Workers extends Component {
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column>
-                                <this.BootstrapTableWorkers remote data={this.props.workers} keyField={"id"} columns={columnsOnCall} caption={"On Call"} />
+                                <div>
+                                    <Header as="h2">On Call</Header><Divider />
+                                    <this.ReactTableWorkers data={this.props.onCall} columns={columnOnCall} />
+                                </div>
                             </Grid.Column>
                             <Grid.Column>
-                                <div style={{ verticalAlign: "middle" }}>
-                                    <this.ReactTableWorkers />
+                                <div>
+                                    <Header as="h2">Workers</Header><Divider />
+                                    <this.ReactTableWorkers data={this.props.workers} columns={columnWorkers} />
                                 </div>
                             </Grid.Column>
                         </Grid.Row>
@@ -158,7 +148,8 @@ const mapStateToProps = (state, ownProps) => {
     console.log('maptostate', state);
     return {
         // You can now say this.props.workers
-        workers: state.workers
+        workers: state.workersReducer.workers,
+        onCall: state.workersReducer.onCall
     }
 };
 
@@ -168,7 +159,8 @@ const mapDispatchToProps = (dispatch) => {
         // You can now say this.props.createBook
         addWorker: worker => dispatch(workersActions.addWorker(worker)),
         removeWorker: id => dispatch(workersActions.removeWorker(id)),
-
+        addToOnCall: worker => dispatch(workersActions.addToOnCall(worker)),
+        removeFromOnCall: id => dispatch(workersActions.removeFromOnCall(id))
     }
 };
 

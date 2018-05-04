@@ -1,29 +1,41 @@
 /*---------------------------IT FIX THE MODAL BUG-----------------------*/
+
 /*More info here: https://github.com/Semantic-Org/Semantic-UI-React/issues/2550 */
+
 .ui.dimmer {
-    display: flex !important;
-  }
-  
-  .ui.modal {
-    margin-top: 0;
-  }
+  display: flex !important;
+}
+
+.ui.modal {
+  margin-top: 0;
+}
+
 /*-----------------------------------------------------------------------*/
 
 /*Padding to avoid fixed navbar above the main content*/
-.paddingTopContent{
+
+.paddingTopContent {
   padding-top: 55px;
 }
 
 /*Those d*mmed scrollbars*/
+
 .noScrollBar {
   overflow: hidden !important;
 }
 
 /*Align to center horizontally*/
-.centerContent{
-  margin: 0 auto !important;
-} 
 
-.floatRight{
-  float:right;
+.centerContent {
+  margin: 0 auto !important;
+}
+
+.floatRight {
+  float: right;
+}
+
+.flexboxCenterVerHor.flexboxCenterVerHor.flexboxCenterVerHor.flexboxCenterVerHor.flexboxCenterVerHor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

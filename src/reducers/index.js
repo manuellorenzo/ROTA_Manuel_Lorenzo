@@ -1,7 +1,11 @@
-import workers from './workers';
-import { combineReducers } from 'redux'
+import workersReducer from './workersReducer';
+import compensationsReducer from './compensationsReducer';
 
-export default workers;
-/*export default combineReducers({
-    workers
-  })*/
+import {
+  combineReducers
+} from 'redux'
+
+export default combineReducers({
+  workersReducer,
+  compensationsReducer
+})

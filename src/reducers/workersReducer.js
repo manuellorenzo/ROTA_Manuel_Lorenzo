@@ -1,5 +1,6 @@
-const workers = (state = {
-    workers: []
+const workersReducer = (state = {
+    workers: [],
+    onCall: []
 }, action) => {
     switch (action.type) {
         case 'ADD_WORKER':
@@ -14,9 +15,19 @@ const workers = (state = {
             return { ...state,
                 workers: state.workers.filter(item => item.id !== action.id)
             }
+        case 'ADD_ONCALL_WORKER':
+            return {
+                ...state,
+                onCall: [...state.onCall, action.worker]
+            }
+        case 'REMOVE_ONCALL_WORKER':
+            return {
+                ...state,
+                onCall: state.onCall.filter(item => item.id !== action.id)
+            }
         default:
             return state
     }
 }
 
-export default workers
+export default workersReducer
