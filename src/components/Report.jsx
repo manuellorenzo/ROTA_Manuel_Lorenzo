@@ -1,34 +1,14 @@
 import React, { Component } from 'react';
 import { List, Image, Grid, Table, Header, Button, Search, Container } from 'semantic-ui-react';
+import { connect } from 'react-redux';
+
 import _ from 'lodash'
 
 import '../style.css';
 
-function GenericTable() {
-    return <Table celled>
-        <Table.Header>
-            <Table.Row>
-                <Table.HeaderCell>Employees</Table.HeaderCell>
-                <Table.HeaderCell>Compensation</Table.HeaderCell>
-            </Table.Row>
-        </Table.Header>
-        <Table.Body>
-            <Table.Row>
-                <Table.Cell>
-                    <Header as='h4' image>
-                        <Header.Content>
-                            Lena
-                        <Header.Subheader>Human Resources</Header.Subheader>
-                        </Header.Content>
-                    </Header>
-                </Table.Cell>
-                <Table.Cell>
-                    <strong>999999999</strong>
-                </Table.Cell>
-            </Table.Row>
-        </Table.Body>
-    </Table>
-}
+import ReactTable from 'react-table';
+import "react-table/react-table.css";
+import * as reportsActions from '../actions/reportsActions';
 
 class Reports extends Component {
     constructor(props) {
@@ -37,9 +17,85 @@ class Reports extends Component {
             isLoading: false,
             results: []
         }
+        this.ReactTableMonths = this.ReactTableMonths.bind(this);
+    }
+
+    ReactTableMonths(props) {
+        return (
+            <div>
+                <ReactTable
+                    getTdProps={(state, rowInfo, column) => {
+                        return {
+                            style: {
+                                "whiteSpace": "normal",
+                                "display": "flex",
+                                "alignItems": "center",
+                                "justifyContent": "center"
+
+                            }
+                        };
+                    }}
+                    filterable
+                    data={props.data}
+                    noDataText="No workers"
+                    columns={props.columns}
+                    defaultPageSize={10}
+                    className="-striped -highlight"
+                    SubComponent={row => {
+                        console.log('row',row)
+                        return (
+                            <ReactTable
+                                getTdProps={(state, rowInfo, column) => {
+                                    return {
+                                        style: {
+                                            "whiteSpace": "normal",
+                                            "display": "flex",
+                                            "alignItems": "center",
+                                            "justifyContent": "center"
+
+                                        }
+                                    };
+                                }}
+                                data={row.row._original.workers}
+                                columns={[
+                                    {
+                                        Header: "Name",
+                                        id: "name",
+                                        accessor: d => d.name,
+                                    },
+                                    {
+                                        Header: "ID",
+                                        id: "_id",
+                                        accessor: d => d._id,
+                                    },
+                                    {
+                                        Header: "Compensation",
+                                        id: "compensation",
+                                        accessor: d => d.compensation,
+                                    }
+                                ]}
+                                defaultPageSize={5}
+                            />
+                        );
+                    }}
+                />
+            </div>
+        )
     }
 
     render() {
+        const columnMonths = [
+            {
+                Header: "Month",
+                id: "monthName",
+                accessor: d => d.monthName,
+            },
+            {
+                Header: "Overall compensation",
+                id: "overallCompensation",
+                accessor: d => d.overallCompensation,
+            }
+        ]
         return (
             <div>
                 <Container>
@@ -47,12 +103,13 @@ class Reports extends Component {
                         <Grid.Row>
                             <Grid.Column>
                                 <Button floated="left">Auto-schelude</Button>
-                                <Button floated="right">Add employee</Button>
+                                <Button floated="right" onClick={() => this.props.addMonth({monthName: "Mayo", overallCompensation:"55", 
+                                workers:[{_id: 1, name:'Jose', compensation:"55"},{_id: 2, name:'Ismael', compensation:"35"}]})}>Add employee</Button>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column>
-                                <GenericTable />
+                                <this.ReactTableMonths columns={columnMonths} data={this.props.months} />
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
@@ -61,4 +118,21 @@ class Reports extends Component {
         )
     }
 }
-export default Reports;
+
+const mapStateToProps = (state, ownProps) => {
+    console.log('maptostate', state);
+    return {
+        // You can now say this.props.workers
+        workers: state.workersReducer.workers,
+        months: state.reportsReducer.months
+    }
+};
+
+// Maps actions to props
+const mapDispatchToProps = (dispatch) => {
+    return {
+        // You can now say this.props.createBook
+        addMonth: month => dispatch(reportsActions.addMonth(month)),
+    }
+};
+export default connect(mapStateToProps, mapDispatchToProps)(Reports);

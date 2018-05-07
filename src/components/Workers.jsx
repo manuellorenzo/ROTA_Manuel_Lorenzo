@@ -10,9 +10,6 @@ import '../style.css';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
 
-import BootstrapTable from 'react-bootstrap-table-next';
-import paginationFactory from 'react-bootstrap-table2-paginator';
-
 
 
 class Workers extends Component {
@@ -41,6 +38,7 @@ class Workers extends Component {
                             }
                         };
                     }}
+                    filterable
                     data={props.data}
                     noDataText="No workers"
                     columns={props.columns}
@@ -87,9 +85,11 @@ class Workers extends Component {
                 accessor: d => d.id,
             },
             {
+                filterable: false,
                 Cell: row => (
                     <Button fluid icon='bell slash' onClick={() => this.props.removeFromOnCall(row.row.id)} />
                 )
+
             }
         ]
 
@@ -105,6 +105,7 @@ class Workers extends Component {
                 accessor: d => d.id,
             },
             {
+                filterable: false,
                 Cell: row => (
                     <div style={{ "width": "100%" }}>
                         <this.ButtonsTableWorkers row={row} />

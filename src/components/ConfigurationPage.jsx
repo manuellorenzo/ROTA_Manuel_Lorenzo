@@ -39,6 +39,7 @@ class ConfigurationPage extends Component {
     componentDidMount() {
         this.setState(this.props.compensations)
     }
+
     componentWillReceiveProps(props) {
         console.log("PROPS", props);
         this.setState(
@@ -47,7 +48,7 @@ class ConfigurationPage extends Component {
     }
 
     handleChange = (e, { name, value }) => {
-        if (value < 0 || value === "") {
+        if (value < 0) {
             value = 0;
         }
         this.setState({ [name]: value })
@@ -63,6 +64,13 @@ class ConfigurationPage extends Component {
         this.props.changeWeekendMoney(weekendMoney);
         this.props.changeNightEndTime(nightEndTime);
         this.props.changeNightStartTime(nightStartTime);
+    }
+
+    handleBlur = (e) => {
+        if (e.target.value === "") {
+            e.target.value = 1;
+        }
+        this.setState({ [e.target.name]: e.target.value })
     }
 
     render() {
@@ -84,36 +92,42 @@ class ConfigurationPage extends Component {
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Base money" name="baseMoney" type='number' min={0} placeholder="Base money" value={this.state.baseMoney} onChange={this.handleChange} />
+                                                    <Form.Input label="Base money" name="baseMoney" type='number' min={0} placeholder="Base money" 
+                                                    value={this.state.baseMoney} onChange={this.handleChange} onBlur={this.handleBlur}/>
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Base time" name="baseTime" type='number' placeholder="Base time" value={this.state.baseTime} onChange={this.handleChange} />
+                                                    <Form.Input label="Base time" name="baseTime" type='number' placeholder="Base time" value={this.state.baseTime} 
+                                                    onChange={this.handleChange} onBlur={this.handleBlur}/>
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Money multiplier" name="moneyMult" type='number' placeholder="Money multiplier" value={this.state.moneyMult} onChange={this.handleChange} />
+                                                    <Form.Input label="Money multiplier" name="moneyMult" type='number' placeholder="Money multiplier" value={this.state.moneyMult} 
+                                                    onChange={this.handleChange} onBlur={this.handleBlur}/>
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Money multiplier" name="timeMult" type='number' placeholder="Time multiplier" value={this.state.timeMult} onChange={this.handleChange} />
+                                                    <Form.Input label="Money multiplier" name="timeMult" type='number' placeholder="Time multiplier" value={this.state.timeMult} 
+                                                    onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Week money" name="weekMoney" type='number' placeholder="Week money" value={this.state.weekMoney} onChange={this.handleChange} />
+                                                    <Form.Input label="Week money" name="weekMoney" type='number' placeholder="Week money" value={this.state.weekMoney} 
+                                                    onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Weekend money" name="weekendMoney" type='number' placeholder="Weekend money" value={this.state.weekendMoney} onChange={this.handleChange} />
+                                                    <Form.Input label="Weekend money" name="weekendMoney" type='number' placeholder="Weekend money" value={this.state.weekendMoney} 
+                                                    onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
