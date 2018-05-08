@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { Input, Button, Grid, Form, Image, Menu, Container, Header, Divider } from 'semantic-ui-react'
 import { connect } from 'react-redux';
 
-import TimePicker from 'react-bootstrap-time-picker';
+//import TimePicker from 'react-bootstrap-time-picker';
+import { TimePicker } from 'antd';
+import 'antd/dist/antd.css';
 import moment from 'moment';
 import history from '../history';
 
@@ -12,8 +14,8 @@ class ConfigurationPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            nightEndTime: '0',
-            nightStartTime: '0',
+            nightEndTime: moment(),
+            nightStartTime: moment(),
             baseMoney: "1",
             baseTime: "1",
             moneyMult: "1",
@@ -37,6 +39,7 @@ class ConfigurationPage extends Component {
     }
 
     componentDidMount() {
+        console.log("componentDidMount")
         this.setState(this.props.compensations)
     }
 
@@ -92,42 +95,42 @@ class ConfigurationPage extends Component {
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Base money" name="baseMoney" type='number' min={0} placeholder="Base money" 
-                                                    value={this.state.baseMoney} onChange={this.handleChange} onBlur={this.handleBlur}/>
+                                                    <Form.Input label="Base money" name="baseMoney" type='number' min={0} placeholder="Base money"
+                                                        value={this.state.baseMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Base time" name="baseTime" type='number' placeholder="Base time" value={this.state.baseTime} 
-                                                    onChange={this.handleChange} onBlur={this.handleBlur}/>
+                                                    <Form.Input label="Base time" name="baseTime" type='number' placeholder="Base time" value={this.state.baseTime}
+                                                        onChange={this.handleChange} onBlur={this.handleBlur} />
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Money multiplier" name="moneyMult" type='number' placeholder="Money multiplier" value={this.state.moneyMult} 
-                                                    onChange={this.handleChange} onBlur={this.handleBlur}/>
+                                                    <Form.Input label="Money multiplier" name="moneyMult" type='number' placeholder="Money multiplier" value={this.state.moneyMult}
+                                                        onChange={this.handleChange} onBlur={this.handleBlur} />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Money multiplier" name="timeMult" type='number' placeholder="Time multiplier" value={this.state.timeMult} 
-                                                    onBlur={this.handleBlur} onChange={this.handleChange} />
+                                                    <Form.Input label="Money multiplier" name="timeMult" type='number' placeholder="Time multiplier" value={this.state.timeMult}
+                                                        onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Week money" name="weekMoney" type='number' placeholder="Week money" value={this.state.weekMoney} 
-                                                    onBlur={this.handleBlur} onChange={this.handleChange} />
+                                                    <Form.Input label="Week money" name="weekMoney" type='number' placeholder="Week money" value={this.state.weekMoney}
+                                                        onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Weekend money" name="weekendMoney" type='number' placeholder="Weekend money" value={this.state.weekendMoney} 
-                                                    onBlur={this.handleBlur} onChange={this.handleChange} />
+                                                    <Form.Input label="Weekend money" name="weekendMoney" type='number' placeholder="Weekend money" value={this.state.weekendMoney}
+                                                        onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
@@ -149,13 +152,15 @@ class ConfigurationPage extends Component {
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field>
                                                     <label>Night Start Time</label>
-                                                    <TimePicker onChange={this.handleNightStartTimeChange} value={this.state.nightStartTime} step={10} format={24} />
+                                                    <TimePicker style={{width: "100%"}} value={moment(this.state.nightStartTime, 'HH:mm')} 
+                                                    onChange={this.handleNightStartTimeChange} format={"HH:mm"} allowEmpty="false" inputReadOnly/>
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
                                                     <label>Night End Time</label>
-                                                    <TimePicker onChange={this.handleNightEndTimeChange} value={this.state.nightEndTime} step={10} format={24} />
+                                                    <TimePicker style={{width: "100%"}} value={moment(this.state.nightEndTime, 'HH:mm')} 
+                                                    onChange={this.handleNightEndTimeChange} format={"HH:mm"} allowEmpty="false" inputReadOnly/>
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>

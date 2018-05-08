@@ -1,7 +1,7 @@
 const compensationsReducer = (state = {
     compensations: {
-        nightEndTime: "0",
-        nightStartTime: "0",
+        nightEndTime: "12:00",
+        nightStartTime: "12:00",
         baseMoney: "1",
         baseTime: "1",
         moneyMult: "1",
