@@ -153,14 +153,14 @@ class ConfigurationPage extends Component {
                                                 <Form.Field>
                                                     <label>Night Start Time</label>
                                                     <TimePicker style={{width: "100%"}} value={moment(this.state.nightStartTime, 'HH:mm')} 
-                                                    onChange={this.handleNightStartTimeChange} format={"HH:mm"} allowEmpty="false" inputReadOnly/>
+                                                    onChange={this.handleNightStartTimeChange} format={"HH:mm"} allowEmpty={false} inputReadOnly/>
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
                                                     <label>Night End Time</label>
                                                     <TimePicker style={{width: "100%"}} value={moment(this.state.nightEndTime, 'HH:mm')} 
-                                                    onChange={this.handleNightEndTimeChange} format={"HH:mm"} allowEmpty="false" inputReadOnly/>
+                                                    onChange={this.handleNightEndTimeChange} format={"HH:mm"} allowEmpty={false} inputReadOnly/>
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>

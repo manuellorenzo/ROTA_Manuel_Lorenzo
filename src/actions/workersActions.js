@@ -3,15 +3,15 @@ export const addWorker = worker => ({
     worker
   })
 
-  export const removeWorker = id => ({
+  export const removeWorker = _id => ({
     type: 'REMOVE_WORKER',
-    id
+    _id
   })
   export const addToOnCall = worker => ({
     type: 'ADD_ONCALL_WORKER',
     worker
   })
-  export const removeFromOnCall = id => ({
+  export const removeFromOnCall = _id => ({
     type: 'REMOVE_ONCALL_WORKER',
-    id
+    _id
   })

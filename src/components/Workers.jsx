@@ -50,13 +50,13 @@ class Workers extends Component {
     }
 
     ButtonsTableWorkers(props) {
-        console.log("ROW VALUE", props.row.row.id);
-        console.log("PROP PLS", this.props.onCall.map((item) => props.row.row.id === item.id));
-        if (this.props.onCall.map((item) => props.row.row.id === item.id).includes(true)) {
+        console.log("ROW VALUE", props.row.row._id);
+        console.log("PROP PLS", this.props.onCall.map((item) => props.row.row._id === item._id));
+        if (this.props.onCall.map((item) => props.row.row._id === item._id).includes(true)) {
             return (<div style={{ "width": "100%" }}>
                 <Button fluid className="flexboxCenterVerHor" icon='close' onClick={() => {
-                    this.props.removeWorker(props.row.row.id)
-                    this.props.removeFromOnCall(props.row.row.id)
+                    this.props.removeWorker(props.row.row._id)
+                    this.props.removeFromOnCall(props.row.row._id)
                 }} />
             </div>)
         } else {
@@ -64,8 +64,8 @@ class Workers extends Component {
                 <Button.Group widths='2'>
                     <Button className="flexboxCenterVerHor" icon='bell' onClick={() => this.props.addToOnCall(props.row.row)} />
                     <Button className="flexboxCenterVerHor" icon='close' onClick={() => {
-                        this.props.removeWorker(props.row.row.id)
-                        this.props.removeFromOnCall(props.row.row.id)
+                        this.props.removeWorker(props.row.row._id)
+                        this.props.removeFromOnCall(props.row.row._id)
                     }} />
                 </Button.Group>
             </div>)
@@ -81,13 +81,13 @@ class Workers extends Component {
             },
             {
                 Header: "ID",
-                id: "id",
-                accessor: d => d.id,
+                id: "_id",
+                accessor: d => d._id,
             },
             {
                 filterable: false,
                 Cell: row => (
-                    <Button fluid icon='bell slash' onClick={() => this.props.removeFromOnCall(row.row.id)} />
+                    <Button fluid icon='bell slash' onClick={() => this.props.removeFromOnCall(row.row._id)} />
                 )
 
             }
@@ -101,8 +101,8 @@ class Workers extends Component {
             },
             {
                 Header: "ID",
-                id: "id",
-                accessor: d => d.id,
+                id: "_id",
+                accessor: d => d._id,
             },
             {
                 filterable: false,
@@ -121,7 +121,7 @@ class Workers extends Component {
                         <Grid.Row>
                             <Grid.Column>
                                 <Button floated="left" onClick={() => console.log('workers', this.props.workers.length)}>Auto-schelude</Button>
-                                <Button floated="right" onClick={() => this.props.addWorker({ id: Math.random(), name: 'Manuel Lorenzo', role: 'Admin' })}>Add employee</Button>
+                                <Button floated="right" onClick={() => this.props.addWorker({ _id: Math.random(), name: 'Manuel Lorenzo'+Math.random()*100, role: 'Admin' })}>Add employee</Button>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
@@ -159,9 +159,9 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         addWorker: worker => dispatch(workersActions.addWorker(worker)),
-        removeWorker: id => dispatch(workersActions.removeWorker(id)),
+        removeWorker: _id => dispatch(workersActions.removeWorker(_id)),
         addToOnCall: worker => dispatch(workersActions.addToOnCall(worker)),
-        removeFromOnCall: id => dispatch(workersActions.removeFromOnCall(id))
+        removeFromOnCall: _id => dispatch(workersActions.removeFromOnCall(_id))
     }
 };
 

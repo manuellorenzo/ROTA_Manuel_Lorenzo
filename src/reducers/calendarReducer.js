@@ -13,8 +13,9 @@ const calendarReducer = (state = {
             return {
                 ...state,
                 calendarEvents: state.calendarEvents.map((item, index) => {
-                    console.log('item', item)
+                    console.log('changeOnCall', action.event._id, item._id)
                     if (item._id === action.event._id) {
+                        console.log('change on call if')
                         return {
                             ...item,
                             ...action.event

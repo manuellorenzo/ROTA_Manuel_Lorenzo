@@ -13,7 +13,7 @@ const workersReducer = (state = {
             const workerId = action;
             console.log('worker.id', workerId)
             return { ...state,
-                workers: state.workers.filter(item => item.id !== action.id)
+                workers: state.workers.filter(item => item._id !== action._id)
             }
         case 'ADD_ONCALL_WORKER':
             return {
@@ -23,7 +23,7 @@ const workersReducer = (state = {
         case 'REMOVE_ONCALL_WORKER':
             return {
                 ...state,
-                onCall: state.onCall.filter(item => item.id !== action.id)
+                onCall: state.onCall.filter(item => item._id !== action._id)
             }
         default:
             return state
