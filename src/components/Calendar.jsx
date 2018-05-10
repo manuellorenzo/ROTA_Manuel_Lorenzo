@@ -17,6 +17,8 @@ import '../style.css';
 
 import * as calendarActions from '../actions/calendarActions';
 
+import Toast from './Toast';
+
 moment.locale('ko', {
     week: {
         dow: 1,
@@ -28,11 +30,15 @@ const DragAndDropCalendar = withDragAndDrop(BigCalendar);
 const dateFormat = 'DD/MM/YYYY';
 
 function BasicMessage(props) {
-    console.log('Basic message', props);
+    console.log(' message', props);
+    let visible, hidden;
+    props.visible === true ? (visible = true, hidden = false) : (visible = false, hidden = true);
     return (<Message
-        visible={props.visible}
+        visible={visible}
+        hidden={hidden}
         success={props.success}
         content={props.content}
+        onDismiss={props.handleOnDismiss}
     />)
 }
 class CalendarPage extends Component {
@@ -52,6 +58,12 @@ class CalendarPage extends Component {
                 },
                 startDate: moment(),
                 endDate: moment()
+            },
+            messages: {
+                addEditEvents: {
+                    show: false,
+                    text: ''
+                }
             }
         };
         this.moveEvent = this.moveEvent.bind(this);
@@ -67,31 +79,33 @@ class CalendarPage extends Component {
 
     componentWillReceiveProps(props) {
         console.log('props will receive prop', props)
-        this.setState({ calendarEvents: props.calendarEvents });
-        this.setState({
-            onCallOptions: this.props.onCall.map((item) => {
-                return {
-                    key: item._id,
-                    text: item.name,
-                    value: item._id,
-                }
+        this.setState({ calendarEvents: props.calendarEvents }, () => {
+            this.setState({
+                onCallOptions: this.props.onCall.map((item) => {
+                    return {
+                        key: item._id,
+                        text: item.name,
+                        value: item._id,
+                    }
+                })
             })
-        })
+        });
         console.log('onCallOptions', this.state.onCallOptions)
 
     }
 
     componentDidMount() {
-        this.setState({ calendarEvents: this.props.calendarEvents });
-        this.setState({
-            onCallOptions: this.props.onCall.map((item) => {
-                return {
-                    key: item._id,
-                    text: item.name,
-                    value: item._id,
-                }
-            })
-        })
+        this.setState({ calendarEvents: this.props.calendarEvents }, () => {
+            this.setState({
+                onCallOptions: this.props.onCall.map((item) => {
+                    return {
+                        key: item._id,
+                        text: item.name,
+                        value: item._id,
+                    }
+                })
+            });
+        });
         console.log('component did mount', this.state)
     }
 
@@ -106,8 +120,10 @@ class CalendarPage extends Component {
                 endDate: evt.end,
                 _id: evt._id
             }
+        }, () => {
+            this.setState({ modals: { ...this.state.modals, showModalEditEvent: true } });
+
         })
-        this.setState({ modals: { ...this.state.modals, showModalEditEvent: true } });
     }
 
     moveEvent({ event, start, end }) {
@@ -132,11 +148,34 @@ class CalendarPage extends Component {
         this.setState({ newEvent: { ...this.state.newEvent, [name]: value } })
     }
 
+    handleChangeMessages = (value) => {
+        console.log('handleChangesMessages', );
+        this.setState({
+            messages: {
+                ...this.state.messages, addEditEvents: {
+                    ...this.state.messages.addEditEvents, text: value, show: true
+                }
+            }
+        }, () => {
+            this.setState({
+                messages: {
+                    ...this.state.messages, addEditEvents: {
+                        ...this.state.messages.addEditEvents, text: value, show: false
+                    }
+                }
+            })
+        });
+    }
+
     handleChangeNewEventDates(e, name) {
         console.log("handleChangeDates", e)
         name === "startDate"
             ? this.setState({ newEvent: { ...this.state.newEvent, startDate: e._d } })
             : this.setState({ newEvent: { ...this.state.newEvent, endDate: e._d } })
+    }
+
+    handleOnDismiss(name) {
+        this.setState({ messages: { ...this.state.messages, [name]: false } });
     }
 
     render() {
@@ -181,6 +220,8 @@ class CalendarPage extends Component {
 
                                             if (event.type === 'OnCall') {
                                                 newStyle.backgroundColor = "lightgreen"
+                                            } else {
+                                                newStyle.backgroundColor = "lightblue"
                                             }
 
                                             return {
@@ -214,7 +255,6 @@ class CalendarPage extends Component {
                                     <label>End Date</label>
                                     <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.endDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e, "endDate")} />
                                 </Form.Field>
-
                             </Form>
                         </Modal.Content>
                         <Modal.Actions>
@@ -238,8 +278,10 @@ class CalendarPage extends Component {
                                         startDate: moment(),
                                         endDate: moment()
                                     }
+                                }, () => {
+                                    this.handleModalClose("showModalAddEvent");
+                                    this.handleChangeMessages("Event added successfully");
                                 });
-                                this.handleModalClose("showModalAddEvent");
                             }}>Add task</Button>
                         </Modal.Actions>
                     </Modal>
@@ -265,7 +307,6 @@ class CalendarPage extends Component {
                                     <label>End Date</label>
                                     <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.endDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e, "endDate")} />
                                 </Form.Field>
-                                <BasicMessage success={true} visible={true} content="Se ha añadido" />
                             </Form>
                         </Modal.Content>
                         <Modal.Actions>
@@ -288,13 +329,17 @@ class CalendarPage extends Component {
                                         startDate: moment(),
                                         endDate: moment()
                                     }
+                                }, () => {
+                                    this.handleModalClose("showModalEditEvent");
+                                    this.handleChangeMessages("Event edited successfully");
                                 });
-                                this.handleModalClose("showModalEditEvent");
                             }}>Add task</Button>
                         </Modal.Actions>
                     </Modal>
+
+                    <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} />
                 </Container>
-            </div>
+            </div >
         );
     }
 }

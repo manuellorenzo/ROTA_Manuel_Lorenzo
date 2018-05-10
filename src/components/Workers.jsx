@@ -1,8 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { List, Image, Grid, Table, Header, Button, Search, Container, Divider, Icon } from 'semantic-ui-react';
-import _ from 'lodash'
+import { List, Image, Grid, Table, Header, Button, Search, Container, Divider, Icon, Modal, Form } from 'semantic-ui-react';
 
 import * as workersActions from '../actions/workersActions';
 import '../style.css';
@@ -10,17 +9,33 @@ import '../style.css';
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
 
+import Toast from './Toast';
 
 
 class Workers extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            isLoading: false,
-            results: []
-        }
+            modals: {
+                showModalAddWorker: false,
+                showModalEditWorker: false
+            },
+            newWorker: {
+                _id: '',
+                name: '',
+                role: ''
+            },
+            messages: {
+                addEditEvents: {
+                    show: false,
+                    text: ''
+                }
+            }
+        };
         this.ReactTableWorkers = this.ReactTableWorkers.bind(this);
         this.ButtonsTableWorkers = this.ButtonsTableWorkers.bind(this);
+        this.handleOnChangeDropdownWorkerRole = this.handleOnChangeDropdownWorkerRole.bind(this);
+        this.handleOnChangeInputWorkerName = this.handleOnChangeInputWorkerName.bind(this);
     }
 
     ReactTableWorkers(props) {
@@ -72,6 +87,37 @@ class Workers extends Component {
         }
     }
 
+    handleModalClose = (name) => this.setState({ modals: { ...this.state.modals, [name]: false } });
+
+    handleOnChangeDropdownWorkerRole(e, { value }) {
+        console.log('CHANGIN THE DROPDOWN', value)
+        this.setState({ newWorker: { ...this.state.newWorker, role: value } });
+    }
+
+    handleOnChangeInputWorkerName(e, { value }) {
+        console.log('CHANGIN THE INPUT', value)
+        this.setState({ newWorker: { ...this.state.newWorker, name: value } });
+    }
+
+    handleChangeMessages = (value) => {
+        console.log('handleChangesMessages', );
+        this.setState({
+            messages: {
+                ...this.state.messages, addEditEvents: {
+                    ...this.state.messages.addEditEvents, text: value, show: true
+                }
+            }
+        }, () => {
+            this.setState({
+                messages: {
+                    ...this.state.messages, addEditEvents: {
+                        ...this.state.messages.addEditEvents, text: value, show: false
+                    }
+                }
+            })
+        });
+    }
+
     render() {
         const columnOnCall = [
             {
@@ -120,8 +166,8 @@ class Workers extends Component {
                     <Grid centered columns='equal'>
                         <Grid.Row>
                             <Grid.Column>
-                                <Button floated="left" onClick={() => console.log('workers', this.props.workers.length)}>Auto-schelude</Button>
-                                <Button floated="right" onClick={() => this.props.addWorker({ _id: Math.random(), name: 'Manuel Lorenzo'+Math.random()*100, role: 'Admin' })}>Add employee</Button>
+                                <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddWorker: true } })}>Auto-schelude</Button>
+                                <Button floated="right" onClick={() => this.props.addWorker({ _id: Math.random(), name: 'Manuel Lorenzo' + Math.random() * 100, role: 'Admin' })}>Add employee</Button>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
@@ -140,6 +186,47 @@ class Workers extends Component {
                         </Grid.Row>
                     </Grid>
                 </Container>
+                <Modal
+                    open={this.state.modals.showModalAddWorker}
+                    onClose={() => this.handleModalClose("showModalAddWorker")}
+                    size='tiny'
+                    closeOnRootNodeClick={false}
+                >
+                    <Header icon='browser' content='Add Worker' />
+                    <Modal.Content>
+                        <Form>
+                            <Form.Field >
+                                <Form.Input placeholder='Name' onChange={this.handleOnChangeInputWorkerName} value={this.state.newWorker.name} fluid />
+                            </Form.Field>
+                            <Form.Field>
+                                <Form.Dropdown placeholder='Role' onChange={this.handleOnChangeDropdownWorkerRole} value={this.state.newWorker.role} fluid search selection options={[{
+                                    key: 1,
+                                    text: 'ADMIN',
+                                    value: 1,
+                                }, {
+                                    key: 2,
+                                    text: 'ON CALL MANAGER',
+                                    value: 2,
+                                }, {
+                                    key: 3,
+                                    text: 'USER',
+                                    value: 3,
+                                }]} />
+                            </Form.Field>
+                        </Form>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={() => {
+                            this.handleModalClose("showModalAddWorker")
+                        }}>Close</Button>
+                        <Button floated="right" onClick={() => {
+                            this.props.addWorker({ ...this.state.newWorker, _id: Math.random() });
+                            this.handleModalClose("showModalAddWorker")
+                            this.handleChangeMessages("Worker added successfully");
+                        }}>Add task</Button>
+                    </Modal.Actions>
+                </Modal>
+                <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} />
             </div>
         )
     }
