@@ -18,6 +18,7 @@ import '../style.css';
 import * as calendarActions from '../actions/calendarActions';
 
 import Toast from './Toast';
+import ConfirmComponent from './Confirm';
 
 moment.locale('ko', {
     week: {
@@ -49,7 +50,7 @@ class CalendarPage extends Component {
             onCallOptions: [],
             modals: {
                 showModalAddEvent: false,
-                showModalEditEvent: false
+                showModalEditEvent: false,
             },
             newEvent: {
                 worker: {
@@ -57,12 +58,14 @@ class CalendarPage extends Component {
                     name: ''
                 },
                 startDate: moment(),
-                endDate: moment()
             },
             messages: {
                 addEditEvents: {
                     show: false,
                     text: ''
+                },
+                confirmDelete: {
+                    open: false
                 }
             }
         };
@@ -109,7 +112,15 @@ class CalendarPage extends Component {
         console.log('component did mount', this.state)
     }
 
-    handleModalClose = (name) => this.setState({ modals: { ...this.state.modals, [name]: false } });
+    handleModalClose = (name) => this.setState({
+        modals: { ...this.state.modals, [name]: false }, newEvent: {
+            worker: {
+                _id: '',
+                name: ''
+            },
+            startDate: moment(),
+        },
+    });
 
     handleOnSelectEventCalendar(evt, e) {
         console.log('handleOnSelectEventCalendar', evt)
@@ -117,7 +128,6 @@ class CalendarPage extends Component {
             newEvent: {
                 worker: evt.worker,
                 startDate: evt.start,
-                endDate: evt.end,
                 _id: evt._id
             }
         }, () => {
@@ -136,10 +146,10 @@ class CalendarPage extends Component {
         console.log('state events', this.props.calendarEvents);
     }
 
-    resizeEvent = (resizeType, { event, start, end }) => {
+    /*resizeEvent = (resizeType, { event, start, end }) => {
         const updatedEvent = { ...event, start, end }
         this.props.changeOnCall(updatedEvent);
-    }
+    }*/
     componentWillUpdate(props, state) {
         console.log("will update", state)
     }
@@ -167,11 +177,9 @@ class CalendarPage extends Component {
         });
     }
 
-    handleChangeNewEventDates(e, name) {
+    handleChangeNewEventDates(e) {
         console.log("handleChangeDates", e)
-        name === "startDate"
-            ? this.setState({ newEvent: { ...this.state.newEvent, startDate: e._d } })
-            : this.setState({ newEvent: { ...this.state.newEvent, endDate: e._d } })
+        this.setState({ newEvent: { ...this.state.newEvent, startDate: e._d } })
     }
 
     handleOnDismiss(name) {
@@ -185,7 +193,7 @@ class CalendarPage extends Component {
                     <Grid verticalAlign="middle">
                         <Grid.Row centered >
                             <Grid.Column>
-                                <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddEvent: true } })}>Auto-schelude</Button>
+                                <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddEvent: true } })}>Add event</Button>
                                 <Button floated="right" onClick={() => {
                                     this.props.addOnCall({
                                         start: new Date(),
@@ -193,7 +201,7 @@ class CalendarPage extends Component {
                                         title: "Some title",
                                         _id: Math.random()
                                     })
-                                }}>Add task</Button>
+                                }}>Auto-schelude</Button>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row centered>
@@ -204,7 +212,7 @@ class CalendarPage extends Component {
                                     defaultDate={new Date()}
                                     defaultView="month"
                                     events={this.state.calendarEvents}
-                                    onEventResize={this.resizeEvent}
+                                    /*onEventResize={this.resizeEvent}*/
                                     style={{ height: "70vh" }}
                                     onEventDrop={this.moveEvent}
                                     popup
@@ -248,12 +256,8 @@ class CalendarPage extends Component {
                                     <Form.Dropdown placeholder='Worker' onChange={this.handleOnChangeDropdown} fluid search selection options={this.state.onCallOptions} />
                                 </Form.Field>
                                 <Form.Field>
-                                    <label>Start Date</label>
-                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e, "startDate")} />
-                                </Form.Field>
-                                <Form.Field>
-                                    <label>End Date</label>
-                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.endDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e, "endDate")} />
+                                    <label>Event Date</label>
+                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e)} />
                                 </Form.Field>
                             </Form>
                         </Modal.Content>
@@ -262,7 +266,7 @@ class CalendarPage extends Component {
                             <Button floated="right" disabled={this.state.newEvent.worker._id === ''} onClick={() => {
                                 this.props.addOnCall({
                                     start: new Date(this.state.newEvent.startDate),
-                                    end: new Date(this.state.newEvent.endDate),
+                                    end: new Date(this.state.newEvent.startDate),
                                     title: this.state.newEvent.worker.name,
                                     _id: Math.random(),
                                     type: 'OnCall',
@@ -275,8 +279,7 @@ class CalendarPage extends Component {
                                             _id: '',
                                             name: ''
                                         },
-                                        startDate: moment(),
-                                        endDate: moment()
+                                        startDate: moment()
                                     }
                                 }, () => {
                                     this.handleModalClose("showModalAddEvent");
@@ -301,20 +304,36 @@ class CalendarPage extends Component {
                                 </Form.Field>
                                 <Form.Field>
                                     <label>Start Date</label>
-                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e, "startDate")} />
-                                </Form.Field>
-                                <Form.Field>
-                                    <label>End Date</label>
-                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.endDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e, "endDate")} />
+                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e)} />
                                 </Form.Field>
                             </Form>
                         </Modal.Content>
                         <Modal.Actions>
                             <Button onClick={() => this.handleModalClose("showModalEditEvent")}>Close</Button>
+                            <Button onClick={() => {
+                                /*this.props.removeOnCall(this.state.newEvent._id)
+                                this.handleModalClose("showModalEditEvent");
+                                this.handleChangeMessages("Event deleted successfully");*/
+                                this.setState({
+                                    messages: {
+                                        ...this.state.messages, confirmDelete: {
+                                            open: true
+                                        }
+                                    }
+                                }, () => {
+                                    this.setState({
+                                        messages: {
+                                            ...this.state.messages, confirmDelete: {
+                                                open: false
+                                            }
+                                        }
+                                    })
+                                });
+                            }}>Remove</Button>
                             <Button floated="right" disabled={this.state.newEvent.worker._id === ''} onClick={() => {
                                 this.props.changeOnCall({
                                     start: new Date(this.state.newEvent.startDate),
-                                    end: new Date(this.state.newEvent.endDate),
+                                    end: new Date(this.state.newEvent.startDate),
                                     title: this.state.newEvent.worker.name,
                                     _id: this.state.newEvent._id,
                                     worker: this.state.newEvent.worker,
@@ -327,7 +346,6 @@ class CalendarPage extends Component {
                                             name: ''
                                         },
                                         startDate: moment(),
-                                        endDate: moment()
                                     }
                                 }, () => {
                                     this.handleModalClose("showModalEditEvent");
@@ -338,6 +356,13 @@ class CalendarPage extends Component {
                     </Modal>
 
                     <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} />
+                    <ConfirmComponent show={this.state.messages.confirmDelete} onConfirm={() => {
+                        this.props.removeOnCall(this.state.newEvent._id)
+                        this.handleModalClose("showModalEditEvent");
+                        this.handleChangeMessages("Event deleted successfully");
+                    }} onClose={() => {
+
+                    }} />
                 </Container>
             </div >
         );
@@ -358,7 +383,8 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         addOnCall: event => dispatch(calendarActions.addOnCall(event)),
-        changeOnCall: event => dispatch(calendarActions.changeOnCall(event))
+        changeOnCall: event => dispatch(calendarActions.changeOnCall(event)),
+        removeOnCall: _id => dispatch(calendarActions.removeOnCall(_id))
     };
 };
 

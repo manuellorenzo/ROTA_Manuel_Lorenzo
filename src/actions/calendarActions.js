@@ -7,3 +7,7 @@ export const addOnCall = event => ({
     type: 'CHANGE_ONCALL',
     event
   })
+  export const removeOnCall = _id => ({
+    type: 'REMOVE_ONCALL',
+    _id
+  })

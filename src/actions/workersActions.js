@@ -2,7 +2,10 @@ export const addWorker = worker => ({
     type: 'ADD_WORKER',
     worker
   })
-
+  export const updateWorker = worker => ({
+    type: 'UPDATE_WORKER',
+    worker
+  })
   export const removeWorker = _id => ({
     type: 'REMOVE_WORKER',
     _id

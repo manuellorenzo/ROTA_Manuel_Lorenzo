@@ -24,6 +24,11 @@ const calendarReducer = (state = {
                     return item
                 })
             }
+        case 'REMOVE_ONCALL':
+            console.log('REMOVE_ONCALL', state)
+            return { ...state,
+                calendarEvents: state.calendarEvents.filter(item => item._id !== action._id)
+            }
         default:
             return state
     }

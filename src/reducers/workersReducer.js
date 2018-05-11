@@ -9,6 +9,31 @@ const workersReducer = (state = {
                 ...state,
                 workers: [...state.workers, action.worker]
             }
+        case 'UPDATE_WORKER':
+            console.log('UPDATE_WORKER', state)
+            return {
+                ...state,
+                workers: state.workers.map((item, index) => {
+                    if (item._id === action.worker._id) {
+                        console.log('change worker')
+                        return {
+                            ...item,
+                            ...action.worker
+                        };
+                    }
+                    return item
+                }),
+                onCall: state.onCall.map((item, index) => {
+                    if (item._id === action.worker._id) {
+                        console.log('change worker')
+                        return {
+                            ...item,
+                            ...action.worker
+                        };
+                    }
+                    return item
+                })
+            }
         case 'REMOVE_WORKER':
             const workerId = action;
             console.log('worker.id', workerId)

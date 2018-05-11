@@ -23,14 +23,27 @@ class Workers extends Component {
             newWorker: {
                 _id: '',
                 name: '',
-                role: ''
+                role: 1
             },
             messages: {
                 addEditEvents: {
                     show: false,
                     text: ''
                 }
-            }
+            },
+            rolesOptions: [{
+                key: 1,
+                text: 'ADMIN',
+                value: 1,
+            }, {
+                key: 2,
+                text: 'ON CALL MANAGER',
+                value: 2,
+            }, {
+                key: 3,
+                text: 'USER',
+                value: 3,
+            }]
         };
         this.ReactTableWorkers = this.ReactTableWorkers.bind(this);
         this.ButtonsTableWorkers = this.ButtonsTableWorkers.bind(this);
@@ -42,7 +55,7 @@ class Workers extends Component {
         return (
             <div>
                 <ReactTable
-                    getTdProps={(state, rowInfo, column) => {
+                    getTdProps={(state, rowInfo, column, instance) => {
                         return {
                             style: {
                                 "whiteSpace": "normal",
@@ -50,6 +63,27 @@ class Workers extends Component {
                                 "alignItems": "center",
                                 "justifyContent": "center"
 
+                            },
+                            onClick: (e, handleOriginal) => {
+                                if (rowInfo !== undefined && column.id !== "actions") {
+                                    console.log("state instance", state, instance)
+                                    this.setState({
+                                        modals: { ...this.state.modals, showModalEditWorker: true }, newWorker: {
+                                            name: rowInfo.row.name,
+                                            _id: rowInfo.row._id,
+                                            role: rowInfo.row._original.role
+                                        }
+                                    })
+                                }
+
+                                // IMPORTANT! React-Table uses onClick internally to trigger
+                                // events like expanding SubComponents and pivots.
+                                // By default a custom 'onClick' handler will override this functionality.
+                                // If you want to fire the original onClick handler, call the
+                                // 'handleOriginal' function.
+                                if (handleOriginal) {
+                                    handleOriginal();
+                                }
                             }
                         };
                     }}
@@ -87,7 +121,13 @@ class Workers extends Component {
         }
     }
 
-    handleModalClose = (name) => this.setState({ modals: { ...this.state.modals, [name]: false } });
+    handleModalClose = (name) => this.setState({
+        modals: { ...this.state.modals, [name]: false }, newWorker: {
+            _id: '',
+            name: '',
+            role: 1
+        }
+    });
 
     handleOnChangeDropdownWorkerRole(e, { value }) {
         console.log('CHANGIN THE DROPDOWN', value)
@@ -132,6 +172,7 @@ class Workers extends Component {
             },
             {
                 filterable: false,
+                id: "actions",
                 Cell: row => (
                     <Button fluid icon='bell slash' onClick={() => this.props.removeFromOnCall(row.row._id)} />
                 )
@@ -152,6 +193,7 @@ class Workers extends Component {
             },
             {
                 filterable: false,
+                id: "actions",
                 Cell: row => (
                     <div style={{ "width": "100%" }}>
                         <this.ButtonsTableWorkers row={row} />
@@ -166,7 +208,7 @@ class Workers extends Component {
                     <Grid centered columns='equal'>
                         <Grid.Row>
                             <Grid.Column>
-                                <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddWorker: true } })}>Auto-schelude</Button>
+                                <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddWorker: true } })}>Add new worker</Button>
                                 <Button floated="right" onClick={() => this.props.addWorker({ _id: Math.random(), name: 'Manuel Lorenzo' + Math.random() * 100, role: 'Admin' })}>Add employee</Button>
                             </Grid.Column>
                         </Grid.Row>
@@ -199,19 +241,7 @@ class Workers extends Component {
                                 <Form.Input placeholder='Name' onChange={this.handleOnChangeInputWorkerName} value={this.state.newWorker.name} fluid />
                             </Form.Field>
                             <Form.Field>
-                                <Form.Dropdown placeholder='Role' onChange={this.handleOnChangeDropdownWorkerRole} value={this.state.newWorker.role} fluid search selection options={[{
-                                    key: 1,
-                                    text: 'ADMIN',
-                                    value: 1,
-                                }, {
-                                    key: 2,
-                                    text: 'ON CALL MANAGER',
-                                    value: 2,
-                                }, {
-                                    key: 3,
-                                    text: 'USER',
-                                    value: 3,
-                                }]} />
+                                <Form.Dropdown placeholder='Role' onChange={this.handleOnChangeDropdownWorkerRole} value={this.state.newWorker.role} fluid search selection options={this.state.rolesOptions} />
                             </Form.Field>
                         </Form>
                     </Modal.Content>
@@ -219,10 +249,38 @@ class Workers extends Component {
                         <Button onClick={() => {
                             this.handleModalClose("showModalAddWorker")
                         }}>Close</Button>
-                        <Button floated="right" onClick={() => {
+                        <Button floated="right" disabled={this.state.newWorker.name === ''} onClick={() => {
                             this.props.addWorker({ ...this.state.newWorker, _id: Math.random() });
                             this.handleModalClose("showModalAddWorker")
                             this.handleChangeMessages("Worker added successfully");
+                        }}>Add task</Button>
+                    </Modal.Actions>
+                </Modal>
+                <Modal
+                    open={this.state.modals.showModalEditWorker}
+                    onClose={() => this.handleModalClose("showModalEditWorker")}
+                    size='tiny'
+                    closeOnRootNodeClick={false}
+                >
+                    <Header icon='browser' content='Edit Worker' />
+                    <Modal.Content>
+                        <Form>
+                            <Form.Field >
+                                <Form.Input placeholder='Name' onChange={this.handleOnChangeInputWorkerName} value={this.state.newWorker.name} fluid />
+                            </Form.Field>
+                            <Form.Field>
+                                <Form.Dropdown placeholder='Role' onChange={this.handleOnChangeDropdownWorkerRole} value={this.state.newWorker.role} fluid search selection options={this.state.rolesOptions} />
+                            </Form.Field>
+                        </Form>
+                    </Modal.Content>
+                    <Modal.Actions>
+                        <Button onClick={() => {
+                            this.handleModalClose("showModalEditWorker")
+                        }}>Close</Button>
+                        <Button floated="right" disabled={this.state.newWorker.name === ''} onClick={() => {
+                            this.props.updateWorker(this.state.newWorker);
+                            this.handleModalClose("showModalEditWorker")
+                            this.handleChangeMessages("Worker edited successfully");
                         }}>Add task</Button>
                     </Modal.Actions>
                 </Modal>
@@ -246,6 +304,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         addWorker: worker => dispatch(workersActions.addWorker(worker)),
+        updateWorker: worker => dispatch(workersActions.updateWorker(worker)),
         removeWorker: _id => dispatch(workersActions.removeWorker(_id)),
         addToOnCall: worker => dispatch(workersActions.addToOnCall(worker)),
         removeFromOnCall: _id => dispatch(workersActions.removeFromOnCall(_id))
