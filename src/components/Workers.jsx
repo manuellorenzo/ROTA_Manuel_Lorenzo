@@ -10,6 +10,7 @@ import ReactTable from 'react-table';
 import "react-table/react-table.css";
 
 import Toast from './Toast';
+import ConfirmComponent from './Confirm';
 
 
 class Workers extends Component {
@@ -26,9 +27,13 @@ class Workers extends Component {
                 role: 1
             },
             messages: {
-                addEditEvents: {
+                CRUDWorkers: {
                     show: false,
                     text: ''
+                },
+                confirmDelete: {
+                    open: false,
+                    _id: ''
                 }
             },
             rolesOptions: [{
@@ -104,8 +109,14 @@ class Workers extends Component {
         if (this.props.onCall.map((item) => props.row.row._id === item._id).includes(true)) {
             return (<div style={{ "width": "100%" }}>
                 <Button fluid className="flexboxCenterVerHor" icon='close' onClick={() => {
-                    this.props.removeWorker(props.row.row._id)
-                    this.props.removeFromOnCall(props.row.row._id)
+                    this.setState({
+                        messages: {
+                            ...this.state.messages, confirmDelete: {
+                                _id: props.row.row._id,
+                                open: true
+                            }
+                        }
+                    });
                 }} />
             </div>)
         } else {
@@ -113,8 +124,14 @@ class Workers extends Component {
                 <Button.Group widths='2'>
                     <Button className="flexboxCenterVerHor" icon='bell' onClick={() => this.props.addToOnCall(props.row.row)} />
                     <Button className="flexboxCenterVerHor" icon='close' onClick={() => {
-                        this.props.removeWorker(props.row.row._id)
-                        this.props.removeFromOnCall(props.row.row._id)
+                        this.setState({
+                            messages: {
+                                ...this.state.messages, confirmDelete: {
+                                    _id: props.row.row._id,
+                                    open: true
+                                }
+                            }
+                        });
                     }} />
                 </Button.Group>
             </div>)
@@ -139,22 +156,43 @@ class Workers extends Component {
         this.setState({ newWorker: { ...this.state.newWorker, name: value } });
     }
 
-    handleChangeMessages = (value) => {
-        console.log('handleChangesMessages', );
-        this.setState({
-            messages: {
-                ...this.state.messages, addEditEvents: {
-                    ...this.state.messages.addEditEvents, text: value, show: true
-                }
-            }
+    handleChangeMessages(value) {
+        this.setState((prevState, props) => {
+            console.log("handleChangesMessages calendar prueba value", value)
+            return { messages: { ...prevState.messages, CRUDWorkers: { ...prevState.messages.CRUDWorkers, text: value, show: true } } }
+
         }, () => {
-            this.setState({
+            this.setState((prevState, props) => {
+                console.log('handleChangesMessages calendar', value, this.state);
+                return { messages: { ...prevState.messages, CRUDWorkers: { ...prevState.messages.CRUDWorkers, text: value, show: false } } }
+            })
+        });
+    }
+
+    handleOnConfirmWorkers = () => {
+        this.props.removeWorker(this.state.messages.confirmDelete._id);
+        this.props.removeFromOnCall(this.state.messages.confirmDelete._id);
+        this.handleChangeMessages("Worker deleted successfully");
+        this.setState((prevState, props) => {
+            return {
                 messages: {
-                    ...this.state.messages, addEditEvents: {
-                        ...this.state.messages.addEditEvents, text: value, show: false
+                    ...prevState.messages, confirmDelete: {
+                        open: false,
+                        _id: ''
                     }
                 }
-            })
+            }
+        });
+    }
+
+    handleOnCloseWorkers = () => {
+        this.setState({
+            messages: {
+                ...this.state.messages, confirmDelete: {
+                    open: false,
+                    _id: ''
+                }
+            }
         });
     }
 
@@ -253,7 +291,7 @@ class Workers extends Component {
                             this.props.addWorker({ ...this.state.newWorker, _id: Math.random() });
                             this.handleModalClose("showModalAddWorker")
                             this.handleChangeMessages("Worker added successfully");
-                        }}>Add task</Button>
+                        }}>Add event</Button>
                     </Modal.Actions>
                 </Modal>
                 <Modal
@@ -279,12 +317,16 @@ class Workers extends Component {
                         }}>Close</Button>
                         <Button floated="right" disabled={this.state.newWorker.name === ''} onClick={() => {
                             this.props.updateWorker(this.state.newWorker);
-                            this.handleModalClose("showModalEditWorker")
+                            this.handleModalClose("showModalEditWorker");
                             this.handleChangeMessages("Worker edited successfully");
-                        }}>Add task</Button>
+                        }}>Edit event</Button>
                     </Modal.Actions>
                 </Modal>
-                <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} />
+                <Toast message={this.state.messages.CRUDWorkers.text} show={this.state.messages.CRUDWorkers.show} />
+                <ConfirmComponent
+                    show={this.state.messages.confirmDelete.open}
+                    onConfirm={this.handleOnConfirmWorkers}
+                    onClose={this.handleOnCloseWorkers} />
             </div>
         )
     }

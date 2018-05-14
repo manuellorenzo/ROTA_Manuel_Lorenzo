@@ -4,25 +4,28 @@ import { Button, Confirm } from 'semantic-ui-react'
 class ConfirmComponent extends Component {
     constructor(props) {
         super(props);
-        this.state = { open: props.open, onClose: props.onClose, onConfirm: props.onConfirm }
+        this.state = { open: props.show, onClose: props.onClose, onConfirm: props.onConfirm }
         console.log("Confirm initiated", props)
     }
 
-    componentWillReceiveProps(nextProps){
-        console.log("Confirm initiated", nextProps)
-        this.setState({ open: nextProps.open, onClose: nextProps.onClose, onConfirm: nextProps.onConfirm });
+    componentWillReceiveProps(nextProps) {
+        console.log("Confirm recieve props", nextProps)
+        this.setState({ open: nextProps.show, onClose: nextProps.onClose, onConfirm: nextProps.onConfirm });
     }
     show = () => this.setState({ open: true })
-    handleConfirm = () => this.setState({ result: 'confirmed', open: false })
-    handleCancel = () => this.setState({ result: 'cancelled', open: false })
+    handleConfirm = () => this.props.onConfirm();
+    handleCancel = () => this.state.onClose();
+
+    shouldComponentUpdate(nextProps) {
+        return nextProps.show !== this.state.open;
+    }
 
     render() {
-        const { open, result } = this.state
-
         return (
             <div>
                 <Confirm
-                    open={open}
+                    size="tiny"
+                    open={this.state.open}
                     onCancel={this.handleCancel}
                     onConfirm={this.handleConfirm}
                 />

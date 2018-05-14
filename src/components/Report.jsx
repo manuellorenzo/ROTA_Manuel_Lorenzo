@@ -3,7 +3,7 @@ import { List, Image, Grid, Table, Header, Button, Search, Container } from 'sem
 import { connect } from 'react-redux';
 
 import _ from 'lodash'
-
+import moment from 'moment';
 import '../style.css';
 
 import ReactTable from 'react-table';
@@ -13,13 +13,28 @@ import * as reportsActions from '../actions/reportsActions';
 class Reports extends Component {
     constructor(props) {
         super(props);
+
         this.state = {
-            isLoading: false,
-            results: []
+            months: []
         }
+        props.calendarEvents.map(item => {
+            console.log("CalendarEvents", moment(item).format('MMMM'), moment(item).format('YYYY'));
+            this.props.addMonth({
+                monthName: moment(item).format('MMMM'),
+                year: moment(item).format('YYYY'),
+                overallCompensation: "55",
+                workers: [{ _id: 1, name: 'Jose', compensation: "55" }, { _id: 2, name: 'Ismael', compensation: "35" }]
+            })
+        });
         this.ReactTableMonths = this.ReactTableMonths.bind(this);
     }
 
+    componentWillReceiveProps(nextProps){
+        console.log("nextProps report", nextProps);
+        this.setState((prevProps, prevState)=>{
+            return { months: this.props.months}
+        });
+    }
     ReactTableMonths(props) {
         return (
             <div>
@@ -42,7 +57,7 @@ class Reports extends Component {
                     defaultPageSize={10}
                     className="-striped -highlight"
                     SubComponent={row => {
-                        console.log('row',row)
+                        console.log('row', row)
                         return (
                             <ReactTable
                                 getTdProps={(state, rowInfo, column) => {
@@ -91,6 +106,11 @@ class Reports extends Component {
                 accessor: d => d.monthName,
             },
             {
+                Header: "Year",
+                id: "year",
+                accessor: d => d.year,
+            },
+            {
                 Header: "Overall compensation",
                 id: "overallCompensation",
                 accessor: d => d.overallCompensation,
@@ -103,13 +123,15 @@ class Reports extends Component {
                         <Grid.Row>
                             <Grid.Column>
                                 <Button floated="left">Auto-schelude</Button>
-                                <Button floated="right" onClick={() => this.props.addMonth({monthName: "Mayo", overallCompensation:"55", 
-                                workers:[{_id: 1, name:'Jose', compensation:"55"},{_id: 2, name:'Ismael', compensation:"35"}]})}>Add employee</Button>
+                                <Button floated="right" onClick={() => this.props.addMonth({
+                                    monthName: "Mayo", overallCompensation: "55",
+                                    workers: [{ _id: 1, name: 'Jose', compensation: "55" }, { _id: 2, name: 'Ismael', compensation: "35" }]
+                                })}>Add employee</Button>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column>
-                                <this.ReactTableMonths columns={columnMonths} data={this.props.months} />
+                                <this.ReactTableMonths columns={columnMonths} data={this.state.months} />
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
@@ -124,7 +146,8 @@ const mapStateToProps = (state, ownProps) => {
     return {
         // You can now say this.props.workers
         workers: state.workersReducer.workers,
-        months: state.reportsReducer.months
+        months: state.reportsReducer.months,
+        calendarEvents: state.calendarReducer.calendarEvents,
     }
 };
 

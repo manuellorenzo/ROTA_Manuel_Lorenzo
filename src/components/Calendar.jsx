@@ -12,7 +12,8 @@ import { DatePicker } from 'antd';
 
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import 'react-datepicker/dist/react-datepicker.css';
+//import 'react-datepicker/dist/react-datepicker.css';ç
+import 'antd/dist/antd.css';
 import '../style.css';
 
 import * as calendarActions from '../actions/calendarActions';
@@ -45,6 +46,14 @@ function BasicMessage(props) {
 class CalendarPage extends Component {
     constructor(props) {
         super(props);
+
+        this.moveEvent = this.moveEvent.bind(this);
+        this.handleOnChangeDropdown = this.handleOnChangeDropdown.bind(this);
+        this.handleOnSelectEventCalendar = this.handleOnSelectEventCalendar.bind(this);
+        this.handleChangeMessages = this.handleChangeMessages.bind(this);
+        this.handleOnConfirmCalendar = this.handleOnConfirmCalendar.bind(this);
+        this.handleOnCloseCalendar = this.handleOnCloseCalendar.bind(this);
+
         this.state = {
             calendarEvents: [],
             onCallOptions: [],
@@ -62,16 +71,13 @@ class CalendarPage extends Component {
             messages: {
                 addEditEvents: {
                     show: false,
-                    text: ''
+                    text: '',
                 },
                 confirmDelete: {
                     open: false
-                }
-            }
+                },
+            },
         };
-        this.moveEvent = this.moveEvent.bind(this);
-        this.handleOnChangeDropdown = this.handleOnChangeDropdown.bind(this);
-        this.handleOnSelectEventCalendar = this.handleOnSelectEventCalendar.bind(this);
     }
 
     handleOnChangeDropdown(e, { value }) {
@@ -137,9 +143,6 @@ class CalendarPage extends Component {
     }
 
     moveEvent({ event, start, end }) {
-        console.log("moveEvent")
-        const { calendarEvents } = this.state
-        const idx = calendarEvents.indexOf(event)
         const updatedEvent = { ...event, start, end }
         console.log('updatedEvents', updatedEvent)
         this.props.changeOnCall(updatedEvent)
@@ -148,8 +151,9 @@ class CalendarPage extends Component {
 
     /*resizeEvent = (resizeType, { event, start, end }) => {
         const updatedEvent = { ...event, start, end }
-        this.props.changeOnCall(updatedEvent);
+        this.props.AchangeOnCall(updatedEvent);
     }*/
+
     componentWillUpdate(props, state) {
         console.log("will update", state)
     }
@@ -158,21 +162,15 @@ class CalendarPage extends Component {
         this.setState({ newEvent: { ...this.state.newEvent, [name]: value } })
     }
 
-    handleChangeMessages = (value) => {
-        console.log('handleChangesMessages', );
-        this.setState({
-            messages: {
-                ...this.state.messages, addEditEvents: {
-                    ...this.state.messages.addEditEvents, text: value, show: true
-                }
-            }
+    handleChangeMessages(value) {
+        this.setState((prevState, props) => {
+            console.log("handleChangesMessages calendar prueba value", value)
+            return { messages: { ...prevState.messages, addEditEvents: { ...prevState.messages.addEditEvents, text: value, show: true } } }
+
         }, () => {
-            this.setState({
-                messages: {
-                    ...this.state.messages, addEditEvents: {
-                        ...this.state.messages.addEditEvents, text: value, show: false
-                    }
-                }
+            this.setState((prevState, props) => {
+                console.log('handleChangesMessages calendar', value, this.state);
+                return { messages: { ...prevState.messages, addEditEvents: { ...prevState.messages.addEditEvents, text: value, show: false } } }
             })
         });
     }
@@ -184,6 +182,31 @@ class CalendarPage extends Component {
 
     handleOnDismiss(name) {
         this.setState({ messages: { ...this.state.messages, [name]: false } });
+    }
+
+    handleOnConfirmCalendar = () => {
+        this.props.removeOnCall(this.state.newEvent._id);
+        this.handleChangeMessages("Event deleted successfully");
+        this.handleModalClose("showModalEditEvent");
+        this.setState((prevState, props) => {
+             return {
+                 messages: {
+                     ...prevState.messages, confirmDelete: {
+                         open: false
+                     }
+                 }
+             }
+         });
+    }
+
+    handleOnCloseCalendar = () => {
+        this.setState({
+            messages: {
+                ...this.state.messages, confirmDelete: {
+                    open: false
+                }
+            }
+        });
     }
 
     render() {
@@ -227,9 +250,9 @@ class CalendarPage extends Component {
                                             };
 
                                             if (event.type === 'OnCall') {
-                                                newStyle.backgroundColor = "lightgreen"
+                                                newStyle.backgroundColor = "lightgreen";
                                             } else {
-                                                newStyle.backgroundColor = "lightblue"
+                                                newStyle.backgroundColor = "lightblue";
                                             }
 
                                             return {
@@ -285,7 +308,7 @@ class CalendarPage extends Component {
                                     this.handleModalClose("showModalAddEvent");
                                     this.handleChangeMessages("Event added successfully");
                                 });
-                            }}>Add task</Button>
+                            }}>Add event</Button>
                         </Modal.Actions>
                     </Modal>
 
@@ -311,23 +334,14 @@ class CalendarPage extends Component {
                         <Modal.Actions>
                             <Button onClick={() => this.handleModalClose("showModalEditEvent")}>Close</Button>
                             <Button onClick={() => {
-                                /*this.props.removeOnCall(this.state.newEvent._id)
-                                this.handleModalClose("showModalEditEvent");
-                                this.handleChangeMessages("Event deleted successfully");*/
-                                this.setState({
-                                    messages: {
-                                        ...this.state.messages, confirmDelete: {
-                                            open: true
-                                        }
-                                    }
-                                }, () => {
-                                    this.setState({
+                                this.setState((prevState, props) => {
+                                    return {
                                         messages: {
                                             ...this.state.messages, confirmDelete: {
-                                                open: false
+                                                open: true
                                             }
                                         }
-                                    })
+                                    }
                                 });
                             }}>Remove</Button>
                             <Button floated="right" disabled={this.state.newEvent.worker._id === ''} onClick={() => {
@@ -351,18 +365,11 @@ class CalendarPage extends Component {
                                     this.handleModalClose("showModalEditEvent");
                                     this.handleChangeMessages("Event edited successfully");
                                 });
-                            }}>Add task</Button>
+                            }}>Edit event</Button>
                         </Modal.Actions>
                     </Modal>
-
                     <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} />
-                    <ConfirmComponent show={this.state.messages.confirmDelete} onConfirm={() => {
-                        this.props.removeOnCall(this.state.newEvent._id)
-                        this.handleModalClose("showModalEditEvent");
-                        this.handleChangeMessages("Event deleted successfully");
-                    }} onClose={() => {
-
-                    }} />
+                    <ConfirmComponent show={this.state.messages.confirmDelete.open} onConfirm={this.handleOnConfirmCalendar} onClose={this.handleOnCloseCalendar} />
                 </Container>
             </div >
         );
