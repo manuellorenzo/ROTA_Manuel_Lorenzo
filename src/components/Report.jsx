@@ -17,7 +17,20 @@ class Reports extends Component {
         this.state = {
             months: []
         }
-        props.calendarEvents.map(item => {
+        console.log("constructor report", props.months)
+        this.ReactTableMonths = this.ReactTableMonths.bind(this);
+    }
+
+    componentWillReceiveProps(nextProps) {
+        console.log("nextProps report", nextProps);
+        this.setState((prevProps, prevState) => {
+            return { months: this.props.months }
+        });
+    }
+
+    componentDidMount() {
+        //FIX
+        this.props.calendarEvents.map(item => {
             console.log("CalendarEvents", moment(item).format('MMMM'), moment(item).format('YYYY'));
             this.props.addMonth({
                 monthName: moment(item).format('MMMM'),
@@ -26,13 +39,8 @@ class Reports extends Component {
                 workers: [{ _id: 1, name: 'Jose', compensation: "55" }, { _id: 2, name: 'Ismael', compensation: "35" }]
             })
         });
-        this.ReactTableMonths = this.ReactTableMonths.bind(this);
-    }
-
-    componentWillReceiveProps(nextProps){
-        console.log("nextProps report", nextProps);
-        this.setState((prevProps, prevState)=>{
-            return { months: this.props.months}
+        this.setState((prevProps, prevState) => {
+            return { months: this.props.months }
         });
     }
     ReactTableMonths(props) {
