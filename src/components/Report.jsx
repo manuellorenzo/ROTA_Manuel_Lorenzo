@@ -10,6 +10,8 @@ import ReactTable from 'react-table';
 import "react-table/react-table.css";
 import * as reportsActions from '../actions/reportsActions';
 
+import groupArray from 'group-array';
+
 class Reports extends Component {
     constructor(props) {
         super(props);
@@ -17,30 +19,46 @@ class Reports extends Component {
         this.state = {
             months: []
         }
-        console.log("constructor report", props.months)
         this.ReactTableMonths = this.ReactTableMonths.bind(this);
     }
 
     componentWillReceiveProps(nextProps) {
         console.log("nextProps report", nextProps);
         this.setState((prevProps, prevState) => {
-            return { months: this.props.months }
+            return { months: nextProps.months };
         });
     }
 
     componentDidMount() {
-        //FIX
-        this.props.calendarEvents.map(item => {
-            console.log("CalendarEvents", moment(item).format('MMMM'), moment(item).format('YYYY'));
-            this.props.addMonth({
-                monthName: moment(item).format('MMMM'),
-                year: moment(item).format('YYYY'),
-                overallCompensation: "55",
-                workers: [{ _id: 1, name: 'Jose', compensation: "55" }, { _id: 2, name: 'Ismael', compensation: "35" }]
-            })
+        let monthsReport = [];
+
+        //Agrupo por año
+        let groupedByYearMonth = _.groupBy(this.props.calendarEvents, (result) => moment(result['start'], 'DD/MM/YYYY').startOf('year').format("YYYY"));
+        //Vuelvo a agrupar por fecha y año
+        _.forEach(groupedByYearMonth, (value, key) => {
+            groupedByYearMonth[key] = _.groupBy(groupedByYearMonth[key], item => moment(item['start'], 'DD/MM/YYYY').startOf('month').format("MMMM"));
         });
+
+        //Relleno el modelo por cada uno de los valores agrupados anteriores
+        _.forEach(groupedByYearMonth, (month, indexYear) => _.forEach(month, (event, indexMonth) => {
+            let itemToAdd = {
+                monthName: indexMonth, year: indexYear, overallCompensation: "55",
+                workers: event.map((item) => { return { ...item.worker, compensation: '5' } })
+            }
+            console.log("reduce report", itemToAdd.workers)
+            //Calculamos las compensations mensuales
+            itemToAdd = { ...itemToAdd, overallCompensation: itemToAdd.workers.reduce((value, sum) => value + Number(sum.compensation), 0)};
+            console.log("itemToAdd report", itemToAdd.overallCompensation);
+            monthsReport.push(itemToAdd);
+        }));
+
+        //Ordenamos por año y luego por mes
+        monthsReport = monthsReport.sort((a, b) => a.year - b.year || moment().month(a.monthName).format("M") - moment().month(b.monthName).format("M"));
+        //Actualizamos los meses de Redux
+        this.props.updateMonths(monthsReport);
+        //Cambiamos el estado de la aplicación 
         this.setState((prevProps, prevState) => {
-            return { months: this.props.months }
+            return { months: this.props.months };
         });
     }
     ReactTableMonths(props) {
@@ -132,7 +150,7 @@ class Reports extends Component {
                             <Grid.Column>
                                 <Button floated="left">Auto-schelude</Button>
                                 <Button floated="right" onClick={() => this.props.addMonth({
-                                    monthName: "Mayo", overallCompensation: "55",
+                                    monthName: "Mayo", year: '2018', overallCompensation: "55",
                                     workers: [{ _id: 1, name: 'Jose', compensation: "55" }, { _id: 2, name: 'Ismael', compensation: "35" }]
                                 })}>Add employee</Button>
                             </Grid.Column>
@@ -164,6 +182,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         addMonth: month => dispatch(reportsActions.addMonth(month)),
+        updateMonths: months => dispatch(reportsActions.updateMonths(months))
     }
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Reports);

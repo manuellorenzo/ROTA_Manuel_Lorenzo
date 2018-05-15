@@ -8,6 +8,11 @@ const reportsReducer = (state = {
                 ...state,
                 months: [...state.months, action.month]
             }
+        case 'UPDATE_MONTHS':
+            return {
+                ...state,
+                months: action.months
+            }
         default:
             return state
     }
