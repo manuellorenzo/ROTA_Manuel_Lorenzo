@@ -10,18 +10,18 @@ import history from '../history';
 
 import * as compensationsActions from '../actions/compensationsActions';
 
-class ConfigurationPage extends Component {
+class CompensationsPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
             nightEndTime: moment(),
             nightStartTime: moment(),
-            baseMoney: "1",
-            baseTime: "1",
-            moneyMult: "1",
-            timeMult: "1",
-            weekMoney: "1",
-            weekendMoney: "1"
+            onCallWeekMoney: "1",
+            onCallWeekendMoney: "1",
+            weekMoneyMult: "1",
+            weekendMoneyMult: "1",
+            weekTimeMult: "1",
+            weekendTimeMult: "1"
         };
         this.handleNightStartTimeChange = this.handleNightStartTimeChange.bind(this);
         this.handleNightEndTimeChange = this.handleNightEndTimeChange.bind(this);
@@ -58,13 +58,13 @@ class ConfigurationPage extends Component {
     }
 
     handleSubmit = () => {
-        const { baseMoney, baseTime, moneyMult, timeMult, weekMoney, weekendMoney, nightStartTime, nightEndTime } = this.state
-        this.props.changeBaseMoney(baseMoney);
-        this.props.changeBaseTime(baseTime);
-        this.props.changeMoneyMult(moneyMult);
-        this.props.changeTimeMult(timeMult);
-        this.props.changeWeekMoney(weekMoney);
-        this.props.changeWeekendMoney(weekendMoney);
+        const { onCallWeekMoney, onCallWeekendMoney, weekMoneyMult, weekendMoneyMult, weekTimeMult, weekendTimeMult, nightStartTime, nightEndTime } = this.state
+        this.props.changeOnCallWeekMoney(onCallWeekMoney);
+        this.props.changeOnCallWeekendMoney(onCallWeekendMoney);
+        this.props.changeWeekMoneyMult(weekMoneyMult);
+        this.props.changeWeekendMoneyMult(weekendMoneyMult);
+        this.props.changeWeekTimeMult(weekTimeMult);
+        this.props.changeWeekendTimeMult(weekendTimeMult);
         this.props.changeNightEndTime(nightEndTime);
         this.props.changeNightStartTime(nightStartTime);
     }
@@ -95,13 +95,13 @@ class ConfigurationPage extends Component {
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Base money" name="baseMoney" type='number' min={0} placeholder="Base money"
-                                                        value={this.state.baseMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekMoney" type='number' min={0} placeholder="On Call Base Week Money"
+                                                        value={this.state.onCallWeekMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Base time" name="baseTime" type='number' placeholder="Base time" value={this.state.baseTime}
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekendMoney" type='number' placeholder="On Call Base Weekend Money" value={this.state.onCallWeekendMoney}
                                                         onChange={this.handleChange} onBlur={this.handleBlur} />
                                                 </Form.Field>
                                             </Grid.Column>
@@ -109,13 +109,13 @@ class ConfigurationPage extends Component {
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Money multiplier" name="moneyMult" type='number' placeholder="Money multiplier" value={this.state.moneyMult}
+                                                    <Form.Input label="Week Money Multiplier" name="weekMoneyMult" type='number' placeholder="Week Money Multiplier" value={this.state.weekMoneyMult}
                                                         onChange={this.handleChange} onBlur={this.handleBlur} />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Money multiplier" name="timeMult" type='number' placeholder="Time multiplier" value={this.state.timeMult}
+                                                    <Form.Input label="Weekend Money Multiplier" name="weekendMoneyMult" type='number' placeholder="Weekend Money Multiplier" value={this.state.weekendMoneyMult}
                                                         onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
@@ -123,13 +123,13 @@ class ConfigurationPage extends Component {
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="Week money" name="weekMoney" type='number' placeholder="Week money" value={this.state.weekMoney}
+                                                    <Form.Input label="Week Time Multiplier" name="weekTimeMult" type='number' placeholder="Week Time Multiplier" value={this.state.weekTimeMult}
                                                         onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
-                                                    <Form.Input label="Weekend money" name="weekendMoney" type='number' placeholder="Weekend money" value={this.state.weekendMoney}
+                                                    <Form.Input label="Weekend Time Multiplier" name="weekendTimeMult" type='number' placeholder="Weekend Time Multiplier" value={this.state.weekendTimeMult}
                                                         onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
@@ -152,15 +152,15 @@ class ConfigurationPage extends Component {
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field>
                                                     <label>Night Start Time</label>
-                                                    <TimePicker style={{width: "100%"}} value={moment(this.state.nightStartTime, 'HH:mm')} 
-                                                    onChange={this.handleNightStartTimeChange} format={"HH:mm"} allowEmpty={false} inputReadOnly/>
+                                                    <TimePicker style={{ width: "100%" }} value={moment(this.state.nightStartTime, 'HH:mm')}
+                                                        onChange={this.handleNightStartTimeChange} format={"HH:mm"} allowEmpty={false} inputReadOnly />
                                                 </Form.Field>
                                             </Grid.Column>
                                             <Grid.Column width={8} floated="right">
                                                 <Form.Field>
                                                     <label>Night End Time</label>
-                                                    <TimePicker style={{width: "100%"}} value={moment(this.state.nightEndTime, 'HH:mm')} 
-                                                    onChange={this.handleNightEndTimeChange} format={"HH:mm"} allowEmpty={false} inputReadOnly/>
+                                                    <TimePicker style={{ width: "100%" }} value={moment(this.state.nightEndTime, 'HH:mm')}
+                                                        onChange={this.handleNightEndTimeChange} format={"HH:mm"} allowEmpty={false} inputReadOnly />
                                                 </Form.Field>
                                             </Grid.Column>
                                         </Grid.Row>
@@ -194,15 +194,15 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
-        changeBaseMoney: newValue => dispatch(compensationsActions.changeBaseMoney(newValue)),
-        changeBaseTime: newValue => dispatch(compensationsActions.changeBaseTime(newValue)),
-        changeMoneyMult: newValue => dispatch(compensationsActions.changeMoneyMult(newValue)),
-        changeTimeMult: newValue => dispatch(compensationsActions.changeTimeMult(newValue)),
-        changeWeekMoney: newValue => dispatch(compensationsActions.changeWeekMoney(newValue)),
-        changeWeekendMoney: newValue => dispatch(compensationsActions.changeWeekendMoney(newValue)),
+        changeOnCallWeekMoney: newValue => dispatch(compensationsActions.changeOnCallWeekMoney(newValue)),
+        changeOnCallWeekendMoney: newValue => dispatch(compensationsActions.changeOnCallWeekendMoney(newValue)),
+        changeWeekMoneyMult: newValue => dispatch(compensationsActions.changeWeekMoneyMult(newValue)),
+        changeWeekendMoneyMult: newValue => dispatch(compensationsActions.changeWeekendMoneyMult(newValue)),
+        changeWeekTimeMult: newValue => dispatch(compensationsActions.changeWeekTimeMult(newValue)),
+        changeWeekendTimeMult: newValue => dispatch(compensationsActions.changeWeekendTimeMult(newValue)),
         changeNightStartTime: newValue => dispatch(compensationsActions.changeNightStartTime(newValue)),
         changeNightEndTime: newValue => dispatch(compensationsActions.changeNightEndTime(newValue)),
     }
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(ConfigurationPage);
+export default connect(mapStateToProps, mapDispatchToProps)(CompensationsPage);

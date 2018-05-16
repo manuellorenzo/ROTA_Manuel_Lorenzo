@@ -1,27 +1,27 @@
-export const changeBaseMoney = newValue => ({
-    type: 'CHANGE_BASE_MONEY',
+export const changeOnCallWeekMoney = newValue => ({
+    type: 'CHANGE_ONCALL_WEEK_MONEY',
     newValue
   })
-  export const changeBaseTime = newValue => ({
-    type: 'CHANGE_BASE_TIME',
+  export const changeOnCallWeekendMoney = newValue => ({
+    type: 'CHANGE_ONCALL_WEEKEND_MONEY',
     newValue
   })
 
-  export const changeMoneyMult = newValue => ({
-    type: 'CHANGE_MONEY_MULT',
+  export const changeWeekMoneyMult = newValue => ({
+    type: 'CHANGE_WEEK_MONEY_MULT',
     newValue
   })
-  export const changeTimeMult = newValue => ({
-    type: 'CHANGE_TIME_MULT',
+  export const changeWeekendMoneyMult = newValue => ({
+    type: 'CHANGE_WEEKEND_MONEY_MULT',
     newValue
   })
   
-  export const changeWeekMoney = newValue => ({
-    type: 'CHANGE_WEEK_MONEY',
+  export const changeWeekTimeMult = newValue => ({
+    type: 'CHANGE_WEEK_TIME_MULT',
     newValue
   })
-  export const changeWeekendMoney = newValue => ({
-    type: 'CHANGE_WEEKEND_MONEY',
+  export const changeWeekendTimeMult = newValue => ({
+    type: 'CHANGE_WEEKEND_TIME_MULT',
     newValue
   })
 

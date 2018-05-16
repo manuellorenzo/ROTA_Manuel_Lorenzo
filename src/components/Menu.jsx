@@ -5,7 +5,7 @@ import CalendarPage from './Calendar';
 import Login from './Login';
 import App from './App';
 import Workers from './Workers';
-import ConfigurationPage from './ConfigurationPage';
+import CompensationsPage from './CompensationsPage';
 
 import history from '../history';
 import Reports from './Report';
@@ -22,7 +22,7 @@ function BasicRouting(props) {
         history.push("/login");
         return null;
     }else if(activePage === 'confi'){
-        return <ConfigurationPage />
+        return <CompensationsPage />
     }else if(activePage === 'reports'){
         return <Reports />;
     }

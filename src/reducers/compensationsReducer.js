@@ -2,57 +2,57 @@ const compensationsReducer = (state = {
     compensations: {
         nightEndTime: "12:00",
         nightStartTime: "12:00",
-        baseMoney: "1",
-        baseTime: "1",
-        moneyMult: "1",
-        timeMult: "1",
-        weekMoney: "1",
-        weekendMoney: "1"
+        onCallWeekMoney: "1",
+        onCallWeekendMoney: "1",
+        weekMoneyMult: "1",
+        weekendMoneyMult: "1",
+        weekTimeMult: "1",
+        weekendTimeMult: "1"
     }
 }, action) => {
     switch (action.type) {
-        case 'CHANGE_BASE_MONEY':
+        case 'CHANGE_ONCALL_WEEK_MONEY':
             console.log("action.newValue", action.newValue)
             return {
                 ...state,
                 compensations: {
                     ...state.compensations,
-                    baseMoney: action.newValue
+                    onCallWeekMoney: action.newValue
                 }
             }
-        case 'CHANGE_BASE_TIME':
+        case 'CHANGE_ONCALL_WEEKEND_MONEY':
             return {
                 ...state,
                 compensations: { ...state.compensations,
-                    baseTime: action.newValue
+                    onCallWeekendMoney: action.newValue
                 }
             }
-        case 'CHANGE_MONEY_MULT':
+        case 'CHANGE_WEEK_MONEY_MULT':
             return {
                 ...state,
                 compensations: { ...state.compensations,
-                    moneyMult: action.newValue
+                    weekMoneyMult: action.newValue
                 }
             }
-        case 'CHANGE_TIME_MULT':
+        case 'CHANGE_WEEKEND_MONEY_MULT':
             return {
                 ...state,
                 compensations: { ...state.compensations,
-                    timeMult: action.newValue
+                    weekendMoneyMult: action.newValue
                 }
             }
-        case 'CHANGE_WEEK_MONEY':
+        case 'CHANGE_WEEK_TIME_MULT':
             return {
                 ...state,
                 compensations: { ...state.compensations,
-                    weekMoney: action.newValue
+                    weekTimeMult: action.newValue
                 }
             }
-        case 'CHANGE_WEEKEND_MONEY':
+        case 'CHANGE_WEEKEND_TIME_MULT':
             return {
                 ...state,
                 compensations: { ...state.compensations,
-                    weekendMoney: action.newValue
+                    weekendTimeMult: action.newValue
                 }
             }
         case 'CHANGE_NIGHT_END_TIME':

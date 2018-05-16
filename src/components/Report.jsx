@@ -29,7 +29,7 @@ class Reports extends Component {
         });
     }
 
-    componentDidMount() {
+    sortByYearMonthReports() {
         let monthsReport = [];
 
         //Agrupo por año
@@ -42,18 +42,20 @@ class Reports extends Component {
         //Relleno el modelo por cada uno de los valores agrupados anteriores
         _.forEach(groupedByYearMonth, (month, indexYear) => _.forEach(month, (event, indexMonth) => {
             let itemToAdd = {
-                monthName: indexMonth, year: indexYear, overallCompensation: "55",
+                monthName: indexMonth, year: indexYear, overallCompensation: "0",
                 workers: event.map((item) => { return { ...item.worker, compensation: '5' } })
             }
-            console.log("reduce report", itemToAdd.workers)
             //Calculamos las compensations mensuales
-            itemToAdd = { ...itemToAdd, overallCompensation: itemToAdd.workers.reduce((value, sum) => value + Number(sum.compensation), 0)};
-            console.log("itemToAdd report", itemToAdd.overallCompensation);
+            itemToAdd = { ...itemToAdd, overallCompensation: itemToAdd.workers.reduce((value, sum) => value + Number(sum.compensation), 0) };
             monthsReport.push(itemToAdd);
         }));
 
         //Ordenamos por año y luego por mes
-        monthsReport = monthsReport.sort((a, b) => a.year - b.year || moment().month(a.monthName).format("M") - moment().month(b.monthName).format("M"));
+        return monthsReport = monthsReport.sort((a, b) => a.year - b.year || moment().month(a.monthName).format("M") - moment().month(b.monthName).format("M"));
+    }
+
+    componentDidMount() {
+        let monthsReport = this.sortByYearMonthReports();
         //Actualizamos los meses de Redux
         this.props.updateMonths(monthsReport);
         //Cambiamos el estado de la aplicación 
@@ -97,6 +99,7 @@ class Reports extends Component {
                                         }
                                     };
                                 }}
+                                filterable
                                 data={row.row._original.workers}
                                 columns={[
                                     {
