@@ -5,7 +5,7 @@ const eventSchema = new Schema({
     start: Date,
     end: Date,
     title: String,
-    Type: String,
+    type: String,
     workerId: {type: Schema.ObjectId, ref: 'Worker'},
     activities: [{type: Schema.ObjectId, ref: 'Activity'}]
 });
