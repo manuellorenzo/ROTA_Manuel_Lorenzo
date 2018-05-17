@@ -4,7 +4,7 @@ let router = express.Router();
 
 router.post('/new', activityController.addActivity);
 router.get('/list', activityController.listActivities);
-router.update('/edit', activityController.editActivity);
+router.put('/edit', activityController.editActivity);
 router.delete('/delete/:id', activityController.deleteActivity);
 router.get('/findActivity/:id', activityController.findOneActivity);
 
