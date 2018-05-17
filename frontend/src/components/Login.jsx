@@ -15,6 +15,30 @@ class Login extends Component {
         history.push(route);
     }
 
+    pruebaArrays() {
+        let array = ["A","B", "C"];
+        let array1 = [...array];
+        let array2 = [...array];
+        let array3 = [...array];
+        array.map((itemA, indexA) => {
+            if (indexA - 1 < 0) {
+                array2[array2.length - 1] = itemA;
+            } else {
+                array2[indexA - 1] = itemA;
+            }
+        });
+        array.map((itemA, indexA) => {
+            if (indexA +1 >= array3.length) {
+                array3[0] = itemA;
+            } else {
+                array3[indexA +1] = itemA;
+            }
+        });
+        console.log(array);
+        console.log(array2);
+        console.log(array3);
+    }
+
     render() {
         return (
             <div>
@@ -26,7 +50,7 @@ class Login extends Component {
                     </Grid.Row>
                     <Grid.Row centered>
                         <Grid.Column mobile={14} tablet={7} computer={5}>
-                            <Form onSubmit={() => this.goToRoute("/menu")}>
+                            <Form onSubmit={() => this.goToRoute("/menu")} /*this.pruebaArrays()*/>
                                 <Form.Field>
                                     <Form.Input label="Username" placeholder="Username" />
                                 </Form.Field>

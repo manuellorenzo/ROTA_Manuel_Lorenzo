@@ -53,10 +53,11 @@ class CalendarPage extends Component {
                     name: ''
                 },
                 startDate: moment(),
-                activity: false,
-                startTime: moment().format('HH:mm'),
-                duration: 0,
-                workReference: ''
+                activities: [{
+                    startTime: moment().format('HH:mm'),
+                    duration: 0,
+                    workReference: ''
+                }]
             },
             messages: {
                 addEditEvents: {
@@ -234,7 +235,7 @@ class CalendarPage extends Component {
         this.setState((prevState, props) => { return { newEvent: { ...prevState.newEvent, [name]: value } } });
     }
 
-    checkEmptyEditModal = () =>{
+    checkEmptyEditModal = () => {
         console.log("checkEmtyModal", this.state.newEvent.workReference !== '' && this.state.newEvent.duration !== '');
         return this.state.newEvent.workReference === '' && this.state.newEvent.duration === ''
     }
@@ -383,7 +384,7 @@ class CalendarPage extends Component {
                                             <Form.Input label="Duration" type='number' placeholder="Duration" name="duration" value={this.state.newEvent.duration} onChange={this.handleActivityInputOnChange} />
                                         </Form.Field>
                                         <Form.Field>
-                                            <Form.Input label="Work Reference" name="workReference" type='text' placeholder="Work Reference"  value={this.state.newEvent.workReference} onChange={this.handleActivityInputOnChange}/>
+                                            <Form.Input label="Work Reference" name="workReference" type='text' placeholder="Work Reference" value={this.state.newEvent.workReference} onChange={this.handleActivityInputOnChange} />
                                         </Form.Field>
                                     </div>
                                     : null}
@@ -410,9 +411,11 @@ class CalendarPage extends Component {
                                     _id: this.state.newEvent._id,
                                     worker: this.state.newEvent.worker,
                                     type: this.state.newEvent.activity === true ? "Activity" : "On Call",
-                                    startTime: this.state.newEvent.startTime,
-                                    duration: this.state.newEvent.duration,
-                                    workReference: this.state.newEvent.workReference
+                                    activities: [{
+                                        startTime: this.state.newEvent.startTime,
+                                        duration: this.state.newEvent.duration,
+                                        workReference: this.state.newEvent.workReference,
+                                    }]
                                 });
                                 this.setState({
                                     newEvent: {
