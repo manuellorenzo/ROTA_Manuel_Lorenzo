@@ -8,24 +8,39 @@ import 'antd/dist/antd.css';
 import moment from 'moment';
 import history from '../history';
 
+import ReactTable from 'react-table';
+import "react-table/react-table.css";
+
 import * as compensationsActions from '../actions/compensationsActions';
 
 class CompensationsPage extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            nightEndTime: moment(),
-            nightStartTime: moment(),
+            //ON CALL MONEY
             onCallWeekMoney: "1",
             onCallWeekendMoney: "1",
-            weekMoneyMult: "1",
-            weekendMoneyMult: "1",
-            weekTimeMult: "1",
-            weekendTimeMult: "1"
+            //WEEK
+            bfNtWeekMoneyMult: "1",
+            afNtWeekMoneyMult: "1",
+            bfNtWeekTimeMult: "1",
+            afNtWeekTimeMult: "1",
+            //WEEKEND
+            bfNtWeekendMoneyMult: "1",
+            afNtWeekendMoneyMult: "1",
+            bfNtWeekendTimeMult: "1",
+            afNtWeekendTimeMult: "1",
+            //TIME
+            nightEndTime: "12:00",
+            nightStartTime: "12:00",
         };
         this.handleNightStartTimeChange = this.handleNightStartTimeChange.bind(this);
         this.handleNightEndTimeChange = this.handleNightEndTimeChange.bind(this);
 
+    }
+
+    componentDidMount() {
+        //ACTUALIZAR REDUX CON LOS DATOS DE LA API
     }
 
     handleNightStartTimeChange(nightStartTime) {
@@ -58,13 +73,27 @@ class CompensationsPage extends Component {
     }
 
     handleSubmit = () => {
-        const { onCallWeekMoney, onCallWeekendMoney, weekMoneyMult, weekendMoneyMult, weekTimeMult, weekendTimeMult, nightStartTime, nightEndTime } = this.state
+        const { onCallWeekMoney, onCallWeekendMoney,
+            bfNtWeekMoneyMult, afNtWeekMoneyMult, bfNtWeekTimeMult, afNtWeekTimeMult,
+            bfNtWeekendMoneyMult, afNtWeekendMoneyMult, bfNtWeekendTimeMult, afNtWeekendTimeMult,
+            nightEndTime, nightStartTime } = this.state
+        //ON CALL MONEY
         this.props.changeOnCallWeekMoney(onCallWeekMoney);
         this.props.changeOnCallWeekendMoney(onCallWeekendMoney);
-        this.props.changeWeekMoneyMult(weekMoneyMult);
-        this.props.changeWeekendMoneyMult(weekendMoneyMult);
-        this.props.changeWeekTimeMult(weekTimeMult);
-        this.props.changeWeekendTimeMult(weekendTimeMult);
+
+        //WEEK
+        this.props.changeBeforeNTWeekMoneyMult(bfNtWeekMoneyMult);
+        this.props.changeAfterNTWeekMoneyMult(afNtWeekMoneyMult);
+        this.props.changeBeforeNTWeekTimeMult(bfNtWeekTimeMult);
+        this.props.changeAfterNTWeekTimeMult(afNtWeekTimeMult);
+
+        //WEEKEND
+        this.props.changeBeforeNTWeekendMoneyMult(bfNtWeekendMoneyMult);
+        this.props.changeAfterNTWeekendMoneyMult(afNtWeekendMoneyMult);
+        this.props.changeBeforeNTWeekendTimeMult(bfNtWeekendTimeMult);
+        this.props.changeAfterNTWeekendTimeMult(afNtWeekendTimeMult);
+
+        //TIME
         this.props.changeNightEndTime(nightEndTime);
         this.props.changeNightStartTime(nightStartTime);
     }
@@ -77,21 +106,108 @@ class CompensationsPage extends Component {
     }
 
     render() {
-
+        const compensationsTableColumns = [
+            {
+                Header: "Before Night Time Money",
+                id: "bfNT",
+                accessor: d => d.bfNtWeekMoneyMult
+            },
+            {
+                Header: "After Night Time Money",
+                id: "lastName",
+                accessor: d => d.afNtWeekMoneyMult
+            }
+        ]
         return (
             <div>
                 <Container>
                     <Grid>
                         <Grid.Row>
                             <Grid.Column>
-                                <Header as="h2">Compensations</Header>
-                                <Divider />
-                            </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row>
-                            <Grid.Column>
                                 <Form>
                                     <Grid>
+                                        <Grid.Row>
+                                            <Grid.Column>
+                                                <Header as="h3">Compensations</Header>
+                                                <Divider />
+                                            </Grid.Column>
+                                        </Grid.Row>
+                                        <Grid.Row>
+                                            <Grid.Column width={8} floated="left">
+                                                <Form.Field >
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekMoney" type='number' min={0} placeholder="On Call Base Week Money"
+                                                        value={this.state.onCallWeekMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                            <Grid.Column width={8} floated="right">
+                                                <Form.Field>
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekendMoney" type='number' placeholder="On Call Base Weekend Money" value={this.state.onCallWeekendMoney}
+                                                        onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                        </Grid.Row>
+                                        <Grid.Row>
+                                            <ReactTable
+                                                data={[]}
+                                                columns={this.compensationsTableColumns}
+                                                defaultPageSize={10}
+                                                className="-striped -highlight"
+                                            />
+                                        </Grid.Row>
+                                        {/*<Grid.Row>
+                                            <Grid.Column>
+                                                <Header as="h3">Before Night Time</Header>
+                                                <Divider />
+                                            </Grid.Column>
+                                        </Grid.Row>
+                                        <Grid.Row>
+                                            <Grid.Column width={8} floated="left">
+                                                <Form.Field >
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekMoney" type='number' min={0} placeholder="On Call Base Week Money"
+                                                        value={this.state.onCallWeekMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                            <Grid.Column width={8} floated="right">
+                                                <Form.Field>
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekendMoney" type='number' placeholder="On Call Base Weekend Money" value={this.state.onCallWeekendMoney}
+                                                        onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                        </Grid.Row>
+                                        <Grid.Row>
+                                            <Grid.Column width={8} floated="left">
+                                                <Form.Field >
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekMoney" type='number' min={0} placeholder="On Call Base Week Money"
+                                                        value={this.state.onCallWeekMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                            <Grid.Column width={8} floated="right">
+                                                <Form.Field>
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekendMoney" type='number' placeholder="On Call Base Weekend Money" value={this.state.onCallWeekendMoney}
+                                                        onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                        </Grid.Row>
+                                        <Grid.Row>
+                                            <Grid.Column>
+                                                <Header as="h3">Before Night Time</Header>
+                                                <Divider />
+                                            </Grid.Column>
+                                        </Grid.Row>
+                                        <Grid.Row>
+                                            <Grid.Column width={8} floated="left">
+                                                <Form.Field >
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekMoney" type='number' min={0} placeholder="On Call Base Week Money"
+                                                        value={this.state.onCallWeekMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                            <Grid.Column width={8} floated="right">
+                                                <Form.Field>
+                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekendMoney" type='number' placeholder="On Call Base Weekend Money" value={this.state.onCallWeekendMoney}
+                                                        onChange={this.handleChange} onBlur={this.handleBlur} />
+                                                </Form.Field>
+                                            </Grid.Column>
+                                        </Grid.Row>
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
@@ -133,14 +249,14 @@ class CompensationsPage extends Component {
                                                         onBlur={this.handleBlur} onChange={this.handleChange} />
                                                 </Form.Field>
                                             </Grid.Column>
-                                        </Grid.Row>
+                                        </Grid.Row>*/}
                                     </Grid>
                                 </Form>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
                             <Grid.Column>
-                                <Header as="h2">Time configuration</Header>
+                                <Header as="h3">Time configuration</Header>
                                 <Divider />
                             </Grid.Column>
                         </Grid.Row>
@@ -193,13 +309,23 @@ const mapStateToProps = (state, ownProps) => {
 // Maps actions to props
 const mapDispatchToProps = (dispatch) => {
     return {
-        // You can now say this.props.createBook
+        //ON CALL METHODS
         changeOnCallWeekMoney: newValue => dispatch(compensationsActions.changeOnCallWeekMoney(newValue)),
         changeOnCallWeekendMoney: newValue => dispatch(compensationsActions.changeOnCallWeekendMoney(newValue)),
-        changeWeekMoneyMult: newValue => dispatch(compensationsActions.changeWeekMoneyMult(newValue)),
-        changeWeekendMoneyMult: newValue => dispatch(compensationsActions.changeWeekendMoneyMult(newValue)),
-        changeWeekTimeMult: newValue => dispatch(compensationsActions.changeWeekTimeMult(newValue)),
-        changeWeekendTimeMult: newValue => dispatch(compensationsActions.changeWeekendTimeMult(newValue)),
+
+        //WEEK METHODS
+        changeBeforeNTWeekMoneyMult: newValue => dispatch(compensationsActions.changeBeforeNTWeekMoneyMult(newValue)),
+        changeAfterNTWeekMoneyMult: newValue => dispatch(compensationsActions.changeAfterNTWeekMoneyMult(newValue)),
+        changeBeforeNTWeekTimeMult: newValue => dispatch(compensationsActions.changeBeforeNTWeekTimeMult(newValue)),
+        changeAfterNTWeekTimeMult: newValue => dispatch(compensationsActions.changeAfterNTWeekTimeMult(newValue)),
+
+        //WEEKEND METHODS
+        changeBeforeNTWeekendMoneyMult: newValue => dispatch(compensationsActions.changeBeforeNTWeekendMoneyMult(newValue)),
+        changeAfterNTWeekendMoneyMult: newValue => dispatch(compensationsActions.changeAfterNTWeekendMoneyMult(newValue)),
+        changeBeforeNTWeekendTimeMult: newValue => dispatch(compensationsActions.changeBeforeNTWeekendTimeMult(newValue)),
+        changeAfterNTWeekendTimeMult: newValue => dispatch(compensationsActions.changeAfterNTWeekendTimeMult(newValue)),
+
+        //TIME METHODS
         changeNightStartTime: newValue => dispatch(compensationsActions.changeNightStartTime(newValue)),
         changeNightEndTime: newValue => dispatch(compensationsActions.changeNightEndTime(newValue)),
     }
