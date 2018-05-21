@@ -1,5 +1,5 @@
 import workersReducer from './workersReducer';
-import compensationsReducer from './compensationsReducer';
+import configurationsReducer from './configurationsReducer';
 import reportsReducer from './reportsReducer';
 import calendarReducer from './calendarReducer';
 
@@ -9,7 +9,7 @@ import {
 
 export default combineReducers({
   workersReducer,
-  compensationsReducer,
+  configurationsReducer,
   reportsReducer,
   calendarReducer
 })

@@ -1,16 +1,18 @@
+import * as types from '../actions/actionTypes';
+
 const workersReducer = (state = {
     workers: [],
     onCall: []
 }, action) => {
     switch (action.type) {
-        case 'ADD_WORKER':
+        case types.LOAD_WORKERS_SUCCESS:
             console.log('ADD_WORKERS', state)
             return {
                 ...state,
-                workers: [...state.workers, action.worker]
+                workers: action.workers
             }
-        case 'UPDATE_WORKER':
-            console.log('UPDATE_WORKER', state)
+        case types.EDIT_WORKER_SUCCESS:
+            console.log(types.EDIT_WORKER_SUCCESS, state)
             return {
                 ...state,
                 workers: state.workers.map((item, index) => {
@@ -34,11 +36,37 @@ const workersReducer = (state = {
                     return item
                 })
             }
-        case 'REMOVE_WORKER':
+        case types.ADD_WORKER_SUCCESS:
+            console.log('ADD_WORKERS', state)
+            return {
+                ...state,
+                workers: [...state.workers, action.worker]
+            }
+        case types.DELETE_WORKER_SUCCESS:
             const workerId = action;
-            console.log('worker.id', workerId)
-            return { ...state,
-                workers: state.workers.filter(item => item._id !== action._id)
+            console.log('Delete worker worker.id', workerId)
+            return {
+                ...state,
+                workers: state.workers.map((item, index) => {
+                    if (item._id === action.worker._id) {
+                        console.log('change worker')
+                        return {
+                            ...item,
+                            inactive: true
+                        };
+                    }
+                    return item
+                }),
+                onCall: state.onCall.map((item, index) => {
+                    if (item._id === action.worker._id) {
+                        console.log('change worker')
+                        return {
+                            ...item,
+                            inactive: true
+                        };
+                    }
+                    return item
+                })
             }
         case 'ADD_ONCALL_WORKER':
             return {
