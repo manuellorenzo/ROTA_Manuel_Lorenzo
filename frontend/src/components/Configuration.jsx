@@ -52,14 +52,14 @@ class Configuration extends Component {
     componentDidMount() {
         //ACTUALIZAR REDUX CON LOS DATOS DE LA API
         console.log("componentDidMount", this.props.compensations)
-        this.props.loadAllConf();
-        this.setState((prevState, props) => {
-            return props.compensations
-        }, () => {
-            /*Object.keys(this.state).map((key) => {
-                console.log("Compensation state",{[key]:this.state[key]});
-            })*/
-        })
+        this.props.loadAllConf().then(() =>
+            this.setState((prevState, props) => {
+                return props.compensations
+            }, () => {
+                /*Object.keys(this.state).map((key) => {
+                    console.log("Compensation state",{[key]:this.state[key]});
+                })*/
+            }));
     }
 
     componentWillReceiveProps(props) {
@@ -81,7 +81,7 @@ class Configuration extends Component {
             bfNtWeekMoneyMult, afNtWeekMoneyMult, bfNtWeekTimeMult, afNtWeekTimeMult,
             bfNtWeekendMoneyMult, afNtWeekendMoneyMult, bfNtWeekendTimeMult, afNtWeekendTimeMult,
             nightEndTime, nightStartTime } = this.state
-        this.props.editConf({...this.state, _id: this.props.compensations._id});
+        this.props.editConf({ ...this.state, _id: this.props.compensations._id });
         /*//ON CALL MONEY
         this.props.changeOnCallWeekMoney(onCallWeekMoney);
         this.props.changeOnCallWeekendMoney(onCallWeekendMoney);
