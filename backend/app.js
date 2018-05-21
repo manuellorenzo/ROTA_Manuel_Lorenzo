@@ -13,6 +13,8 @@ mongoose.Promise = global.Promise;
 const activity = require('./routes/Activity');
 const event = require('./routes/Event');
 const worker = require('./routes/Worker');
+const compensation=require('./routes/Compensation');
+const configuration=require('./routes/Configuration')
 
 app.use(cors());
 app.use(logger('dev'));
@@ -24,5 +26,7 @@ app.use(cookieParser());
 app.use('/event', event);
 app.use('/worker', worker);
 app.use('/activity', activity);
+app.use('/compensation', compensation);
+app.use('/configuration', configuration);
 
 module.exports = app;

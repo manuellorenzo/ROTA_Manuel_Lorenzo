@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const compensationSchema=new Schema({
-    payment:Double,
-    date:Date,
+    payment:String,
+    dateCompensation:String,
     type:String
 })
 
