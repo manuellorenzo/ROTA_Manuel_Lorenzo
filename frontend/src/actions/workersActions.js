@@ -11,6 +11,7 @@ export function loadWorkers() {
   };
 }
 export function loadWorkersSuccess(workers) {
+  console.log("PROPS DATA LOAD WORKERS", workers)
   return {
     type: types.LOAD_WORKERS_SUCCESS,
     workers

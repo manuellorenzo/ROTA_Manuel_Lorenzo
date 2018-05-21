@@ -1,15 +1,18 @@
+import * as urls from '../api/urls';
+
 class WorkerApi {
     static getAllWorkers() {
-        return fetch('http://172.22.4.117:3000/worker/list').then(response => {
+        return fetch(urls.URL_FERN+'/worker/list').then(response => {
             return response.json();
         }).catch(error => {
+            console.log("PROPS DATA ERROR", error)
             return error;
         });
     }
 
     static editWorker(worker) {
         console.log("Edit worker api", worker);
-        return fetch('http://172.22.4.117:3000/worker/edit', {
+        return fetch(urls.URL_FERN+'/worker/edit', {
             method: 'put',
             headers: {
                 'Accept': 'application/json',
@@ -25,7 +28,7 @@ class WorkerApi {
 
     static addWorker(worker) {
         console.log("Add worker api", worker);
-        return fetch('http://172.22.4.117:3000/worker/new', {
+        return fetch(urls.URL_FERN+'/worker/new', {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
@@ -41,7 +44,7 @@ class WorkerApi {
 
     static deleteWorker(_id) {
         console.log("Delete worker api", _id);
-        return fetch('http://172.22.4.117:3000/worker/delete/' + _id, {
+        return fetch(urls.URL_FERN+'/worker/delete/' + _id, {
             method: 'put',
             headers: {
                 'Accept': 'application/json',
