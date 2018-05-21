@@ -24,7 +24,7 @@ class Workers extends Component {
             newWorker: {
                 _id: '',
                 name: '',
-                role: 1
+                role: 3
             },
             messages: {
                 CRUDWorkers: {
@@ -56,10 +56,16 @@ class Workers extends Component {
         this.handleOnChangeInputWorkerName = this.handleOnChangeInputWorkerName.bind(this);
     }
 
+    componentDidMount() {
+        this.props.loadAllWorkers();
+        console.log("WORKERS LOADED", this.props.workers);
+    }
+
     ReactTableWorkers(props) {
         return (
             <div>
                 <ReactTable
+                    onFetchData={this.props.loadAllWorkers}
                     getTdProps={(state, rowInfo, column, instance) => {
                         return {
                             style: {
@@ -71,7 +77,7 @@ class Workers extends Component {
                             },
                             onClick: (e, handleOriginal) => {
                                 if (rowInfo !== undefined && column.id !== "actions") {
-                                    console.log("state instance", state, instance)
+                                    console.log("state instance", rowInfo.row)
                                     this.setState({
                                         modals: { ...this.state.modals, showModalEditWorker: true }, newWorker: {
                                             name: rowInfo.row.name,
@@ -93,7 +99,7 @@ class Workers extends Component {
                         };
                     }}
                     filterable
-                    data={props.data}
+                    data={props.data.filter(item => item.inactive === false)}
                     noDataText="No workers"
                     columns={props.columns}
                     defaultPageSize={10}
@@ -142,7 +148,7 @@ class Workers extends Component {
         modals: { ...this.state.modals, [name]: false }, newWorker: {
             _id: '',
             name: '',
-            role: 1
+            role: 3
         }
     });
 
@@ -170,7 +176,7 @@ class Workers extends Component {
     }
 
     handleOnConfirmWorkers = () => {
-        this.props.removeWorker(this.state.messages.confirmDelete._id);
+        this.props.deleteWorker(this.state.messages.confirmDelete._id);
         this.props.removeFromOnCall(this.state.messages.confirmDelete._id);
         this.handleChangeMessages("Worker deleted successfully");
         this.setState((prevState, props) => {
@@ -288,7 +294,7 @@ class Workers extends Component {
                             this.handleModalClose("showModalAddWorker")
                         }}>Close</Button>
                         <Button floated="right" disabled={this.state.newWorker.name === ''} onClick={() => {
-                            this.props.addWorker({ ...this.state.newWorker, _id: Math.random() });
+                            this.props.addWorker({ ...this.state.newWorker, _id: Math.random(), inactive: false, onCall: false });
                             this.handleModalClose("showModalAddWorker")
                             this.handleChangeMessages("Worker added successfully");
                         }}>Add event</Button>
@@ -316,7 +322,7 @@ class Workers extends Component {
                             this.handleModalClose("showModalEditWorker")
                         }}>Close</Button>
                         <Button floated="right" disabled={this.state.newWorker.name === ''} onClick={() => {
-                            this.props.updateWorker(this.state.newWorker);
+                            this.props.editWorker(this.state.newWorker);
                             this.handleModalClose("showModalEditWorker");
                             this.handleChangeMessages("Worker edited successfully");
                         }}>Edit event</Button>
@@ -345,9 +351,11 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
+        loadAllWorkers: () => dispatch(workersActions.loadWorkers()),
+        editWorker: worker => dispatch(workersActions.editWorker(worker)),
         addWorker: worker => dispatch(workersActions.addWorker(worker)),
         updateWorker: worker => dispatch(workersActions.updateWorker(worker)),
-        removeWorker: _id => dispatch(workersActions.removeWorker(_id)),
+        deleteWorker: _id => dispatch(workersActions.deleteWorker(_id)),
         addToOnCall: worker => dispatch(workersActions.addToOnCall(worker)),
         removeFromOnCall: _id => dispatch(workersActions.removeFromOnCall(_id))
     }
