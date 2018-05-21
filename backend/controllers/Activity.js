@@ -30,17 +30,18 @@ module.exports.listActivities = (req, res) => {
 };
 
 module.exports.editActivity = (req, res) => {
-    Activity.findByIdAndUpdate(req.params.id, req.body, {new:true}, function (err, activity) {
+    Activity.findByIdAndUpdate(req.body.id, req.body, {new:true}, function (err, activity) {
         if (err) {
             return res.status(400).jsonp({error: 500, message: `${err.message}`})
         }
-    });
 
-    return res.status(200).jsonp({
-        startTime: req.body.startTime,
-        duration: req.body.duration,
-        workReference: req.body.workReference
-    })
+        activity.save((err, result) => {
+            if (err)
+                return res.status(500).jsonp({error: 500, message: `${err.message}`});
+
+            return res.status(201).jsonp(result);
+        });
+    });
 };
 
 module.exports.deleteActivity = (req, res) => {
@@ -51,14 +52,18 @@ module.exports.deleteActivity = (req, res) => {
         activity.remove((err) => {
             if (err)
                 return res.status(500).jsonp({error: 500, message: `${err.message}`});
+            res.sendStatus(204);
         })
     })
 };
 
 module.exports.findOneActivity = (req, res) => {
-      Activity.findById(req.params.id, function (err, activity) {
-          if (err)
-              return res.status(500).jsonp({error: 500, message: `${err.message}`});
+      Activity.find({_id: req.params._id}, (err, activity) => {
+          if (activity === undefined)
+              return res.status(500).jsonp({
+                  error: 500,
+                  message: `${err.message}`
+              });
           res.status(200).jsonp(activity);
       })
 };
