@@ -8,5 +8,6 @@ router.put('/edit', workerController.editWorker);
 router.put('/delete/:id', workerController.deleteWorker);
 router.get('/findWorker/:_id', workerController.findOneWorker);
 router.get('/findWorkerOnCall', workerController.findWorkerOnCall);
+router.get('/findWorkerAndCompensation/:values', workerController.findWorkerAndCompensation);
 
 module.exports = router;
