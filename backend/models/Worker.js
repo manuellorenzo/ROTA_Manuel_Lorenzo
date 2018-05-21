@@ -3,7 +3,9 @@ const Schema = mongoose.Schema;
 
 const workerSchema = new Schema({
     name: String,
-    role: String
+    role: Number,
+    onCall: Boolean,
+    inactive: Boolean
 });
 
 module.exports = mongoose.model('Worker', workerSchema);

@@ -12,10 +12,12 @@ import Calendar from './components/Calendar';
 import HorizontalMenu from './components/Menu';
 
 import history from './history';
-import reducer from './reducers'
+import reducer from './reducers';
 import configureStore from './store/configureStore';
+import { loadConf } from './actions/configurationsActions';
 
-const store = configureStore()
+const store = configureStore();
+store.dispatch(loadConf());
 
 ReactDOM.render(
     <Provider store={store}>
