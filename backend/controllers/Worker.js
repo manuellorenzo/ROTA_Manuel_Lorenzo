@@ -1,5 +1,6 @@
 const Worker = require('../models/Worker');
 const Event = require('../models/Event');
+const Compensation = require('../models/Compensation');
 const moment = require('moment');
 
 module.exports.addWorker = (req, res) => {
@@ -25,9 +26,10 @@ module.exports.listWorker = (req, res) => {
             return res.status(500).jsonp({error: 500, message: `${err.message}`});
 
         if (result && result.length) {
-            res.status(200).jsonp(result);
+            return res.status(200).jsonp(result);
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
+
         }
     })
 };
@@ -53,16 +55,21 @@ module.exports.editWorker = (req, res) => {
 module.exports.deleteWorker = (req, res) => {
     Worker.findByIdAndUpdate(req.params.id,{inactive: true}, function (err, worker) {
         if (worker === undefined)
-            return res.sendStatus(404);
-
+            return res.status(404).jsonp({
+                status: 404,
+                message: `${err.message}`
+            });
         worker.save((err) => {
             if (err)
                 return res.status(500).jsonp({
-                    error: 500,
+                    status: 500,
                     message: `${err.message}`
                 });
+            return res.status(201).jsonp({
+                status: 201,
+                worker: worker
+            });
 
-            res.status(201);
         });
     });
 };
@@ -74,7 +81,7 @@ module.exports.findOneWorker = (req, res) => {
                 error: 500,
                 message: `${err.message}`
             });
-        res.status(200).jsonp(worker);
+        return res.status(200).jsonp(worker);
     })
 };
 
@@ -85,23 +92,75 @@ module.exports.findWorkerOnCall = (req, res) => {
                 error: 500,
                 message: `${err.message}`
             });
-        res.status(200).jsonp(worker);
+        return res.status(200).jsonp(worker);
     })
 };
 
-//TODO conseguir buscar por mes y año
+module.exports.addOncallWorker = (req, res) => {
+    Worker.findByIdAndUpdate(req.params.id, {onCall: true}, function (err, worker) {
+        if (worker === undefined)
+            return res.status(404).jsonp({
+                status: 404,
+                message: `${err.message}`
+            });
+        worker.save((err) => {
+            if (err)
+                return res.status(500).jsonp({
+                    status: 500,
+                    message: `${err.message}`
+                });
+            return res.status(201).jsonp({
+                status: 201,
+                worker: worker
+            });
+
+        });
+    })
+};
+
+module.exports.removeOncallWorker = (req, res) => {
+    Worker.findByIdAndUpdate(req.params.id, {onCall: false}, function (err, worker) {
+        if (worker === undefined)
+            return res.status(404).jsonp({
+                status: 404,
+                message: `${err.message}`
+            });
+        worker.save((err) => {
+            if (err)
+                return res.status(500).jsonp({
+                    status: 500,
+                    message: `${err.message}`
+                });
+            return res.status(201).jsonp({
+                status: 201,
+                worker: worker
+            });
+
+        });
+    })
+};
+
+//TODO Cambiar y buscar todos los trabajadores con sus compensaciones si tienen
 module.exports.findWorkerAndCompensation = (req, res) => {
-    var startDate = moment(["2018", req.params.month - 1]);
-    var endDate = moment(startDate).endOf('month');
+    const startDate = moment(["2018", req.params.month - 1]);
+    const endDate = moment(startDate).endOf('month');
+    const workerComp = [];
 
     Event.find({start: {$gte:startDate, $lte: endDate}} , function (err, result) {
         if (err)
             return res.status(500).jsonp({error: 500, message: `${err.message}`});
 
         if (result && result.length) {
-            res.status(200).jsonp(result);
+            for (let i = 0; result.length > i; i++) {
+                Compensation.find({worker: result[i].workerId}, function (err, compensation) {
+                    //workerComp.push(compensation);
+                    console.log(compensation)
+                    //return res.status(200).jsonp(compensation);
+                })
+            }
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
+        //return res.status(200).jsonp(workerComp);
     });
 };

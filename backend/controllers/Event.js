@@ -27,7 +27,7 @@ module.exports.addEvent = (req, res) => {
                 if (err)
                     return res.status(500).jsonp({error: 500, message: `${err.message}`});
 
-                res.status(200).jsonp(result);
+                return res.status(200).jsonp(result);
             })
         })
 
@@ -42,9 +42,9 @@ module.exports.listEvent = (req, res) => {
             return res.status(500).jsonp({error: 500, message: `${err.message}`});
 
         if (result && result.length) {
-            res.status(200).jsonp(result);
+            return res.status(200).jsonp(result);
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
     })
 };
@@ -75,7 +75,7 @@ module.exports.deleteEvent = (req, res) => {
                     error: 500,
                     message: `${err.message}`
                 });
-            res.sendStatus(204)
+            return res.sendStatus(204)
         });
     });
 };
@@ -87,7 +87,7 @@ module.exports.findOneEvent = (req, res) => {
                 error: 500,
                 message: `${err.message}`
             });
-        res.status(200).jsonp(event);
+        return res.status(200).jsonp(event);
     })
 };
 
