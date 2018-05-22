@@ -52,9 +52,9 @@ module.exports.editWorker = (req, res) => {
 
 module.exports.deleteWorker = (req, res) => {
     Worker.findByIdAndUpdate(req.params.id,{inactive: true}, function (err, worker) {
-        if (worker === undefined)
+        if (worker === undefined){
             return res.sendStatus(404);
-
+        }
         worker.save((err) => {
             if (err)
                 return res.status(500).jsonp({
@@ -62,7 +62,7 @@ module.exports.deleteWorker = (req, res) => {
                     message: `${err.message}`
                 });
 
-            res.status(201);
+            return res.status(201);
         });
     });
 };

@@ -3,9 +3,10 @@ import * as urls from '../api/urls';
 class WorkerApi {
     static getAllWorkers() {
         return fetch(urls.URL_FERN+'/worker/list').then(response => {
+            console.log("WORKERS API -- GET ALL WORKERS --", response)
             return response.json();
         }).catch(error => {
-            console.log("PROPS DATA ERROR", error)
+            console.log("WORKERS API -- GET ALL WORKERS ERROR --",error)
             return error;
         });
     }
@@ -51,8 +52,10 @@ class WorkerApi {
                 'Content-Type': 'application/json'
             }
         }).then(response => {
+            console.log("WORKERS COMPONENT -- DELETEWORKER RESPONSE API --",response)
             return response.json();
         }).catch(error => {
+            console.log("WORKERS COMPONENT -- DELETEWORKER ERROR API --",error)
             return error;
         });
     }

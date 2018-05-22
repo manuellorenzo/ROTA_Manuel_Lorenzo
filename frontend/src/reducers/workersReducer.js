@@ -68,16 +68,6 @@ const workersReducer = (state = {
                     return item
                 })
             }
-        case 'ADD_ONCALL_WORKER':
-            return {
-                ...state,
-                onCall: [...state.onCall, action.worker]
-            }
-        case 'REMOVE_ONCALL_WORKER':
-            return {
-                ...state,
-                onCall: state.onCall.filter(item => item._id !== action._id)
-            }
         default:
             return state
     }

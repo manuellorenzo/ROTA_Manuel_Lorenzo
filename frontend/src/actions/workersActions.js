@@ -4,6 +4,7 @@ import * as types from './actionTypes';
 export function loadWorkers() {
   return function (dispatch) {
     return workersApi.getAllWorkers().then(workers => {
+      console.log("WORKERS ACTIONS -- LOAD ALL WORKERS --", workers)
       dispatch(loadWorkersSuccess(workers));
     }).catch(error => {
       throw (error);
@@ -66,14 +67,6 @@ export function deleteWorkerSuccess(_id) {
   };
 }
 
-export const updateWorker = worker => ({
-  type: 'UPDATE_WORKER',
-  worker
-})
-export const removeWorker = _id => ({
-  type: 'REMOVE_WORKER',
-  _id
-})
 export const addToOnCall = worker => ({
   type: 'ADD_ONCALL_WORKER',
   worker
