@@ -8,6 +8,7 @@ const cors = require('cors');
 
 const app = express();
 mongoose.connect(config.MONGODB_URI);
+
 mongoose.Promise = global.Promise;
 
 const activity = require('./routes/Activity');
