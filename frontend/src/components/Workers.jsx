@@ -48,7 +48,8 @@ class Workers extends Component {
                 key: 3,
                 text: 'USER',
                 value: 3,
-            }]
+            }],
+            workers: []
         };
         this.ReactTableWorkers = this.ReactTableWorkers.bind(this);
         this.ButtonsTableWorkers = this.ButtonsTableWorkers.bind(this);
@@ -57,11 +58,24 @@ class Workers extends Component {
     }
 
     componentDidMount() {
-        this.props.loadAllWorkers();
-        console.log("WORKERS LOADED", this.props.workers);
+        this.props.loadAllWorkers().then((result) => {
+            this.setState((prevState, props) => {
+                workers: props.workers.filter(item => item.inactive === false)
+            });
+        });
+        console.log("WORKERS LOADED", this.state.workers);
+    }
+
+    componentReceiveProps(nextProps) {
+        this.props.loadAllWorkers().then((result) => {
+            this.setState((prevState, props) => {
+                workers: props.workers.filter(item => item.inactive === false)
+            });
+        });
     }
 
     ReactTableWorkers(props) {
+        console.log("REACT TABLE WORKERS", props)
         return (
             <div>
                 <ReactTable
@@ -89,7 +103,7 @@ class Workers extends Component {
 
                                 // IMPORTANT! React-Table uses onClick internally to trigger
                                 // events like expanding SubComponents and pivots.
-                                // By default a custom 'onClick' handler will override this functionality.
+                                // By default a custom 'onClick' handler  override this functionality.
                                 // If you want to fire the original onClick handler, call the
                                 // 'handleOriginal' function.
                                 if (handleOriginal) {
@@ -99,7 +113,7 @@ class Workers extends Component {
                         };
                     }}
                     filterable
-                    data={props.data.filter(item => item.inactive === false)}
+                    data={Array.isArray(props.data) ? props.data : []}
                     noDataText="No workers"
                     columns={props.columns}
                     defaultPageSize={10}
@@ -188,6 +202,8 @@ class Workers extends Component {
                     }
                 }
             }
+        }, () => {
+            this.props.loadAllWorkers()
         });
     }
 
@@ -266,7 +282,7 @@ class Workers extends Component {
                             <Grid.Column>
                                 <div>
                                     <Header as="h2">Workers</Header><Divider />
-                                    <this.ReactTableWorkers data={this.props.workers} columns={columnWorkers} />
+                                    <this.ReactTableWorkers data={this.state.workers} columns={columnWorkers} />
                                 </div>
                             </Grid.Column>
                         </Grid.Row>

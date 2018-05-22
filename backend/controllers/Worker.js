@@ -1,4 +1,6 @@
 const Worker = require('../models/Worker');
+const Event = require('../models/Event');
+const moment = require('moment');
 
 module.exports.addWorker = (req, res) => {
 
@@ -85,4 +87,22 @@ module.exports.findWorkerOnCall = (req, res) => {
             });
         res.status(200).jsonp(worker);
     })
+};
+
+//TODO conseguir buscar por mes y año
+module.exports.findWorkerAndCompensation = (req, res) => {
+    let dateValue = moment(req.params.values).format("YYYY-MM");
+
+    Event.find({start: dateValue}).exec((err, result) => {
+        if (err)
+            return res.status(500).jsonp({error: 500, message: `${err.message}`});
+
+        if (result && result.length) {
+            res.status(200).jsonp(result);
+        } else {
+            res.sendStatus(404);
+        }
+
+
+    });
 };

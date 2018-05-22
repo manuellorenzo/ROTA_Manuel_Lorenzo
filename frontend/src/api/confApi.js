@@ -1,6 +1,8 @@
+import * as urls from '../api/urls';
+
 class ConfApi {
     static getAllConf() {
-        return fetch('http://172.22.5.145:3000/configuration/getConfiguration').then(response => {
+        return fetch(urls.URL_JOSE+'/configuration/getConfiguration').then(response => {
             return response.json();
         }).catch(error => {
             return error;
@@ -9,7 +11,7 @@ class ConfApi {
 
     static editConf(newConf) {
         console.log("Edit conf api", newConf);
-        return fetch('http://172.22.5.145:3000/configuration/editConfiguration', {
+        return fetch(urls.URL_JOSE+'/configuration/editConfiguration', {
             method: 'put',
             headers: {
                 'Accept': 'application/json',
