@@ -91,9 +91,10 @@ module.exports.findWorkerOnCall = (req, res) => {
 
 //TODO conseguir buscar por mes y año
 module.exports.findWorkerAndCompensation = (req, res) => {
-    let dateValue = moment(req.params.values).format("YYYY-MM");
+    var startDate = moment(["2018", req.params.month - 1]);
+    var endDate = moment(startDate).endOf('month');
 
-    Event.find({start: dateValue}).exec((err, result) => {
+    Event.find({start: {$gte:startDate, $lte: endDate}} , function (err, result) {
         if (err)
             return res.status(500).jsonp({error: 500, message: `${err.message}`});
 
@@ -102,7 +103,5 @@ module.exports.findWorkerAndCompensation = (req, res) => {
         } else {
             res.sendStatus(404);
         }
-
-
     });
 };
