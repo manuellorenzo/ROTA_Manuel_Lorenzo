@@ -44,12 +44,10 @@ const workersReducer = (state = {
             }
         case types.DELETE_WORKER_SUCCESS:
             const workerId = action;
-            console.log('Delete worker worker.id', workerId)
             return {
                 ...state,
                 workers: state.workers.map((item, index) => {
-                    if (item._id === action.worker._id) {
-                        console.log('change worker')
+                    if (item._id === action._id) {
                         return {
                             ...item,
                             inactive: true
@@ -58,11 +56,42 @@ const workersReducer = (state = {
                     return item
                 }),
                 onCall: state.onCall.map((item, index) => {
-                    if (item._id === action.worker._id) {
-                        console.log('change worker')
+                    if (item._id === action._id) {
                         return {
                             ...item,
                             inactive: true
+                        };
+                    }
+                    return item
+                })
+            }
+        case types.LOAD_ON_CALL_WORKERS_SUCCESS:
+            console.log('WORKERS REDUCER -- LOAD ON CALL SUCCESS', state)
+            return {
+                ...state,
+                onCall: action.workers
+            }
+        case types.ADD_TO_ON_CALL_WORKER_SUCCESS:
+            return {
+                ...state,
+                onCall: state.workers.map((item, index) => {
+                    if (item._id === action._id) {
+                        return {
+                            ...item,
+                            onCall: true
+                        };
+                    }
+                    return item
+                })
+            }
+        case types.REMOVE_FROM_ON_CALL_WORKER_SUCCESS:
+            return {
+                ...state,
+                onCall: state.workers.map((item, index) => {
+                    if (item._id === action._id) {
+                        return {
+                            ...item,
+                            onCall: false
                         };
                     }
                     return item

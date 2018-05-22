@@ -61,7 +61,6 @@ module.exports.deleteWorker = (req, res) => {
                     error: 500,
                     message: `${err.message}`
                 });
-
             return res.status(201);
         });
     });

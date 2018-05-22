@@ -71,7 +71,13 @@ class Workers extends Component {
                 this.setState({
                     workers: this.props.workers.filter(item => item.inactive === false)
                 }, () => {
-                    console.log("WORKERS COMPONENT -- LOAD WORKER TO STATE -- ", this.state.workers)
+                    this.props.loadOnCallWorkers().then(() => {
+                        if (Array.isArray(this.props.onCall)) {
+                            this.setState({
+                                onCall: this.props.onCall.filter(item => item.inactive === false)
+                            });
+                        }
+                    });
                 });
             }
         });
@@ -190,12 +196,20 @@ class Workers extends Component {
     }
 
     handleOnConfirmDeleteWorkers = () => {
-        //this.props.deleteWorker(this.state.messages.confirmDelete._id);
-        this.props.deleteWorker(this.state.messages.confirmDelete._id)
-        this.props.removeFromOnCall(this.state.messages.confirmDelete._id);
-        this.handleChangeMessages("Worker deleted successfully", toast.TYPE.SUCCESS);
-        this.loadWorkerState();
-       
+        this.props.deleteWorker(this.state.messages.confirmDelete._id).then((result) => {
+            console.log("WORKERS COMPONENT HANDLE CONFIRM DELETE RESPONSE", result)
+            if (result === 201) {
+                this.props.removeFromOnCall(this.state.messages.confirmDelete._id);
+                this.handleChangeMessages("Worker deleted successfully", toast.TYPE.SUCCESS);
+                this.handleOnCloseDeleteWorkers();
+                this.loadWorkerState();
+            } else {
+                this.handleChangeMessages("Failed to find worker", toast.TYPE.ERROR);
+                this.handleOnCloseDeleteWorkers();
+                this.loadWorkerState();
+            }
+        })
+
     }
 
     handleOnCloseDeleteWorkers = () => {
@@ -366,11 +380,12 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         loadAllWorkers: () => dispatch(workersActions.loadWorkers()),
+        loadOnCallWorkers: () => dispatch(workersActions.loadOnCallWorkers()),
         editWorker: worker => dispatch(workersActions.editWorker(worker)),
         addWorker: worker => dispatch(workersActions.addWorker(worker)),
         deleteWorker: _id => dispatch(workersActions.deleteWorker(_id)),
-        addToOnCall: worker => dispatch(workersActions.addToOnCall(worker)),
-        removeFromOnCall: _id => dispatch(workersActions.removeFromOnCall(_id))
+        addToOnCall: worker => dispatch(workersActions.addToOnCallWorker(worker)),
+        removeFromOnCall: _id => dispatch(workersActions.removeFromOnCallWorker(_id))
     }
 };
 
