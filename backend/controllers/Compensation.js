@@ -10,7 +10,8 @@ function addCompensation(req,res){
     let compensation=new Compensation({
         payment:req.body.payment,
         dateCompensation:req.body.dateCompensation,
-        type:req.body.type
+        type:req.body.type,
+        worker:req.body.worker
     })
 
     compensation.save((err, result)=>{
@@ -68,6 +69,20 @@ function removeCompensation(req, res){
     })
 }
 
+function getCompensationByWorker(req, res){
+    Compensation.find({worker:req.params.worker}, (err, result)=>{
+        console.log('WORKER=>', req.params.worker);
+        if (err){
+            return res.status(500).jsonp({error:500, message : `${err.message}`})
+        }
+        if (result && result.length){
+            res.status(200).jsonp(result);
+        }else{
+            res.sendStatus(404);
+        }
+    })
+}
+
 function getCompensations (req, res){
     Compensation.find().select().exec((err, result)=>{
         if (err){
@@ -86,5 +101,6 @@ module.exports={
     editCompensation,
     removeCompensation,
     getCompensations,
-    addCompensation
+    addCompensation,
+    getCompensationByWorker
 }

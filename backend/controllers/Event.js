@@ -109,64 +109,71 @@ module.exports.prueba = function (req, res) {
         if (err)
             return `${err.message}`
         return worker;
-    }).then(result => autoScheduleArrays(result))
+    }).then(result => result.length > 0 ? autoScheduleArrays(result) : [])
         .then((result) =>{
             let eventos = [];
             let eventoSingle = {};
             let ES = ['Mo','Tu','We','Th'];
             let FS = ['Fr', 'Sa', 'Su'];
             let contadorArray = 0;
-            arrayDias.map(item => {
-                if(ES.includes(moment(item).format('dd'))) {
-                    console.log("Entre semana",moment(item).format('dd'));
-                    eventoSingle = {start: moment(item).format("YYYY-MM-DD"),
-                        end: moment(item).format("YYYY-MM-DD"),
-                        title: result[0][contadorArray].name,
-                        type: 'On Call',
-                        workerId: result[0][contadorArray]._id,
-                        activities: []
-                    }
-                    //ADD
-                    event = new Event(eventoSingle);
-                    event.save();
-                    console.log("Entre semana", eventoSingle);
-                }else{
-                    console.log("Fin de semana",moment(item).format('dd'));
-                    eventoSingle = {start: moment(item).format("YYYY-MM-DD"),
-                        end: moment(item).format("YYYY-MM-DD"),
-                        title: result[1][contadorArray].name,
-                        type: 'On Call',
-                        workerId: result[1][contadorArray]._id,
-                        activities: []
-                    }
-                    //ADD
-                    event = new Event(eventoSingle);
-                    event.save();
-                    console.log("Fin de semana", eventoSingle);
-                    if(moment(item).format('dd') === 'Sa'){
-                        eventoSingle = {start: moment(item).format("YYYY-MM-DD"),
+            if (result.length >= 3) {
+                arrayDias.map(item => {
+                    if (ES.includes(moment(item).format('dd'))) {
+                        console.log("Entre semana", moment(item).format('dd'));
+                        eventoSingle = {
+                            start: moment(item).format("YYYY-MM-DD"),
                             end: moment(item).format("YYYY-MM-DD"),
-                            title: result[2][contadorArray].name,
+                            title: result[0][contadorArray].name,
                             type: 'On Call',
-                            workerId: result[2][contadorArray]._id,
+                            workerId: result[0][contadorArray]._id,
                             activities: []
                         }
                         //ADD
                         event = new Event(eventoSingle);
                         event.save();
-                        console.log("Refuerzo del sábado", eventoSingle);
-                    }
-                    if(moment(item).format('dd') === 'Su'){
-                        if(contadorArray >= result[0].length-1){
-                            contadorArray = 0;
-                        }else {
-                            contadorArray++;
+                        console.log("Entre semana", eventoSingle);
+                    } else {
+                        console.log("Fin de semana", moment(item).format('dd'));
+                        eventoSingle = {
+                            start: moment(item).format("YYYY-MM-DD"),
+                            end: moment(item).format("YYYY-MM-DD"),
+                            title: result[1][contadorArray].name,
+                            type: 'On Call',
+                            workerId: result[1][contadorArray]._id,
+                            activities: []
+                        }
+                        //ADD
+                        event = new Event(eventoSingle);
+                        event.save();
+                        console.log("Fin de semana", eventoSingle);
+                        if (moment(item).format('dd') === 'Sa') {
+                            eventoSingle = {
+                                start: moment(item).format("YYYY-MM-DD"),
+                                end: moment(item).format("YYYY-MM-DD"),
+                                title: result[2][contadorArray].name,
+                                type: 'On Call',
+                                workerId: result[2][contadorArray]._id,
+                                activities: []
+                            }
+                            //ADD
+                            event = new Event(eventoSingle);
+                            event.save();
+                            console.log("Refuerzo del sábado", eventoSingle);
+                        }
+                        if (moment(item).format('dd') === 'Su') {
+                            if (contadorArray >= result[0].length - 1) {
+                                contadorArray = 0;
+                            } else {
+                                contadorArray++;
+                            }
                         }
                     }
-                }
-            })
+                })
+            } else {
+                console.log("No se encuentra ningún trabajador onCall")
+            }
         }
-    )
+    );
     return days;
 
 
