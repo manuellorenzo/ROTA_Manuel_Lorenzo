@@ -55,7 +55,7 @@ function editCompensation (req, res){
 }
 
 function removeCompensation(req, res){
-    var compensationId=req.params.id;
+    const compensationId = req.params.id;
 
     Compensation.findByIdAndRemove(compensationId, (err, compensationRemoved)=>{
         if(err){
@@ -118,4 +118,4 @@ module.exports={
     addCompensation,
     getCompensationByWorker,
     getCompensationByActivity
-}
+};

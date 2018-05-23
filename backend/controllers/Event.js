@@ -97,15 +97,15 @@ module.exports.autoSchedule = function (req, res) {
 
     let seconds = moment.duration(end.diff(start));
     let event;
-    let days = seconds.asDays();
     let fechaActual = moment(start);
     let arrayDias = [];
+    let addedEvents = [];
     while(fechaActual.format("YYYY-MM-DD") <= end.format("YYYY-MM-DD")){
         arrayDias = [...arrayDias, moment(fechaActual)];
         fechaActual = moment(fechaActual.add(1,'days'));
     }
     let onCall = [];
-    Worker.find({onCall: true}, function (err, worker) {
+    Worker.find({onCall: true, inactive: false}, function (err, worker) {
         if (err)
             return `${err.message}`
         return worker;
@@ -117,7 +117,7 @@ module.exports.autoSchedule = function (req, res) {
             let FS = ['Fr', 'Sa', 'Su'];
             let contadorArray = 0;
             if (result.length >= 3) {
-                arrayDias.map(item => {
+               Promise.all(arrayDias.map(item => {
                     if (ES.includes(moment(item).format('dd'))) {
                         console.log("Entre semana", moment(item).format('dd'));
                         eventoSingle = {
@@ -131,6 +131,7 @@ module.exports.autoSchedule = function (req, res) {
                         //ADD
                         event = new Event(eventoSingle);
                         event.save();
+                        addedEvents.push(eventoSingle);
                         console.log("Entre semana", eventoSingle);
                     } else {
                         console.log("Fin de semana", moment(item).format('dd'));
@@ -145,6 +146,7 @@ module.exports.autoSchedule = function (req, res) {
                         //ADD
                         event = new Event(eventoSingle);
                         event.save();
+                        addedEvents.push(eventoSingle);
                         console.log("Fin de semana", eventoSingle);
                         if (moment(item).format('dd') === 'Sa') {
                             eventoSingle = {
@@ -158,6 +160,7 @@ module.exports.autoSchedule = function (req, res) {
                             //ADD
                             event = new Event(eventoSingle);
                             event.save();
+                            addedEvents.push(eventoSingle);
                             console.log("Refuerzo del sábado", eventoSingle);
                         }
                         if (moment(item).format('dd') === 'Su') {
@@ -168,13 +171,12 @@ module.exports.autoSchedule = function (req, res) {
                             }
                         }
                     }
-                })
+                })).then(() => res.status(201).jsonp(addedEvents))
             } else {
-                console.log("No se encuentra ningún trabajador onCall")
+               return res.status(404).jsonp("No se encuentra ningún trabajador on call");
             }
         }
     );
-    return res.status(201).jsonp(days);
 
 
 };
