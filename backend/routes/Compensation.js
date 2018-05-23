@@ -8,6 +8,7 @@ router.put('/editCompensation', compensationController.editCompensation);
 router.delete('/deleteCompensation/:id', compensationController.removeCompensation);
 router.get('/getCompensation/:id', compensationController.getCompensation);
 router.get('/getCompensationByWorker/:workerId', compensationController.getCompensationByWorker);
+router.get('/getCompensationByActivity/:activityId', compensationController.getCompensationByActivity);
 
 
 module.exports=router;

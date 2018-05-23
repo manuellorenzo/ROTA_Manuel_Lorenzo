@@ -5,6 +5,7 @@ const compensationSchema=new Schema({
     payment:String,
     dateCompensation:String,
     type:String,
+    activity:{type:Schema.ObjectId, ref:'Activity'},
     worker: { type: Schema.ObjectId, ref: 'Worker'}
 });
 
