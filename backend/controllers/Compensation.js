@@ -11,6 +11,7 @@ function addCompensation(req,res){
         payment:req.body.payment,
         dateCompensation:req.body.dateCompensation,
         type:req.body.type,
+        activity:req.body.activity,
         worker:req.body.worker
     })
 
@@ -71,7 +72,19 @@ function removeCompensation(req, res){
 
 function getCompensationByWorker(req, res){
     Compensation.find({worker:req.params.worker}, (err, result)=>{
-        console.log('WORKER=>', req.params.worker);
+        if (err){
+            return res.status(500).jsonp({error:500, message : `${err.message}`})
+        }
+        if (result && result.length){
+            res.status(200).jsonp(result);
+        }else{
+            res.sendStatus(404);
+        }
+    })
+}
+
+function getCompensationByActivity(req, res){
+    Compensation.find({activity:req.params.worker}, (err, result)=>{
         if (err){
             return res.status(500).jsonp({error:500, message : `${err.message}`})
         }
@@ -102,5 +115,6 @@ module.exports={
     removeCompensation,
     getCompensations,
     addCompensation,
-    getCompensationByWorker
+    getCompensationByWorker,
+    getCompensationByActivity
 }
