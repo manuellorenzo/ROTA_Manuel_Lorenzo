@@ -103,6 +103,7 @@ function getCompensations (req, res){
         }
         if (result && result.length){
             res.status(200).jsonp(result);
+
         }else{
             res.sendStatus(404);
         }

@@ -17,9 +17,10 @@ class Toast extends Component {
     componentWillReceiveProps(nextProps) {
         console.log("willrecieveprops toast", nextProps.show);
         if (nextProps.show) {
-            toast.success(nextProps.message, {
+            toast(nextProps.message, {
                 position: toast.POSITION.BOTTOM_RIGHT,
-                hideProgressBar: true
+                hideProgressBar: true,
+                type: nextProps.type
             });
         }
     }

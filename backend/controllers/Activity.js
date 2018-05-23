@@ -22,9 +22,9 @@ module.exports.listActivities = (req, res) => {
             return res.status(500).jsonp({error: 500, mensaje: `${err.message}`});
 
         if (result && result.length) {
-            res.status(200).jsonp(result);
+            return res.status(200).jsonp(result);
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
     });
 };
@@ -52,7 +52,7 @@ module.exports.deleteActivity = (req, res) => {
         activity.remove((err) => {
             if (err)
                 return res.status(500).jsonp({error: 500, message: `${err.message}`});
-            res.sendStatus(204);
+            return res.sendStatus(204);
         })
     })
 };
@@ -64,7 +64,7 @@ module.exports.findOneActivity = (req, res) => {
                   error: 500,
                   message: `${err.message}`
               });
-          res.status(200).jsonp(activity);
+          return res.status(200).jsonp(activity);
       })
 };
 
