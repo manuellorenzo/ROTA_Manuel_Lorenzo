@@ -41,7 +41,7 @@ module.exports.listEvent = (req, res) => {
         if (err)
             return res.status(500).jsonp({error: 500, message: `${err.message}`});
 
-        if (result && result.length) {
+        if (result.length > 0) {
             return res.status(200).jsonp(result);
         } else {
             return res.sendStatus(404);
@@ -97,10 +97,11 @@ module.exports.autoSchedule = function (req, res) {
 
     let seconds = moment.duration(end.diff(start));
     let event;
-    let fechaActual = moment(start);
+    let fechaActual = start;
     let arrayDias = [];
     let addedEvents = [];
     while(fechaActual.format("YYYY-MM-DD") <= end.format("YYYY-MM-DD")){
+        console.log("DE VERDAD",moment(fechaActual))
         arrayDias = [...arrayDias, moment(fechaActual)];
         fechaActual = moment(fechaActual.add(1,'days'));
     }
@@ -119,7 +120,6 @@ module.exports.autoSchedule = function (req, res) {
             if (result.length >= 3) {
                Promise.all(arrayDias.map(item => {
                     if (ES.includes(moment(item).format('dd'))) {
-                        console.log("Entre semana", moment(item).format('dd'));
                         eventoSingle = {
                             start: moment(item).format("YYYY-MM-DD"),
                             end: moment(item).format("YYYY-MM-DD"),
@@ -132,9 +132,7 @@ module.exports.autoSchedule = function (req, res) {
                         event = new Event(eventoSingle);
                         event.save();
                         addedEvents.push(eventoSingle);
-                        console.log("Entre semana", eventoSingle);
                     } else {
-                        console.log("Fin de semana", moment(item).format('dd'));
                         eventoSingle = {
                             start: moment(item).format("YYYY-MM-DD"),
                             end: moment(item).format("YYYY-MM-DD"),
@@ -147,7 +145,6 @@ module.exports.autoSchedule = function (req, res) {
                         event = new Event(eventoSingle);
                         event.save();
                         addedEvents.push(eventoSingle);
-                        console.log("Fin de semana", eventoSingle);
                         if (moment(item).format('dd') === 'Sa') {
                             eventoSingle = {
                                 start: moment(item).format("YYYY-MM-DD"),
@@ -161,7 +158,6 @@ module.exports.autoSchedule = function (req, res) {
                             event = new Event(eventoSingle);
                             event.save();
                             addedEvents.push(eventoSingle);
-                            console.log("Refuerzo del sábado", eventoSingle);
                         }
                         if (moment(item).format('dd') === 'Su') {
                             if (contadorArray >= result[0].length - 1) {
@@ -200,8 +196,5 @@ function autoScheduleArrays(arrayOnCall) {
             SegundoSabado[indexA +1] = itemA;
         }
     });
-    console.log("Array entre semana",base);
-    console.log("Fin de semana",finDeSemana);
-    console.log("Support sabado",SegundoSabado);
     return [base, finDeSemana, SegundoSabado];
 }

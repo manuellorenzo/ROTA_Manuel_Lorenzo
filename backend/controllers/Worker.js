@@ -1,5 +1,6 @@
 const Worker = require('../models/Worker');
 const Event = require('../models/Event');
+const Activity = require('../models/Activity');
 const Compensation = require('../models/Compensation');
 const moment = require('moment');
 
@@ -69,10 +70,6 @@ module.exports.deleteWorker = (req, res) => {
                 status: 201,
                 worker: worker
             });
-<<<<<<< HEAD
-=======
-
->>>>>>> e81bdeffd9ad1d6819846c38be2defaeebd8991d
         });
     });
 };
@@ -143,11 +140,15 @@ module.exports.removeOncallWorker = (req, res) => {
     })
 };
 
+//TODO Reducir los arrays
 module.exports.findWorkerAndCompensation = (req, res) => {
     const startDate = moment([req.params.year, req.params.month - 1]);
     const endDate = moment(startDate).endOf('month');
+    const activity = [];
 
      Event.find({start: {$gte:startDate, $lte: endDate}}).then((result, err) =>
-         Promise.all(result.map(item => Compensation.find({worker: item.workerId})
-         )).then((result) => res.status(201).jsonp(result)))
+         Promise.all(result.map(item => item.activities))).then(act => {
+             console.log(act)
+             return Promise.all(act.map(activity =>  Activity.find({_id: activity}))).then((actData) => actData)
+     }).then((actDataArray) => res.status(201).jsonp(actDataArray))
 };
