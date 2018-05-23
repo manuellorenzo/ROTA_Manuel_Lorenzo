@@ -11,6 +11,7 @@ import "react-table/react-table.css";
 
 import Toast from './Toast';
 import ConfirmComponent from './Confirm';
+import { toast } from 'react-toastify';
 
 
 class Workers extends Component {
@@ -29,7 +30,8 @@ class Workers extends Component {
             messages: {
                 CRUDWorkers: {
                     show: false,
-                    text: ''
+                    text: '',
+                    type: ''
                 },
                 confirmDelete: {
                     open: false,
@@ -48,24 +50,44 @@ class Workers extends Component {
                 key: 3,
                 text: 'USER',
                 value: 3,
-            }]
+            }],
+            workers: []
         };
         this.ReactTableWorkers = this.ReactTableWorkers.bind(this);
         this.ButtonsTableWorkers = this.ButtonsTableWorkers.bind(this);
         this.handleOnChangeDropdownWorkerRole = this.handleOnChangeDropdownWorkerRole.bind(this);
         this.handleOnChangeInputWorkerName = this.handleOnChangeInputWorkerName.bind(this);
+        this.handleOnConfirmDeleteWorkers = this.handleOnConfirmDeleteWorkers.bind(this);
     }
 
     componentDidMount() {
-        this.props.loadAllWorkers();
-        console.log("WORKERS LOADED", this.props.workers);
+        console.log("WORKERS COMPONENT -- COMPONENT DID MOUNT -- ", this.state.workers)
+        this.loadWorkerState();
     }
 
+    loadWorkerState() {
+        this.props.loadAllWorkers().then(() => {
+            if (Array.isArray(this.props.workers)) {
+                this.setState({
+                    workers: this.props.workers.filter(item => item.inactive === false)
+                }, () => {
+                    this.props.loadOnCallWorkers().then(() => {
+                        if (Array.isArray(this.props.onCall)) {
+                            this.setState({
+                                onCall: this.props.onCall.filter(item => item.inactive === false)
+                            });
+                        }
+                    });
+                });
+            }
+        });
+    }
     ReactTableWorkers(props) {
+        console.log("REACT TABLE WORKERS", props)
         return (
             <div>
                 <ReactTable
-                    onFetchData={this.props.loadAllWorkers}
+                    //onFetchData={this.props.loadAllWorkers}
                     getTdProps={(state, rowInfo, column, instance) => {
                         return {
                             style: {
@@ -89,7 +111,7 @@ class Workers extends Component {
 
                                 // IMPORTANT! React-Table uses onClick internally to trigger
                                 // events like expanding SubComponents and pivots.
-                                // By default a custom 'onClick' handler will override this functionality.
+                                // By default a custom 'onClick' handler  override this functionality.
                                 // If you want to fire the original onClick handler, call the
                                 // 'handleOriginal' function.
                                 if (handleOriginal) {
@@ -99,7 +121,7 @@ class Workers extends Component {
                         };
                     }}
                     filterable
-                    data={props.data.filter(item => item.inactive === false)}
+                    data={props.data}
                     noDataText="No workers"
                     columns={props.columns}
                     defaultPageSize={10}
@@ -110,8 +132,6 @@ class Workers extends Component {
     }
 
     ButtonsTableWorkers(props) {
-        console.log("ROW VALUE", props.row.row._id);
-        console.log("PROP PLS", this.props.onCall.map((item) => props.row.row._id === item._id));
         if (this.props.onCall.map((item) => props.row.row._id === item._id).includes(true)) {
             return (<div style={{ "width": "100%" }}>
                 <Button fluid className="flexboxCenterVerHor" icon='close' onClick={() => {
@@ -162,36 +182,37 @@ class Workers extends Component {
         this.setState({ newWorker: { ...this.state.newWorker, name: value } });
     }
 
-    handleChangeMessages(value) {
+    handleChangeMessages(value, type) {
         this.setState((prevState, props) => {
             console.log("handleChangesMessages calendar prueba value", value)
-            return { messages: { ...prevState.messages, CRUDWorkers: { ...prevState.messages.CRUDWorkers, text: value, show: true } } }
+            return { messages: { ...prevState.messages, CRUDWorkers: { ...prevState.messages.CRUDWorkers, text: value, show: true, type } } }
 
         }, () => {
             this.setState((prevState, props) => {
                 console.log('handleChangesMessages calendar', value, this.state);
-                return { messages: { ...prevState.messages, CRUDWorkers: { ...prevState.messages.CRUDWorkers, text: value, show: false } } }
+                return { messages: { ...prevState.messages, CRUDWorkers: { ...prevState.messages.CRUDWorkers, text: value, show: false, type } } }
             })
         });
     }
 
-    handleOnConfirmWorkers = () => {
-        this.props.deleteWorker(this.state.messages.confirmDelete._id);
-        this.props.removeFromOnCall(this.state.messages.confirmDelete._id);
-        this.handleChangeMessages("Worker deleted successfully");
-        this.setState((prevState, props) => {
-            return {
-                messages: {
-                    ...prevState.messages, confirmDelete: {
-                        open: false,
-                        _id: ''
-                    }
-                }
+    handleOnConfirmDeleteWorkers = () => {
+        this.props.deleteWorker(this.state.messages.confirmDelete._id).then((result) => {
+            console.log("WORKERS COMPONENT HANDLE CONFIRM DELETE RESPONSE", result)
+            if (result === 201) {
+                this.props.removeFromOnCall(this.state.messages.confirmDelete._id);
+                this.handleChangeMessages("Worker deleted successfully", toast.TYPE.SUCCESS);
+                this.handleOnCloseDeleteWorkers();
+                this.loadWorkerState();
+            } else {
+                this.handleChangeMessages("Failed to find worker", toast.TYPE.ERROR);
+                this.handleOnCloseDeleteWorkers();
+                this.loadWorkerState();
             }
-        });
+        })
+
     }
 
-    handleOnCloseWorkers = () => {
+    handleOnCloseDeleteWorkers = () => {
         this.setState({
             messages: {
                 ...this.state.messages, confirmDelete: {
@@ -266,7 +287,7 @@ class Workers extends Component {
                             <Grid.Column>
                                 <div>
                                     <Header as="h2">Workers</Header><Divider />
-                                    <this.ReactTableWorkers data={this.props.workers} columns={columnWorkers} />
+                                    <this.ReactTableWorkers data={this.state.workers} columns={columnWorkers} />
                                 </div>
                             </Grid.Column>
                         </Grid.Row>
@@ -294,9 +315,13 @@ class Workers extends Component {
                             this.handleModalClose("showModalAddWorker")
                         }}>Close</Button>
                         <Button floated="right" disabled={this.state.newWorker.name === ''} onClick={() => {
-                            this.props.addWorker({ ...this.state.newWorker, _id: Math.random(), inactive: false, onCall: false });
-                            this.handleModalClose("showModalAddWorker")
-                            this.handleChangeMessages("Worker added successfully");
+                            this.props.addWorker({ ...this.state.newWorker, _id: Math.random(), inactive: false, onCall: false }).then(() => {
+                                console.log("WORKERS -- MODAL -- ADD WORKER RESULT");
+                                this.handleModalClose("showModalAddWorker")
+                                this.handleChangeMessages("Worker added successfully", toast.TYPE.SUCCESS);
+                                this.loadWorkerState();
+                                //this.handleChangeMessages("ERROR: Worker not added", toast.TYPE.ERROR);
+                            });
                         }}>Add event</Button>
                     </Modal.Actions>
                 </Modal>
@@ -322,17 +347,20 @@ class Workers extends Component {
                             this.handleModalClose("showModalEditWorker")
                         }}>Close</Button>
                         <Button floated="right" disabled={this.state.newWorker.name === ''} onClick={() => {
-                            this.props.editWorker(this.state.newWorker);
-                            this.handleModalClose("showModalEditWorker");
-                            this.handleChangeMessages("Worker edited successfully");
+                            this.props.editWorker(this.state.newWorker).then(() => {
+                                this.handleModalClose("showModalEditWorker");
+                                this.handleChangeMessages("Worker edited successfully", toast.TYPE.SUCCESS);
+                                this.loadWorkerState();
+                            });
+
                         }}>Edit event</Button>
                     </Modal.Actions>
                 </Modal>
-                <Toast message={this.state.messages.CRUDWorkers.text} show={this.state.messages.CRUDWorkers.show} />
+                <Toast message={this.state.messages.CRUDWorkers.text} show={this.state.messages.CRUDWorkers.show} type={this.state.messages.CRUDWorkers.type} />
                 <ConfirmComponent
                     show={this.state.messages.confirmDelete.open}
-                    onConfirm={this.handleOnConfirmWorkers}
-                    onClose={this.handleOnCloseWorkers} />
+                    onConfirm={this.handleOnConfirmDeleteWorkers}
+                    onClose={this.handleOnCloseDeleteWorkers} />
             </div>
         )
     }
@@ -352,12 +380,12 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         loadAllWorkers: () => dispatch(workersActions.loadWorkers()),
+        loadOnCallWorkers: () => dispatch(workersActions.loadOnCallWorkers()),
         editWorker: worker => dispatch(workersActions.editWorker(worker)),
         addWorker: worker => dispatch(workersActions.addWorker(worker)),
-        updateWorker: worker => dispatch(workersActions.updateWorker(worker)),
         deleteWorker: _id => dispatch(workersActions.deleteWorker(_id)),
-        addToOnCall: worker => dispatch(workersActions.addToOnCall(worker)),
-        removeFromOnCall: _id => dispatch(workersActions.removeFromOnCall(_id))
+        addToOnCall: worker => dispatch(workersActions.addToOnCallWorker(worker)),
+        removeFromOnCall: _id => dispatch(workersActions.removeFromOnCallWorker(_id))
     }
 };
 

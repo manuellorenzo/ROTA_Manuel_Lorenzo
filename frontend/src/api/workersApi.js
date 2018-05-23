@@ -1,15 +1,22 @@
+import * as urls from '../api/urls';
+import handlePromise from './globalApiFunctions';
+
 class WorkerApi {
+
+    //WORKERS
     static getAllWorkers() {
-        return fetch('http://172.22.4.117:3000/worker/list').then(response => {
+        return fetch(urls.URL_FERN + '/worker/list').then(response => {
+            console.log("WORKERS API -- GET ALL WORKERS --", response)
             return response.json();
         }).catch(error => {
+            console.log("WORKERS API -- GET ALL WORKERS ERROR --", error)
             return error;
         });
     }
 
     static editWorker(worker) {
         console.log("Edit worker api", worker);
-        return fetch('http://172.22.4.117:3000/worker/edit', {
+        return fetch(urls.URL_FERN + '/worker/edit', {
             method: 'put',
             headers: {
                 'Accept': 'application/json',
@@ -25,7 +32,7 @@ class WorkerApi {
 
     static addWorker(worker) {
         console.log("Add worker api", worker);
-        return fetch('http://172.22.4.117:3000/worker/new', {
+        return fetch(urls.URL_FERN + '/worker/new', {
             method: 'post',
             headers: {
                 'Accept': 'application/json',
@@ -41,19 +48,63 @@ class WorkerApi {
 
     static deleteWorker(_id) {
         console.log("Delete worker api", _id);
-        return fetch('http://172.22.4.117:3000/worker/delete/' + _id, {
+        return fetch(urls.URL_FERN + '/worker/delete/' + _id, {
             method: 'put',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
         }).then(response => {
-            return response.json();
+            console.log("WORKERS COMPONENT -- DELETEWORKER RESPONSE API --", response)
+            return handlePromise(response);
         }).catch(error => {
+            console.log("WORKERS COMPONENT -- DELETEWORKER ERROR API --", error)
             return error;
         });
     }
 
+    //ON CALL WORKERS
+    static getAllOnCallWorkers(){
+        return fetch(urls.URL_FERN + '/worker/findWorkerOnCall').then(response => {
+            console.log("WORKERS API -- GET ON CALL WORKERS --", response)
+            return response.json();
+        }).catch(error => {
+            console.log("WORKERS API -- GET ON CALL WORKERS ERROR --", error)
+            return error;
+        });
+    }
+
+    static addToOnCallWorker(_id){
+        return fetch(urls.URL_FERN + '/worker/addOnCall/' + _id, {
+            method: 'put',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            console.log("WORKERS COMPONENT -- ADDTOONCALL RESPONSE API --", response)
+            return handlePromise(response);
+        }).catch(error => {
+            console.log("WORKERS COMPONENT -- ADDTOONCALL ERROR API --", error)
+            return error;
+        });
+    }
+
+    static removeFromOnCallWorker(_id){
+        return fetch(urls.URL_FERN + '/worker/removeOnCall/' + _id, {
+            method: 'put',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            console.log("WORKERS COMPONENT -- removeFromOnCallWorker RESPONSE API --", response)
+            return handlePromise(response);
+        }).catch(error => {
+            console.log("WORKERS COMPONENT -- removeFromOnCallWorker ERROR API --", error)
+            return error;
+        });
+    }
 }
 
 export default WorkerApi;

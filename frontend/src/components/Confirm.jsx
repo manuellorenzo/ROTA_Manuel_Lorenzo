@@ -14,7 +14,7 @@ class ConfirmComponent extends Component {
     }
     show = () => this.setState({ open: true })
     handleConfirm = () => this.props.onConfirm();
-    handleCancel = () => this.state.onClose();
+    handleCancel = () => this.props.onClose();
 
     shouldComponentUpdate(nextProps) {
         return nextProps.show !== this.state.open;
