@@ -71,7 +71,8 @@ function removeCompensation(req, res){
 }
 
 function getCompensationByWorker(req, res){
-    Compensation.find({worker:req.params.worker}, (err, result)=>{
+    Compensation.find({worker:req.params.workerId}, (err, result)=>{
+        console.log(req.params.workerId)
         if (err){
             return res.status(500).jsonp({error:500, message : `${err.message}`})
         }
@@ -84,7 +85,7 @@ function getCompensationByWorker(req, res){
 }
 
 function getCompensationByActivity(req, res){
-    Compensation.find({activity:req.params.worker}, (err, result)=>{
+    Compensation.find({activity:req.params.activityId}, (err, result)=>{
         if (err){
             return res.status(500).jsonp({error:500, message : `${err.message}`})
         }
