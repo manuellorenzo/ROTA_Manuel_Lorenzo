@@ -69,6 +69,10 @@ module.exports.deleteWorker = (req, res) => {
                 status: 201,
                 worker: worker
             });
+<<<<<<< HEAD
+=======
+
+>>>>>>> e81bdeffd9ad1d6819846c38be2defaeebd8991d
         });
     });
 };
