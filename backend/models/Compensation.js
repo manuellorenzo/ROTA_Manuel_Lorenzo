@@ -6,6 +6,6 @@ const compensationSchema=new Schema({
     dateCompensation:String,
     type:String,
     worker: { type: Schema.ObjectId, ref: 'Worker'}
-})
+});
 
 module.exports = mongoose.model('Compensation', compensationSchema);

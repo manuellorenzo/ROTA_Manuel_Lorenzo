@@ -91,7 +91,7 @@ module.exports.findOneEvent = (req, res) => {
     })
 };
 
-module.exports.prueba = function (req, res) {
+module.exports.autoSchedule = function (req, res) {
     let start = moment(req.body.start, 'YYYY-MM-DD');
     let end = moment(req.body.end, 'YYYY-MM-DD');
 
@@ -99,7 +99,7 @@ module.exports.prueba = function (req, res) {
     let event;
     let days = seconds.asDays();
     let fechaActual = moment(start);
-    let arrayDias = []
+    let arrayDias = [];
     while(fechaActual.format("YYYY-MM-DD") <= end.format("YYYY-MM-DD")){
         arrayDias = [...arrayDias, moment(fechaActual)];
         fechaActual = moment(fechaActual.add(1,'days'));
@@ -127,7 +127,7 @@ module.exports.prueba = function (req, res) {
                             type: 'On Call',
                             workerId: result[0][contadorArray]._id,
                             activities: []
-                        }
+                        };
                         //ADD
                         event = new Event(eventoSingle);
                         event.save();
@@ -141,7 +141,7 @@ module.exports.prueba = function (req, res) {
                             type: 'On Call',
                             workerId: result[1][contadorArray]._id,
                             activities: []
-                        }
+                        };
                         //ADD
                         event = new Event(eventoSingle);
                         event.save();
@@ -174,7 +174,7 @@ module.exports.prueba = function (req, res) {
             }
         }
     );
-    return days;
+    return res.status(201).jsonp(days);
 
 
 };
