@@ -7,6 +7,6 @@ router.get('/list', eventController.listEvent);
 router.put('/edit', eventController.editEvent);
 router.delete('/delete/:id', eventController.deleteEvent);
 router.get('/findEvent/:_id', eventController.findOneEvent);
-router.post('/prueba', eventController.prueba);
+router.post('/autoSchedule', eventController.autoSchedule);
 
 module.exports = router;

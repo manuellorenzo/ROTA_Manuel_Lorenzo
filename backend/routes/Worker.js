@@ -10,6 +10,6 @@ router.put('/addOnCallWorker/:id', workerController.addOncallWorker);
 router.put('/removeOnCallWorker/:id', workerController.removeOncallWorker);
 router.get('/findWorker/:_id', workerController.findOneWorker);
 router.get('/findWorkerOnCall', workerController.findWorkerOnCall);
-router.get('/findWorkerAndCompensation/:month', workerController.findWorkerAndCompensation);
+router.get('/findWorkerAndCompensation/:year/:month', workerController.findWorkerAndCompensation);
 
 module.exports = router;

@@ -41,7 +41,7 @@ module.exports.listEvent = (req, res) => {
         if (err)
             return res.status(500).jsonp({error: 500, message: `${err.message}`});
 
-        if (result && result.length) {
+        if (result.length > 0) {
             return res.status(200).jsonp(result);
         } else {
             return res.sendStatus(404);
@@ -91,21 +91,22 @@ module.exports.findOneEvent = (req, res) => {
     })
 };
 
-module.exports.prueba = function (req, res) {
+module.exports.autoSchedule = function (req, res) {
     let start = moment(req.body.start, 'YYYY-MM-DD');
     let end = moment(req.body.end, 'YYYY-MM-DD');
 
     let seconds = moment.duration(end.diff(start));
     let event;
-    let days = seconds.asDays();
-    let fechaActual = moment(start);
-    let arrayDias = []
+    let fechaActual = start;
+    let arrayDias = [];
+    let addedEvents = [];
     while(fechaActual.format("YYYY-MM-DD") <= end.format("YYYY-MM-DD")){
+        console.log("DE VERDAD",moment(fechaActual))
         arrayDias = [...arrayDias, moment(fechaActual)];
         fechaActual = moment(fechaActual.add(1,'days'));
     }
     let onCall = [];
-    Worker.find({onCall: true}, function (err, worker) {
+    Worker.find({onCall: true, inactive: false}, function (err, worker) {
         if (err)
             return `${err.message}`
         return worker;
@@ -117,9 +118,8 @@ module.exports.prueba = function (req, res) {
             let FS = ['Fr', 'Sa', 'Su'];
             let contadorArray = 0;
             if (result.length >= 3) {
-                arrayDias.map(item => {
+               Promise.all(arrayDias.map(item => {
                     if (ES.includes(moment(item).format('dd'))) {
-                        console.log("Entre semana", moment(item).format('dd'));
                         eventoSingle = {
                             start: moment(item).format("YYYY-MM-DD"),
                             end: moment(item).format("YYYY-MM-DD"),
@@ -127,13 +127,12 @@ module.exports.prueba = function (req, res) {
                             type: 'On Call',
                             workerId: result[0][contadorArray]._id,
                             activities: []
-                        }
+                        };
                         //ADD
                         event = new Event(eventoSingle);
                         event.save();
-                        console.log("Entre semana", eventoSingle);
+                        addedEvents.push(eventoSingle);
                     } else {
-                        console.log("Fin de semana", moment(item).format('dd'));
                         eventoSingle = {
                             start: moment(item).format("YYYY-MM-DD"),
                             end: moment(item).format("YYYY-MM-DD"),
@@ -141,11 +140,11 @@ module.exports.prueba = function (req, res) {
                             type: 'On Call',
                             workerId: result[1][contadorArray]._id,
                             activities: []
-                        }
+                        };
                         //ADD
                         event = new Event(eventoSingle);
                         event.save();
-                        console.log("Fin de semana", eventoSingle);
+                        addedEvents.push(eventoSingle);
                         if (moment(item).format('dd') === 'Sa') {
                             eventoSingle = {
                                 start: moment(item).format("YYYY-MM-DD"),
@@ -158,7 +157,7 @@ module.exports.prueba = function (req, res) {
                             //ADD
                             event = new Event(eventoSingle);
                             event.save();
-                            console.log("Refuerzo del sábado", eventoSingle);
+                            addedEvents.push(eventoSingle);
                         }
                         if (moment(item).format('dd') === 'Su') {
                             if (contadorArray >= result[0].length - 1) {
@@ -168,13 +167,12 @@ module.exports.prueba = function (req, res) {
                             }
                         }
                     }
-                })
+                })).then(() => res.status(201).jsonp(addedEvents))
             } else {
-                console.log("No se encuentra ningún trabajador onCall")
+               return res.status(404).jsonp("No se encuentra ningún trabajador on call");
             }
         }
     );
-    return days;
 
 
 };
@@ -198,8 +196,5 @@ function autoScheduleArrays(arrayOnCall) {
             SegundoSabado[indexA +1] = itemA;
         }
     });
-    console.log("Array entre semana",base);
-    console.log("Fin de semana",finDeSemana);
-    console.log("Support sabado",SegundoSabado);
     return [base, finDeSemana, SegundoSabado];
 }

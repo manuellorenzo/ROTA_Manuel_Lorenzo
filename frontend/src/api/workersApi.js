@@ -7,9 +7,24 @@ class WorkerApi {
     static getAllWorkers() {
         return fetch(urls.URL_FERN + '/worker/list').then(response => {
             console.log("WORKERS API -- GET ALL WORKERS --", response)
-            return response.json();
+            return handlePromise(response);
         }).catch(error => {
             console.log("WORKERS API -- GET ALL WORKERS ERROR --", error)
+            return error;
+        });
+    }
+
+    static getWorkerById(_id) {
+        return fetch(urls.URL_FERN + '/worker/findWorker/'+_id, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
+            console.log("WORKERS API -- GET WORKER BY ID --", response)
+            return handlePromise(response);
+        }).catch(error => {
             return error;
         });
     }
@@ -24,7 +39,7 @@ class WorkerApi {
             },
             body: JSON.stringify(worker)
         }).then(response => {
-            return response.json();
+            return handlePromise(response);
         }).catch(error => {
             return error;
         });
@@ -40,7 +55,7 @@ class WorkerApi {
             },
             body: JSON.stringify(worker)
         }).then(response => {
-            return response.json();
+            return handlePromise(response);
         }).catch(error => {
             return error;
         });
@@ -64,44 +79,45 @@ class WorkerApi {
     }
 
     //ON CALL WORKERS
-    static getAllOnCallWorkers(){
+    static getAllOnCallWorkers() {
         return fetch(urls.URL_FERN + '/worker/findWorkerOnCall').then(response => {
             console.log("WORKERS API -- GET ON CALL WORKERS --", response)
-            return response.json();
+            return handlePromise(response);
         }).catch(error => {
             console.log("WORKERS API -- GET ON CALL WORKERS ERROR --", error)
             return error;
         });
     }
 
-    static addToOnCallWorker(_id){
-        return fetch(urls.URL_FERN + '/worker/addOnCall/' + _id, {
+    static addToOnCallWorker(_id) {
+        console.log("WORKERS API --addToOnCallWorker -- " + _id)
+        return fetch(urls.URL_FERN + '/worker/addOnCallWorker/' + _id, {
             method: 'put',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
         }).then(response => {
-            console.log("WORKERS COMPONENT -- ADDTOONCALL RESPONSE API --", response)
+            console.log("WORKERS API -- ADDTOONCALL RESPONSE API --", response)
             return handlePromise(response);
         }).catch(error => {
-            console.log("WORKERS COMPONENT -- ADDTOONCALL ERROR API --", error)
+            console.log("WORKERS API -- ADDTOONCALL ERROR API --", error)
             return error;
         });
     }
 
-    static removeFromOnCallWorker(_id){
-        return fetch(urls.URL_FERN + '/worker/removeOnCall/' + _id, {
+    static removeFromOnCallWorker(_id) {
+        return fetch(urls.URL_FERN + '/worker/removeOnCallWorker/' + _id, {
             method: 'put',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
         }).then(response => {
-            console.log("WORKERS COMPONENT -- removeFromOnCallWorker RESPONSE API --", response)
+            console.log("WORKERS API -- removeFromOnCallWorker RESPONSE API -- ", response)
             return handlePromise(response);
         }).catch(error => {
-            console.log("WORKERS COMPONENT -- removeFromOnCallWorker ERROR API --", error)
+            console.log("WORKERS API -- removeFromOnCallWorker ERROR API -- ", error)
             return error;
         });
     }
