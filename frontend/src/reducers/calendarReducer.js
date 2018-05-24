@@ -1,7 +1,21 @@
+import * as types from '../actions/actionTypes';
+
 const calendarReducer = (state = {
     calendarEvents: []
 }, action) => {
     switch (action.type) {
+        case types.AUTO_SCHEDULE_CALENDAR:
+            console.log("CALENDAR REDUCER -- AUTOSCHEDULE")
+            return {
+                ...state,
+                calendarEvents: [...state.calendarEvents, action.newEvents]
+            }
+        case types.LOAD_EVENTS_CALENDAR_SUCCESS:
+            console.log("CALENDAR REDUCER -- LOAD EVENTS")
+            return {
+                ...state,
+                calendarEvents: action.events
+            }
         case 'ADD_ONCALL':
             console.log('ADD_ONCALL', state)
             return {

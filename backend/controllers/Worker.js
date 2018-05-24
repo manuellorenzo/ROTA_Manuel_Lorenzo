@@ -1,5 +1,6 @@
 const Worker = require('../models/Worker');
 const Event = require('../models/Event');
+const Activity = require('../models/Activity');
 const Compensation = require('../models/Compensation');
 const moment = require('moment');
 
@@ -69,7 +70,6 @@ module.exports.deleteWorker = (req, res) => {
                 status: 201,
                 worker: worker
             });
-
         });
     });
 };
@@ -140,27 +140,15 @@ module.exports.removeOncallWorker = (req, res) => {
     })
 };
 
-//TODO Cambiar y buscar todos los trabajadores con sus compensaciones si tienen
+//TODO Reducir los arrays
 module.exports.findWorkerAndCompensation = (req, res) => {
-    const startDate = moment(["2018", req.params.month - 1]);
+    const startDate = moment([req.params.year, req.params.month - 1]);
     const endDate = moment(startDate).endOf('month');
-    const workerComp = [];
+    const activity = [];
 
-    Event.find({start: {$gte:startDate, $lte: endDate}} , function (err, result) {
-        if (err)
-            return res.status(500).jsonp({error: 500, message: `${err.message}`});
-
-        if (result && result.length) {
-            for (let i = 0; result.length > i; i++) {
-                Compensation.find({worker: result[i].workerId}, function (err, compensation) {
-                    //workerComp.push(compensation);
-                    console.log(compensation)
-                    //return res.status(200).jsonp(compensation);
-                })
-            }
-        } else {
-            return res.sendStatus(404);
-        }
-        //return res.status(200).jsonp(workerComp);
-    });
+     Event.find({start: {$gte:startDate, $lte: endDate}}).then((result, err) =>
+         Promise.all(result.map(item => item.activities))).then(act => {
+             console.log(act)
+             return Promise.all(act.map(activity =>  Activity.find({_id: activity}))).then((actData) => actData)
+     }).then((actDataArray) => res.status(201).jsonp(actDataArray))
 };

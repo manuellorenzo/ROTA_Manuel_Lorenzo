@@ -51,7 +51,8 @@ class Workers extends Component {
                 text: 'USER',
                 value: 3,
             }],
-            workers: []
+            workers: [],
+            onCall: []
         };
         this.ReactTableWorkers = this.ReactTableWorkers.bind(this);
         this.ButtonsTableWorkers = this.ButtonsTableWorkers.bind(this);
@@ -72,6 +73,7 @@ class Workers extends Component {
                     workers: this.props.workers.filter(item => item.inactive === false)
                 }, () => {
                     this.props.loadOnCallWorkers().then(() => {
+                        console.log("loadWorkerState this.props.onCall", this.props.onCall);
                         if (Array.isArray(this.props.onCall)) {
                             this.setState({
                                 onCall: this.props.onCall.filter(item => item.inactive === false)
@@ -132,7 +134,8 @@ class Workers extends Component {
     }
 
     ButtonsTableWorkers(props) {
-        if (this.props.onCall.map((item) => props.row.row._id === item._id).includes(true)) {
+        console.log("WORKERS COMPONENT -- BUTTONS TABLE WORKERS", this.state.onCall);
+        if (this.state.onCall.map((item) => props.row.row._id === item._id).includes(true)) {
             return (<div style={{ "width": "100%" }}>
                 <Button fluid className="flexboxCenterVerHor" icon='close' onClick={() => {
                     this.setState({
@@ -148,7 +151,7 @@ class Workers extends Component {
         } else {
             return (<div style={{ "width": "100%" }}>
                 <Button.Group widths='2'>
-                    <Button className="flexboxCenterVerHor" icon='bell' onClick={() => this.props.addToOnCall(props.row.row)} />
+                    <Button className="flexboxCenterVerHor" icon='bell' onClick={() => (this.props.addToOnCall(props.row.row._id), this.loadWorkerState())} />
                     <Button className="flexboxCenterVerHor" icon='close' onClick={() => {
                         this.setState({
                             messages: {
@@ -239,7 +242,7 @@ class Workers extends Component {
                 filterable: false,
                 id: "actions",
                 Cell: row => (
-                    <Button fluid icon='bell slash' onClick={() => this.props.removeFromOnCall(row.row._id)} />
+                    <Button fluid icon='bell slash' onClick={() => (this.props.removeFromOnCall(row.row._id), this.loadWorkerState())} />
                 )
 
             }
@@ -281,7 +284,7 @@ class Workers extends Component {
                             <Grid.Column>
                                 <div>
                                     <Header as="h2">On Call</Header><Divider />
-                                    <this.ReactTableWorkers data={this.props.onCall} columns={columnOnCall} />
+                                    <this.ReactTableWorkers data={this.state.onCall} columns={columnOnCall} />
                                 </div>
                             </Grid.Column>
                             <Grid.Column>
@@ -384,7 +387,7 @@ const mapDispatchToProps = (dispatch) => {
         editWorker: worker => dispatch(workersActions.editWorker(worker)),
         addWorker: worker => dispatch(workersActions.addWorker(worker)),
         deleteWorker: _id => dispatch(workersActions.deleteWorker(_id)),
-        addToOnCall: worker => dispatch(workersActions.addToOnCallWorker(worker)),
+        addToOnCall: _id => dispatch(workersActions.addToOnCallWorker(_id)),
         removeFromOnCall: _id => dispatch(workersActions.removeFromOnCallWorker(_id))
     }
 };

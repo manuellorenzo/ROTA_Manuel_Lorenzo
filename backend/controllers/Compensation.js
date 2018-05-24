@@ -1,9 +1,9 @@
 'use strict'
 
-var path = require('path');
-var fs = require('fs');
+const path = require('path');
+const fs = require('fs');
 
-var Compensation = require('../models/Compensation');
+const Compensation = require('../models/Compensation');
 
 function addCompensation(req,res){
 
@@ -13,7 +13,7 @@ function addCompensation(req,res){
         type:req.body.type,
         activity:req.body.activity,
         worker:req.body.worker
-    })
+    });
 
     compensation.save((err, result)=>{
         if (err){
@@ -25,7 +25,7 @@ function addCompensation(req,res){
 }
 
 function getCompensation(req, res){
-    var compensationId=req.params.id;
+    const compensationId = req.params.id;
 
     Compensation.findById(compensationId, (err, compensation)=>{
         if (err){
@@ -55,7 +55,7 @@ function editCompensation (req, res){
 }
 
 function removeCompensation(req, res){
-    var compensationId=req.params.id;
+    const compensationId = req.params.id;
 
     Compensation.findByIdAndRemove(compensationId, (err, compensationRemoved)=>{
         if(err){
@@ -119,4 +119,4 @@ module.exports={
     addCompensation,
     getCompensationByWorker,
     getCompensationByActivity
-}
+};
