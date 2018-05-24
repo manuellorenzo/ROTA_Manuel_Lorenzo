@@ -7,32 +7,24 @@ const workerController = require('../controllers/Worker');
 module.exports.addEvent = (req, res) => {
     Worker.findOne({_id: req.body.workerId}, function (err, worker) {
         if (err) {
-            return res.status(500).jsonp({error:500, message: `${err.message}`});
+            return res.status(500).jsonp({error: 500, message: `${err.message}`});
         }
 
-        Activity.findOne({_id: req.body.activities}, function (err, activity) {
-            if (err) {
+        let event = new Event({
+            start: req.body.start,
+            end: req.body.end,
+            title: req.body.title,
+            type: req.body.type,
+            workerId: worker,
+            compensations: req.body.compensations
+        });
+        event.save((err, result) => {
+            if (err)
                 return res.status(500).jsonp({error: 500, message: `${err.message}`});
-            }
 
-            let event = new Event({
-                start: req.body.start,
-                end: req.body.end,
-                title: req.body.title,
-                type: req.body.type,
-                workerId: worker,
-                activities: activity
-            });
-            event.save((err, result) => {
-                if (err)
-                    return res.status(500).jsonp({error: 500, message: `${err.message}`});
-
-                return res.status(200).jsonp(result);
-            })
+            return res.status(200).jsonp(result);
         })
-
-
-    });
+    })
 
 };
 
@@ -81,7 +73,7 @@ module.exports.deleteEvent = (req, res) => {
 };
 
 module.exports.findOneEvent = (req, res) => {
-    Event.find({_id: req.params._id}, (err, event)  =>{
+    Event.find({_id: req.params._id}, (err, event) => {
         if (event === undefined)
             return res.status(500).jsonp({
                 error: 500,
@@ -114,10 +106,10 @@ module.exports.autoSchedule = function (req, res) {
     let fechaActual = start;
     let arrayDias = [];
     let addedEvents = [];
-    while(fechaActual.format("YYYY-MM-DD") <= end.format("YYYY-MM-DD")){
-        console.log("DE VERDAD",moment(fechaActual))
+    while (fechaActual.format("YYYY-MM-DD") <= end.format("YYYY-MM-DD")) {
+        console.log("DE VERDAD", moment(fechaActual))
         arrayDias = [...arrayDias, moment(fechaActual)];
-        fechaActual = moment(fechaActual.add(1,'days'));
+        fechaActual = moment(fechaActual.add(1, 'days'));
     }
     let onCall = [];
     Worker.find({onCall: true, inactive: false}, function (err, worker) {
@@ -125,68 +117,68 @@ module.exports.autoSchedule = function (req, res) {
             return `${err.message}`
         return worker;
     }).then(result => result.length > 0 ? autoScheduleArrays(result) : [])
-        .then((result) =>{
-            let eventos = [];
-            let eventoSingle = {};
-            let ES = ['Mo','Tu','We','Th'];
-            let FS = ['Fr', 'Sa', 'Su'];
-            let contadorArray = 0;
-            if (result.length >= 3) {
-               Promise.all(arrayDias.map(item => {
-                    if (ES.includes(moment(item).format('dd'))) {
-                        eventoSingle = {
-                            start: moment(item).format("YYYY-MM-DD"),
-                            end: moment(item).format("YYYY-MM-DD"),
-                            title: result[0][contadorArray].name,
-                            type: 'On Call',
-                            workerId: result[0][contadorArray]._id,
-                            activities: []
-                        };
-                        //ADD
-                        event = new Event(eventoSingle);
-                        event.save();
-                        addedEvents.push(eventoSingle);
-                    } else {
-                        eventoSingle = {
-                            start: moment(item).format("YYYY-MM-DD"),
-                            end: moment(item).format("YYYY-MM-DD"),
-                            title: result[1][contadorArray].name,
-                            type: 'On Call',
-                            workerId: result[1][contadorArray]._id,
-                            activities: []
-                        };
-                        //ADD
-                        event = new Event(eventoSingle);
-                        event.save();
-                        addedEvents.push(eventoSingle);
-                        if (moment(item).format('dd') === 'Sa') {
+        .then((result) => {
+                let eventos = [];
+                let eventoSingle = {};
+                let ES = ['Mo', 'Tu', 'We', 'Th'];
+                let FS = ['Fr', 'Sa', 'Su'];
+                let contadorArray = 0;
+                if (result.length >= 3) {
+                    Promise.all(arrayDias.map(item => {
+                        if (ES.includes(moment(item).format('dd'))) {
                             eventoSingle = {
                                 start: moment(item).format("YYYY-MM-DD"),
                                 end: moment(item).format("YYYY-MM-DD"),
-                                title: result[2][contadorArray].name,
+                                title: result[0][contadorArray].name,
                                 type: 'On Call',
-                                workerId: result[2][contadorArray]._id,
-                                activities: []
-                            }
+                                workerId: result[0][contadorArray]._id,
+                                compensation: []
+                            };
                             //ADD
                             event = new Event(eventoSingle);
                             event.save();
                             addedEvents.push(eventoSingle);
-                        }
-                        if (moment(item).format('dd') === 'Su') {
-                            if (contadorArray >= result[0].length - 1) {
-                                contadorArray = 0;
-                            } else {
-                                contadorArray++;
+                        } else {
+                            eventoSingle = {
+                                start: moment(item).format("YYYY-MM-DD"),
+                                end: moment(item).format("YYYY-MM-DD"),
+                                title: result[1][contadorArray].name,
+                                type: 'On Call',
+                                workerId: result[1][contadorArray]._id,
+                                compensation: []
+                            };
+                            //ADD
+                            event = new Event(eventoSingle);
+                            event.save();
+                            addedEvents.push(eventoSingle);
+                            if (moment(item).format('dd') === 'Sa') {
+                                eventoSingle = {
+                                    start: moment(item).format("YYYY-MM-DD"),
+                                    end: moment(item).format("YYYY-MM-DD"),
+                                    title: result[2][contadorArray].name,
+                                    type: 'On Call',
+                                    workerId: result[2][contadorArray]._id,
+                                    compensation: []
+                                }
+                                //ADD
+                                event = new Event(eventoSingle);
+                                event.save();
+                                addedEvents.push(eventoSingle);
+                            }
+                            if (moment(item).format('dd') === 'Su') {
+                                if (contadorArray >= result[0].length - 1) {
+                                    contadorArray = 0;
+                                } else {
+                                    contadorArray++;
+                                }
                             }
                         }
-                    }
-                })).then(() => res.status(201).jsonp(addedEvents))
-            } else {
-               return res.status(404).jsonp("No se encuentra ningún trabajador on call");
+                    })).then(() => res.status(201).jsonp(addedEvents))
+                } else {
+                    return res.status(404).jsonp("No se encuentra ningún trabajador on call");
+                }
             }
-        }
-    );
+        );
 
 
 };
@@ -204,10 +196,10 @@ function autoScheduleArrays(arrayOnCall) {
         }
     });
     base.map((itemA, indexA) => {
-        if (indexA +1 >= SegundoSabado.length) {
+        if (indexA + 1 >= SegundoSabado.length) {
             SegundoSabado[0] = itemA;
         } else {
-            SegundoSabado[indexA +1] = itemA;
+            SegundoSabado[indexA + 1] = itemA;
         }
     });
     return [base, finDeSemana, SegundoSabado];

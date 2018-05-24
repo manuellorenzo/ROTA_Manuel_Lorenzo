@@ -16,11 +16,11 @@ const calendarReducer = (state = {
                 ...state,
                 calendarEvents: action.events
             }
-        case 'ADD_ONCALL':
-            console.log('ADD_ONCALL', state)
+        case types.ADD_ON_CALL_EVENT_SUCCESS:
+            console.log('CALENDAR REDUCER -- ADD ON CALL EVENT', state)
             return {
                 ...state,
-                calendarEvents: [...state.calendarEvents, action.event]
+                calendarEvents: [...state.calendarEvents, action.newEvent]
             }
         case 'CHANGE_ONCALL':
             console.log('CHANGE_ONCALL', state)

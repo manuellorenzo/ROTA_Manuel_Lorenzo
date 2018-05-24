@@ -3,6 +3,7 @@ const Event = require('../models/Event');
 const Activity = require('../models/Activity');
 const Compensation = require('../models/Compensation');
 const moment = require('moment');
+const _ = require('lodash');
 
 module.exports.addWorker = (req, res) => {
 
@@ -75,7 +76,7 @@ module.exports.deleteWorker = (req, res) => {
 };
 
 module.exports.findOneWorker = (req, res) => {
-    Worker.find({_id: req.params._id}, (err, worker) => {
+    Worker.findOne({_id: req.params._id}, (err, worker) => {
         if (worker === undefined)
             return res.status(500).jsonp({
                 error: 500,
@@ -147,8 +148,14 @@ module.exports.findWorkerAndCompensation = (req, res) => {
     const activity = [];
 
      Event.find({start: {$gte:startDate, $lte: endDate}}).then((result, err) =>
-         Promise.all(result.map(item => item.activities))).then(act => {
+         Promise.all(result.map(item => item.compensations))).then(act => {
              console.log(act)
-             return Promise.all(act.map(activity =>  Activity.find({_id: activity}))).then((actData) => actData)
-     }).then((actDataArray) => res.status(201).jsonp(actDataArray))
+             return Promise.all(act.map((eachAct) => Compensation.find({_id: eachAct.compensations})
+                     .then((compen) => compen)))
+     }).then(actDataArray => {
+         let workerGroup = _.groupBy(_.flattenDeep((actDataArray)), "worker");
+             res.status(200).jsonp(workerGroup);
+    })
+    /*{ Promise.all(actDataArray.map(comp => console.log("comp", comp) /*Compensation.find({activity: comp})))
+     }).then((compe) => console.log(compe))*/
 };
