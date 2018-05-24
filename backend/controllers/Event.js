@@ -91,6 +91,19 @@ module.exports.findOneEvent = (req, res) => {
     })
 };
 
+module.exports.findEventByWorker=function(req,res){
+    Event.find({workerId:req.params.workerId}, (err, result)=>{
+        if (err){
+            return res.status(500).jsonp({error:500, message : `${err.message}`})
+        }
+        if (result && result.length){
+            res.status(200).jsonp(result);
+        }else{
+            res.sendStatus(404);
+        }
+    })
+}
+
 module.exports.prueba = function (req, res) {
     let start = moment(req.body.start, 'YYYY-MM-DD');
     let end = moment(req.body.end, 'YYYY-MM-DD');

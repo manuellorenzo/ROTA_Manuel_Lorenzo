@@ -8,5 +8,6 @@ router.put('/edit', eventController.editEvent);
 router.delete('/delete/:id', eventController.deleteEvent);
 router.get('/findEvent/:_id', eventController.findOneEvent);
 router.post('/prueba', eventController.prueba);
+router.get('/findEventByWorker/:workerId', eventController.findEventByWorker);
 
 module.exports = router;
