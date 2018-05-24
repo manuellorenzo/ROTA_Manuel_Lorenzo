@@ -7,11 +7,14 @@ import ReactTable from 'react-table';
 import "react-table/react-table.css";
 
 import * as compensationAction from '../actions/compensationAction';
+import {formatDate} from '../global_functions/global_function'
 
 class CompensationPayment extends Component {
 
     constructor(props) {
         super(props);
+
+        //formatDate(this.props.compensations.dateCompensation);
 
         this.handleSeeCompensationsButton = this.handleSeeCompensationsButton.bind(this);
 
@@ -68,11 +71,12 @@ class CompensationPayment extends Component {
                             data={this.props.compensationsFilter}
                             columns={[
                                 {
-                                    Header: "On call workers",
+                                    Header: "Compensation payment",
                                     columns: [
                                         {
                                             Header: "Fecha compensacion",
-                                            accessor: "activity"
+                                            id:'dateCompensation',
+                                            accessor: d=>formatDate(d.dateCompensation)
                                         },
 
                                         {
@@ -84,14 +88,26 @@ class CompensationPayment extends Component {
                                             accessor: 'payment',
                                             Cell: row => (
                                                 <Modal
-                                                    trigger={<Button>Show Modal</Button>}
-                                                    header='Reminder!'
-                                                    content='Call Benjamin regarding the reports.'
-                                                    actions={[
-                                                        'Snooze',
-                                                        { key: 'done', content: 'Done', positive: false },
-                                                    ]}
-                                                />
+                                                    trigger={<Button onClick={this.handleOpen}>Show Modal</Button>}
+                                                    open={this.state.modalOpen}
+                                                    onClose={this.handleClose}
+                                                    size='small'
+                                                >
+                                                    <Header icon='money' content='Compensation payment' />
+                                                    <Modal.Content>
+                                                        <h3>How do you want to get payed your compensation?</h3>
+                                                        <Button.Group>
+                                                            <Button>Money</Button>
+                                                            <Button.Or/>
+                                                            <Button positive>Time</Button>
+                                                        </Button.Group>
+                                                    </Modal.Content>
+                                                    <Modal.Actions>
+                                                        <Button color='red' onClick={this.handleClose} inverted>
+                                                            <Icon name='remove' /> Close
+                                                        </Button>
+                                                    </Modal.Actions>
+                                                </Modal>
                                             )
                                         }
 
@@ -115,15 +131,23 @@ class CompensationPayment extends Component {
 const mapStateToProps = (state, ownProps) => {
     console.log('mapstatetoprops compensationspayment-> ', state)
     return {
+        //COMPENSACIONES
         compensations: state.compensationsReducer.compensationList,
-        compensationsFilter: state.compensationsReducer.compensationListFilter
+        compensationsFilter: state.compensationsReducer.compensationListFilter,
+
+        //EVENTOS
+        events:state.calendarReducer.calendarEvents
     };
 }
 
 const mapDispatchToProps = (dispatch) => {
     return {
+        //COMPENSACIONES
         loadAllCompensations: () => dispatch(compensationAction.loadAllCompensations()),
-        loadCompensationByWorker: worker => dispatch(compensationAction.loadCompensationByWorker(worker))
+        loadCompensationByWorker: worker => dispatch(compensationAction.loadCompensationByWorker(worker)),
+
+        //EVENTOS
+        
     }
 }
 
