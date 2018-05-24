@@ -18,6 +18,7 @@ import 'antd/dist/antd.css';
 import '../style.css';
 
 import * as calendarActions from '../actions/calendarActions';
+import * as workerActions from '../actions/workersActions';
 
 import Toast from './Toast';
 import ConfirmComponent from './Confirm';
@@ -48,12 +49,9 @@ class CalendarPage extends Component {
                 disabledButtonEditEvent: true
             },
             newEvent: {
-                worker: {
-                    _id: '',
-                    name: ''
-                },
+                workerId: '',
                 startDate: moment(),
-                activities: []
+                compensations: []
             },
             messages: {
                 addEditEvents: {
@@ -83,23 +81,11 @@ class CalendarPage extends Component {
     handleOnChangeDropdown(e, { value }) {
         console.log('CHANGIN THE DROPDOWN', value)
         let worker = this.state.onCallOptions.filter(item => item.value === value).map(item => item.text);
-        this.setState({ newEvent: { ...this.state.newEvent, worker: { _id: value, name: worker.toString() } } });
+        this.setState({ newEvent: { ...this.state.newEvent, workerId: value } });
     }
 
     componentWillReceiveProps(props) {
-        /*console.log('props will receive prop', props)
-        this.setState({ calendarEvents: props.calendarEvents }, () => {
-            this.setState({
-                onCallOptions: this.props.onCall.map((item) => {
-                    return {
-                        key: item._id,
-                        text: item.name,
-                        value: item._id,
-                    }
-                })
-            })
-        });
-        console.log('onCallOptions', this.state.onCallOptions)*/
+        //this.loadCalendarEventsToState()
 
     }
 
@@ -109,29 +95,30 @@ class CalendarPage extends Component {
 
     loadCalendarEventsToState() {
         this.props.loadCalendarEvents().then(() => {
-            this.setState({ calendarEvents: this.props.calendarEvents }, () => {
-                this.setState({
-                    onCallOptions: this.props.onCall.map((item) => {
-                        return {
-                            key: item._id,
-                            text: item.name,
-                            value: item._id,
-                        }
-                    })
-                }, () => {
-                    console.log('component did mount', this.props)
+            this.props.loadOnCallWorkers().then(() => {
+                this.setState({ calendarEvents: this.props.calendarEvents }, () => {
+                    console.log("CALENDAR COMPONENT --- LOAD CALENDAR EVENTS TO STATE ---", this.props.onCall);
+                    this.setState({
+                        onCallOptions: this.props.onCall.filter((item) => item.inactive === false).map((itemMap) => {
+                            return {
+                                key: itemMap._id,
+                                text: itemMap.name,
+                                value: itemMap._id,
+                            }
+                        })
+                    }, () => {
+                        console.log('CALENDAR COMPONENT -- LOAD CALENDAR TO STATE -- PROPS', this.state)
+                    });
                 });
-            });
+            })
         });
     }
 
     handleModalClose = (name) => this.setState({
         modals: { ...this.state.modals, [name]: false }, newEvent: {
-            worker: {
-                _id: '',
-                name: ''
-            },
+            workerId: '',
             startDate: moment(),
+            compensations: []
         },
     });
 
@@ -145,7 +132,6 @@ class CalendarPage extends Component {
             }
         }, () => {
             this.setState({ modals: { ...this.state.modals, showModalEditEvent: true } });
-
         })
     }
 
@@ -173,7 +159,6 @@ class CalendarPage extends Component {
         this.setState((prevState, props) => {
             console.log("handleChangesMessages calendar prueba value", value)
             return { messages: { ...prevState.messages, addEditEvents: { ...prevState.messages.addEditEvents, text: value, show: true } } }
-
         }, () => {
             this.setState((prevState, props) => {
                 console.log('handleChangesMessages calendar', value, this.state);
@@ -249,7 +234,8 @@ class CalendarPage extends Component {
                     <Grid verticalAlign="middle">
                         <Grid.Row centered >
                             <Grid.Column>
-                                <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddEvent: true } })}>Add event</Button>
+                                <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddEvent: true } },
+                                    console.log("CALENDAR COMPONENT -- SHOW MODAL ADD EVENT -- ", this.state.newEvent.workerId))}>Add event</Button>
                                 <Button floated="right" onClick={() => {
                                     this.props.autoSchedule(moment(new Date("2018-05-01")), moment(new Date("2018-05-30"))).then(() => {
                                         this.loadCalendarEventsToState();
@@ -321,7 +307,7 @@ class CalendarPage extends Component {
                         <Modal.Actions>
                             <Button onClick={() => this.handleModalClose("showModalAddEvent")}>Close</Button>
                             <Button floated="right" disabled={this.state.newEvent.workerId === ''} onClick={() => {
-                                this.props.addOnCall({
+                                /*this.props.addOnCallEvent({
                                     start: new Date(this.state.newEvent.startDate),
                                     end: new Date(this.state.newEvent.startDate),
                                     title: this.state.newEvent.worker.name,
@@ -332,20 +318,39 @@ class CalendarPage extends Component {
                                 console.log("ADD EVENT WORKER", this.state.newEvent.worker);
                                 this.setState({
                                     newEvent: {
-                                        worker: {
-                                            _id: '',
-                                            name: ''
-                                        },
+                                        workerId: '',
                                         startDate: moment(),
-                                        activity: false,
-                                        startTime: moment(),
-                                        duration: '0',
-                                        workReference: ''
-                                    }
+                                        compensations: []
+                                    },
                                 }, () => {
                                     this.handleModalClose("showModalAddEvent");
                                     this.handleChangeMessages("Event added successfully");
-                                });
+                                });*/
+                                this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
+                                    console.log("CALENDAR CALENDAR CALENDAR ",this.props)
+                                    this.props.addOnCallEvent({
+                                        start: new Date(this.state.newEvent.startDate),
+                                        end: new Date(this.state.newEvent.startDate),
+                                        title: workerData.name,
+                                        _id: this.state.newEvent._id,
+                                        workerId: this.state.newEvent.workerId,
+                                        type: this.state.newEvent.compensations.length > 0 ? "Activity" : "On Call",
+                                        compensations: this.state.newEvent.compensations
+                                    }).then(() => {
+                                        this.setState({
+                                            newEvent: {
+                                                workerId: '',
+                                                startDate: moment(),
+                                                compensations: []
+                                            }
+                                        }, () => {
+                                            console.log("CALENDAR COMPONENT -- ADD ON CALL EVENT -- ",this.state)
+                                            this.loadCalendarEventsToState();
+                                            this.handleModalClose("showModalAddEvent");
+                                            this.handleChangeMessages("Event added successfully");
+                                        });
+                                    });
+                                })
                             }}>Add event</Button>
                         </Modal.Actions>
                     </Modal>
@@ -377,7 +382,7 @@ class CalendarPage extends Component {
                                 <Form.Field>
                                     <Checkbox label={{ children: 'Activity' }} onChange={this.handleActivityCheckboxChange} />
                                 </Form.Field>
-                                {this.state.newEvent.activity === true ?
+                                {this.state.newEvent.compensations.length > 0 ?
                                     <div>
                                         <Form.Field>
                                             <label>Start Time</label>
@@ -408,31 +413,28 @@ class CalendarPage extends Component {
                                 });
                             }}>Remove</Button>
                             <Button floated="right" disabled={this.state.modals.disabledButtonEditEvent} onClick={() => {
-                                /*this.props.changeOnCall({
-                                    start: new Date(this.state.newEvent.startDate),
-                                    end: new Date(this.state.newEvent.startDate),
-                                    title: this.state.newEvent.worker.name,
-                                    _id: this.state.newEvent._id,
-                                    workerId: this.state.newEvent.workerId,
-                                    type: this.state.newEvent.activities.length > 0 ? "Activity" : "On Call",
-                                    activities: this.state.newEvent.activities
-                                });
-                                this.setState({
-                                    newEvent: {
-                                        worker: {
-                                            _id: '',
-                                            name: ''
-                                        },
-                                        startDate: moment(),
-                                        activity: false,
-                                        startTime: moment(),
-                                        duration: '0',
-                                        workReference: ''
-                                    }
-                                }, () => {
-                                    this.handleModalClose("showModalEditEvent");
-                                    this.handleChangeMessages("Event edited successfully");
-                                });*/
+                                this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
+                                    this.props.changeOnCall({
+                                        start: new Date(this.state.newEvent.startDate),
+                                        end: new Date(this.state.newEvent.startDate),
+                                        title: workerData.name,
+                                        _id: this.state.newEvent._id,
+                                        workerId: this.state.newEvent.workerId,
+                                        type: this.state.newEvent.compensations.length > 0 ? "Activity" : "On Call",
+                                        compensations: this.state.newEvent.compensations
+                                    }).then(() => {
+                                        this.setState({
+                                            newEvent: {
+                                                workerId: '',
+                                                startDate: moment(),
+                                                compensations: []
+                                            }
+                                        }, () => {
+                                            this.handleModalClose("showModalEditEvent");
+                                            this.handleChangeMessages("Event edited successfully");
+                                        });
+                                    });
+                                })
                             }}>Edit event</Button>
                         </Modal.Actions>
                     </Modal>
@@ -457,11 +459,14 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
-        addOnCall: event => dispatch(calendarActions.addOnCall(event)),
+        addOnCallEvent: (event) => dispatch(calendarActions.addOnCallEvent(event)),
         changeOnCall: event => dispatch(calendarActions.changeOnCall(event)),
         removeOnCall: _id => dispatch(calendarActions.removeOnCall(_id)),
         autoSchedule: (start, end) => dispatch(calendarActions.autoSchedule(start, end)),
-        loadCalendarEvents: () => dispatch(calendarActions.loadEvents())
+        loadCalendarEvents: () => dispatch(calendarActions.loadEvents()),
+        //WORKERS
+        getWorkerById: _id => dispatch(workerActions.getWorkerById(_id)),
+        loadOnCallWorkers: () => dispatch(workerActions.loadOnCallWorkers())
     };
 };
 

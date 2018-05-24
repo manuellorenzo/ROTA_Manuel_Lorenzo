@@ -15,13 +15,7 @@ class WorkerApi {
     }
 
     static getWorkerById(_id) {
-        return fetch(urls.URL_FERN + '/worker/findWorker/'+_id, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            }
-        }).then(response => {
+        return fetch(urls.URL_FERN + '/worker/findWorker/'+_id).then(response => {
             console.log("WORKERS API -- GET WORKER BY ID --", response)
             return handlePromise(response);
         }).catch(error => {
