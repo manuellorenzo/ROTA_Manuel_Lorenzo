@@ -26,19 +26,19 @@ export function loadWorkersSuccess(workers) {
 
 export function getWorkerById(_id){
   return function (dispatch) {
-    return workersApi.getWorkerById().then(response => {
+    return workersApi.getWorkerById(_id).then(response => {
       if (response.status === 200) {
         console.log("WORKERS ACTIONS -- GET WORKER BY ID --", response);
-        dispatch(loadWorkersSuccess(response.data));
+        return response.data;
       }else{
         console.log("WORKERS ACTIONS -- GET WORKER BY ID ERROR", response);
       }
-      return response.status;
     }).catch(error => {
       throw (error);
     });
   };
 }
+
 
 export function editWorker(worker) {
   return function (dispatch) {

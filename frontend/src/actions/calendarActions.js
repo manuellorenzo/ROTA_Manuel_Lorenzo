@@ -52,10 +52,28 @@ export function loadEventsSuccess(events) {
   };
 }
 
-export const addOnCall = event => ({
-  type: 'ADD_ONCALL',
-  event
-})
+export function addOnCallEvent(newEvent) {
+  console.log("CALENDAR ACTIONS -- ADD ON CALL EVENT -- ", newEvent);
+  return function (dispatch) {
+    return calendarApi.addOnCallEvent(newEvent).then(response => {
+      if (response.status === 200) {
+        dispatch(addOnCallEventSuccess(response.data));
+      }else {
+        console.log("CALENDAR ACTIONS -- ADD ON CALL EVENT ERROR -- ", response)
+      }
+      return response.status;
+    }).catch(error => {
+      throw (error);
+    });
+  };
+}
+export function addOnCallEventSuccess(newEvent) {
+  console.log("CALENDAR ACTIONS -- ADD ON CALL EVENT SUCCESS", newEvent)
+  return {
+    type: types.ADD_ON_CALL_EVENT_SUCCESS,
+    newEvent
+  };
+}
 
 export const changeOnCall = event => ({
   type: 'CHANGE_ONCALL',
