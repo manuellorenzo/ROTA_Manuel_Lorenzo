@@ -95,19 +95,22 @@ module.exports.findEventByWorker = function (req, res) {
         }
     })
 }
-module.exports.autoSchedule = function (req, res) {
-    let start = moment(req.body.start, 'YYYY-MM-DD');
-    let end = moment(req.body.end, 'YYYY-MM-DD');
 
-    let seconds = moment.duration(end.diff(start));
+module.exports.autoSchedule = function (req, res) {
+    let start = moment.utc(req.body.start).format("YYYY-MM-DD");
+    let end = moment.utc(req.body.end).format("YYYY-MM-DD");
+    let overwrite = true;
     let event;
-    let fechaActual = start;
+    let fechaActual = moment(start);
     let arrayDias = [];
     let addedEvents = [];
-    while (fechaActual.format("YYYY-MM-DD") <= end.format("YYYY-MM-DD")) {
-        console.log("DE VERDAD", moment(fechaActual))
+    while (fechaActual <= moment(end)) {
         arrayDias = [...arrayDias, moment(fechaActual)];
-        fechaActual = moment(fechaActual.add(1, 'days'));
+        fechaActual = moment(fechaActual.add(1, 'd'));
+    }
+    if (overwrite === true) {
+        Event.find({start: {$gte: moment(start), $lte: moment(end)}}).then((result, err) =>
+            Promise.all(result.map(item => item.remove())));
     }
     let onCall = [];
     Worker.find({ onCall: true, inactive: false }, function (err, worker) {
