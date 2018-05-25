@@ -46,12 +46,18 @@ class CalendarPage extends Component {
             modals: {
                 showModalAddEvent: false,
                 showModalEditEvent: false,
+                showAutoScheduleModal: false,
                 disabledButtonEditEvent: true
             },
             newEvent: {
                 workerId: '',
                 startDate: moment(),
                 compensations: []
+            },
+            autoSchedule:{
+                start: moment(),
+                end: moment(),
+                overwrite: false
             },
             messages: {
                 addEditEvents: {
@@ -76,6 +82,7 @@ class CalendarPage extends Component {
         this.handleActivityCheckboxChange = this.handleActivityCheckboxChange.bind(this);
         this.handleStartTimeActivityChange = this.handleStartTimeActivityChange.bind(this);
         this.handleActivityInputOnChange = this.handleActivityInputOnChange.bind(this);
+        this.handleAutoScheduleOverwriteCheckboxChange = this.handleAutoScheduleOverwriteCheckboxChange.bind(this);
     }
 
     handleOnChangeDropdown(e, { value }) {
@@ -128,7 +135,8 @@ class CalendarPage extends Component {
             newEvent: {
                 workerId: evt.workerId,
                 startDate: evt.start,
-                _id: evt._id
+                _id: evt._id,
+                compensations: evt.compensations
             }
         }, () => {
             this.setState({ modals: { ...this.state.modals, showModalEditEvent: true } });
@@ -205,9 +213,18 @@ class CalendarPage extends Component {
 
     handleActivityCheckboxChange() {
         this.setState((prevState, props) => {
-            return { newEvent: { ...prevState.newEvent, activity: !prevState.newEvent.activity } };
+            return { newEvent: { ...prevState.newEvent, activities: prevState.newEvent.activities } };
         }, () => {
-            console.log("Activity post state checkbox", this.state.newEvent.activity);
+            console.log("Activity post state checkbox", this.state.newEvent.activities);
+        }
+        )
+    }
+
+    handleAutoScheduleOverwriteCheckboxChange() {
+        this.setState((prevState, props) => {
+            return { autoSchedule: { ...prevState.autoSchedule, overwrite: !prevState.autoSchedule.overwrite } };
+        }, () => {
+            console.log("Overwrite post state checkbox", this.state.autoSchedule.overwrite);
         }
         )
     }
@@ -227,6 +244,14 @@ class CalendarPage extends Component {
         console.log("checkEmptyModal", this.state.newEvent.workReference !== '' && this.state.newEvent.duration !== '');
         return this.state.newEvent.workReference === '' && this.state.newEvent.duration === ''
     }
+
+    handleChangeAutoScheduleDates(name,e){
+        console.log("handleChangeAutoScheduleDates", e)
+        if (e !== null) {
+            this.setState({ autoSchedule: { ...this.state.autoSchedule, [name]: e._d } })
+        }
+    }
+
     render() {
         return (
             <div>
@@ -237,9 +262,7 @@ class CalendarPage extends Component {
                                 <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddEvent: true } },
                                     console.log("CALENDAR COMPONENT -- SHOW MODAL ADD EVENT -- ", this.state.newEvent.workerId))}>Add event</Button>
                                 <Button floated="right" onClick={() => {
-                                    this.props.autoSchedule(moment(new Date("2018-05-01")), moment(new Date("2018-05-30"))).then(() => {
-                                        this.loadCalendarEventsToState();
-                                    });
+                                    this.setState({modals: {...this.state.modals, showAutoScheduleModal:  true}});
                                 }}>Auto-schelude</Button>
                             </Grid.Column>
                         </Grid.Row>
@@ -307,25 +330,6 @@ class CalendarPage extends Component {
                         <Modal.Actions>
                             <Button onClick={() => this.handleModalClose("showModalAddEvent")}>Close</Button>
                             <Button floated="right" disabled={this.state.newEvent.workerId === ''} onClick={() => {
-                                /*this.props.addOnCallEvent({
-                                    start: new Date(this.state.newEvent.startDate),
-                                    end: new Date(this.state.newEvent.startDate),
-                                    title: this.state.newEvent.worker.name,
-                                    _id: Math.random(),
-                                    type: 'OnCall',
-                                    worker: this.state.newEvent.worker
-                                });
-                                console.log("ADD EVENT WORKER", this.state.newEvent.worker);
-                                this.setState({
-                                    newEvent: {
-                                        workerId: '',
-                                        startDate: moment(),
-                                        compensations: []
-                                    },
-                                }, () => {
-                                    this.handleModalClose("showModalAddEvent");
-                                    this.handleChangeMessages("Event added successfully");
-                                });*/
                                 this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
                                     console.log("CALENDAR CALENDAR CALENDAR ",this.props)
                                     this.props.addOnCallEvent({
@@ -373,7 +377,7 @@ class CalendarPage extends Component {
                             <Form>
                                 <Form.Field>
                                     <label>Developer</label>
-                                    <Form.Dropdown placeholder='Worker' onChange={this.handleOnChangeDropdown} value={this.state.newEvent._id} fluid search selection options={this.state.onCallOptions} />
+                                    <Form.Dropdown placeholder='Worker' onChange={this.handleOnChangeDropdown} value={this.state.newEvent.workerId} fluid search selection options={this.state.onCallOptions} />
                                 </Form.Field>
                                 <Form.Field>
                                     <label>Start Date</label>
@@ -438,6 +442,45 @@ class CalendarPage extends Component {
                             }}>Edit event</Button>
                         </Modal.Actions>
                     </Modal>
+                     {/*//////////////////////////////AUTOSCHEDULE MODAL////////////////////////////////////////////*/}
+                     <Modal
+                        open={this.state.modals.showAutoScheduleModal}
+                        onClose={() => this.handleModalClose("showAutoScheduleModal")}
+                        size='tiny'
+                        closeOnRootNodeClick={false}
+                        //FIX MODAL FIXED TO TOP
+                        style={{
+                            marginTop: '0px !important',
+                            marginLeft: 'auto',
+                            marginRight: 'auto'
+                        }}
+                    >
+                        <Header icon='browser' content='AutoSchedule' />
+                        <Modal.Content>
+                            <Form>
+                                <Form.Field >
+                                    <label>Start Date</label>
+                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.autoSchedule.start)} format={dateFormat} size="large" onChange={(e) => this.handleChangeAutoScheduleDates("start",e)} />
+                                </Form.Field>
+                                <Form.Field>
+                                    <label>End Date</label>
+                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.autoSchedule.end)} format={dateFormat} size="large" onChange={(e) => this.handleChangeAutoScheduleDates("end",e)} />
+                                </Form.Field>
+                                <Form.Field>
+                                    <Checkbox label={{ children: 'Overwrite' }} onChange={this.handleAutoScheduleOverwriteCheckboxChange} />
+                                </Form.Field>
+                            </Form>
+                        </Modal.Content>
+                        <Modal.Actions>
+                            <Button onClick={() => this.handleModalClose("showAutoScheduleModal")}>Close</Button>
+                            <Button floated="right" onClick={() => {
+                                this.props.autoSchedule(moment(new Date(this.state.autoSchedule.start)), moment(new Date(this.state.autoSchedule.end), this.state.autoSchedule.overwrite)).then(() => {
+                                    this.loadCalendarEventsToState();
+                                });
+                            }}>Add events</Button>
+                        </Modal.Actions>
+                    </Modal>
+
                     <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} />
                     <ConfirmComponent show={this.state.messages.confirmDelete.open} onConfirm={this.handleOnConfirmCalendar} onClose={this.handleOnCloseCalendar} />
                 </Container>

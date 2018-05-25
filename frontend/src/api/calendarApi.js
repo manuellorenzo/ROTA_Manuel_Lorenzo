@@ -4,7 +4,7 @@ import handlePromise from './globalApiFunctions';
 class calendarApi {
 
     //CALENDAR
-    static autoSchedule(start, end) {
+    static autoSchedule(start, end,overwrite) {
         console.log("CALENDAR API -- AUTO SCHEDULE -- ", JSON.stringify({
             start: start._i,
             end: end._i
@@ -17,7 +17,8 @@ class calendarApi {
             },
             body: JSON.stringify({
                 start,
-                end
+                end,
+                overwrite
             })
         }).then(response => {
             console.log("CALENDAR API -- AUTOSCHEDULE RESPONSE --", response)
