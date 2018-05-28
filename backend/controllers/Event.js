@@ -42,7 +42,7 @@ module.exports.listEvent = (req, res) => {
 };
 
 module.exports.editEvent = (req, res) => {
-    Event.findByIdAndUpdate(req.body.id, req.body, {new: true}, function (err, event) {
+    Event.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, event) {
         if (err) {
             return res.status(400).jsonp({error: 500, message: `${err.message}`})
         }
@@ -99,7 +99,8 @@ module.exports.findEventByWorker=function(req,res){
 module.exports.autoSchedule = function (req, res) {
     let start = moment.utc(req.body.start).format("YYYY-MM-DD");
     let end = moment.utc(req.body.end).format("YYYY-MM-DD");
-    let overwrite = true;
+    let overwrite = req.body.overwrite;
+    console.log(overwrite)
     let event;
     let fechaActual = moment(start);
     let arrayDias = [];
@@ -109,7 +110,8 @@ module.exports.autoSchedule = function (req, res) {
         fechaActual = moment(fechaActual.add(1, 'd'));
     }
     if (overwrite === true) {
-        Event.find({start: {$gte: moment(start), $lte: moment(end)}}).then((result, err) =>
+        console.log(moment(end))
+        Event.find({start: {$gte: start, $lte: end}}).then((result, err) =>
             Promise.all(result.map(item => item.remove())));
     }
 
