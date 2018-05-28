@@ -23,6 +23,7 @@ import * as workerActions from '../actions/workersActions';
 import Toast from './Toast';
 import ConfirmComponent from './Confirm';
 import ActionButton from "antd/lib/modal/ActionButton";
+import { toast } from "react-toastify";
 
 moment.locale('ko', {
     week: {
@@ -54,15 +55,16 @@ class CalendarPage extends Component {
                 startDate: moment(),
                 compensations: []
             },
-            autoSchedule:{
+            autoSchedule: {
                 start: moment(),
-                end: moment(),
+                end: moment().add(1, 'days'),
                 overwrite: false
             },
             messages: {
                 addEditEvents: {
                     show: false,
                     text: '',
+                    type: toast.TYPE.SUCCESS
                 },
                 confirmDelete: {
                     open: false
@@ -83,6 +85,7 @@ class CalendarPage extends Component {
         this.handleStartTimeActivityChange = this.handleStartTimeActivityChange.bind(this);
         this.handleActivityInputOnChange = this.handleActivityInputOnChange.bind(this);
         this.handleAutoScheduleOverwriteCheckboxChange = this.handleAutoScheduleOverwriteCheckboxChange.bind(this);
+        this.disabledDateAutoSchedule = this.disabledDateAutoSchedule.bind(this);
     }
 
     handleOnChangeDropdown(e, { value }) {
@@ -104,7 +107,7 @@ class CalendarPage extends Component {
         this.props.loadCalendarEvents().then(() => {
             this.props.loadOnCallWorkers().then(() => {
                 this.setState({ calendarEvents: this.props.calendarEvents }, () => {
-                    console.log("CALENDAR COMPONENT --- LOAD CALENDAR EVENTS TO STATE ---", this.props.onCall);
+                    console.log("CALENDAR COMPONENT --- LOAD WORKERS TO STATE ---", this.props.onCall);
                     this.setState({
                         onCallOptions: this.props.onCall.filter((item) => item.inactive === false).map((itemMap) => {
                             return {
@@ -146,7 +149,9 @@ class CalendarPage extends Component {
     moveEvent({ event, start, end }) {
         const updatedEvent = { ...event, start, end }
         console.log('updatedEvents', updatedEvent)
-        this.props.changeOnCall(updatedEvent)
+        this.props.changeOnCall(updatedEvent).then(() => {
+            this.loadCalendarEventsToState();
+        })
         console.log('state events', this.props.calendarEvents);
     }
 
@@ -159,18 +164,19 @@ class CalendarPage extends Component {
         console.log("will update", state)
     }
 
+
     handleChangeNewEvent = (e, { name, value }) => {
         this.setState({ newEvent: { ...this.state.newEvent, [name]: value } })
     }
 
-    handleChangeMessages(value) {
+    handleChangeMessages(value, type) {
         this.setState((prevState, props) => {
             console.log("handleChangesMessages calendar prueba value", value)
-            return { messages: { ...prevState.messages, addEditEvents: { ...prevState.messages.addEditEvents, text: value, show: true } } }
+            return { messages: { ...prevState.messages, addEditEvents: { ...prevState.messages.addEditEvents, text: value, show: true, type } } }
         }, () => {
             this.setState((prevState, props) => {
                 console.log('handleChangesMessages calendar', value, this.state);
-                return { messages: { ...prevState.messages, addEditEvents: { ...prevState.messages.addEditEvents, text: value, show: false } } }
+                return { messages: { ...prevState.messages, addEditEvents: { ...prevState.messages.addEditEvents, text: value, show: false, type } } }
             })
         });
     }
@@ -187,18 +193,21 @@ class CalendarPage extends Component {
     }
 
     handleOnConfirmCalendar = () => {
-        this.props.removeOnCall(this.state.newEvent._id);
-        this.handleChangeMessages("Event deleted successfully");
-        this.handleModalClose("showModalEditEvent");
-        this.setState((prevState, props) => {
-            return {
-                messages: {
-                    ...prevState.messages, confirmDelete: {
-                        open: false
+        this.props.removeOnCall(this.state.newEvent._id).then(() => {
+            this.loadCalendarEventsToState();
+            this.handleChangeMessages("Event deleted successfully", toast.TYPE.SUCCESS);
+            this.handleModalClose("showModalEditEvent");
+            this.setState((prevState, props) => {
+                return {
+                    messages: {
+                        ...prevState.messages, confirmDelete: {
+                            open: false
+                        }
                     }
                 }
-            }
-        });
+            });
+        })
+
     }
 
     handleOnCloseCalendar = () => {
@@ -245,11 +254,21 @@ class CalendarPage extends Component {
         return this.state.newEvent.workReference === '' && this.state.newEvent.duration === ''
     }
 
-    handleChangeAutoScheduleDates(name,e){
+    handleChangeAutoScheduleDates(name, e) {
         console.log("handleChangeAutoScheduleDates", e)
         if (e !== null) {
             this.setState({ autoSchedule: { ...this.state.autoSchedule, [name]: e._d } })
         }
+    }
+
+    disabledDateAutoSchedule(current) {
+        // Can not select days before today and today
+        return current && current < moment(this.state.autoSchedule.start).endOf('day');
+    }
+
+    handleDisabledButtonEditEvent() {
+        console.log("CALENDAR COMPONENT -- HANDLE DISABLED BUTTON EDIT EVENT -- ");
+        return (this.state.newEvent.workerId === '' && this.state.newEvent.startDate === '');
     }
 
     render() {
@@ -262,7 +281,7 @@ class CalendarPage extends Component {
                                 <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddEvent: true } },
                                     console.log("CALENDAR COMPONENT -- SHOW MODAL ADD EVENT -- ", this.state.newEvent.workerId))}>Add event</Button>
                                 <Button floated="right" onClick={() => {
-                                    this.setState({modals: {...this.state.modals, showAutoScheduleModal:  true}});
+                                    this.setState({ modals: { ...this.state.modals, showAutoScheduleModal: true } });
                                 }}>Auto-schelude</Button>
                             </Grid.Column>
                         </Grid.Row>
@@ -331,7 +350,7 @@ class CalendarPage extends Component {
                             <Button onClick={() => this.handleModalClose("showModalAddEvent")}>Close</Button>
                             <Button floated="right" disabled={this.state.newEvent.workerId === ''} onClick={() => {
                                 this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
-                                    console.log("CALENDAR CALENDAR CALENDAR ",this.props)
+                                    console.log("CALENDAR CALENDAR CALENDAR ", this.props)
                                     this.props.addOnCallEvent({
                                         start: new Date(this.state.newEvent.startDate),
                                         end: new Date(this.state.newEvent.startDate),
@@ -348,10 +367,10 @@ class CalendarPage extends Component {
                                                 compensations: []
                                             }
                                         }, () => {
-                                            console.log("CALENDAR COMPONENT -- ADD ON CALL EVENT -- ",this.state)
+                                            console.log("CALENDAR COMPONENT -- ADD ON CALL EVENT -- ", this.state)
                                             this.loadCalendarEventsToState();
                                             this.handleModalClose("showModalAddEvent");
-                                            this.handleChangeMessages("Event added successfully");
+                                            this.handleChangeMessages("Event added successfully", toast.TYPE.SUCCESS);
                                         });
                                     });
                                 })
@@ -388,7 +407,7 @@ class CalendarPage extends Component {
                                 </Form.Field>
                                 {this.state.newEvent.compensations.length > 0 ?
                                     <div>
-                                        <Form.Field>
+                                        {/*<Form.Field>
                                             <label>Start Time</label>
                                             <TimePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startTime)}
                                                 onChange={this.handleStartTimeActivityChange} format={"HH:mm"} allowEmpty={false} inputReadOnly />
@@ -398,7 +417,15 @@ class CalendarPage extends Component {
                                         </Form.Field>
                                         <Form.Field>
                                             <Form.Input label="Work Reference" name="workReference" type='text' placeholder="Work Reference" value={this.state.newEvent.workReference} onChange={this.handleActivityInputOnChange} />
-                                        </Form.Field>
+                                        </Form.Field>*/}
+                                        {/*<ReactTable
+                                            filterable
+                                            data={props.data}
+                                            noDataText="No workers"
+                                            columns={props.columns}
+                                            defaultPageSize={10}
+                                            className="-striped -highlight"
+                                        />*/}
                                     </div>
                                     : null}
                             </Form>
@@ -416,7 +443,7 @@ class CalendarPage extends Component {
                                     }
                                 });
                             }}>Remove</Button>
-                            <Button floated="right" disabled={this.state.modals.disabledButtonEditEvent} onClick={() => {
+                            <Button floated="right" disabled={this.handleDisabledButtonEditEvent() ? true : false} onClick={() => {
                                 this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
                                     this.props.changeOnCall({
                                         start: new Date(this.state.newEvent.startDate),
@@ -434,16 +461,17 @@ class CalendarPage extends Component {
                                                 compensations: []
                                             }
                                         }, () => {
+                                            this.loadCalendarEventsToState();
                                             this.handleModalClose("showModalEditEvent");
-                                            this.handleChangeMessages("Event edited successfully");
+                                            this.handleChangeMessages("Event edited successfully", toast.TYPE.SUCCESS);
                                         });
                                     });
                                 })
                             }}>Edit event</Button>
                         </Modal.Actions>
                     </Modal>
-                     {/*//////////////////////////////AUTOSCHEDULE MODAL////////////////////////////////////////////*/}
-                     <Modal
+                    {/*//////////////////////////////AUTOSCHEDULE MODAL////////////////////////////////////////////*/}
+                    <Modal
                         open={this.state.modals.showAutoScheduleModal}
                         onClose={() => this.handleModalClose("showAutoScheduleModal")}
                         size='tiny'
@@ -460,11 +488,11 @@ class CalendarPage extends Component {
                             <Form>
                                 <Form.Field >
                                     <label>Start Date</label>
-                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.autoSchedule.start)} format={dateFormat} size="large" onChange={(e) => this.handleChangeAutoScheduleDates("start",e)} />
+                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.autoSchedule.start)} format={dateFormat} size="large" onChange={(e) => this.handleChangeAutoScheduleDates("start", e)} />
                                 </Form.Field>
                                 <Form.Field>
                                     <label>End Date</label>
-                                    <DatePicker style={{ width: "100%" }} value={moment(this.state.autoSchedule.end)} format={dateFormat} size="large" onChange={(e) => this.handleChangeAutoScheduleDates("end",e)} />
+                                    <DatePicker style={{ width: "100%" }} disabledDate={this.disabledDateAutoSchedule} value={moment(this.state.autoSchedule.end)} format={dateFormat} size="large" onChange={(e) => this.handleChangeAutoScheduleDates("end", e)} />
                                 </Form.Field>
                                 <Form.Field>
                                     <Checkbox label={{ children: 'Overwrite' }} onChange={this.handleAutoScheduleOverwriteCheckboxChange} />
@@ -472,16 +500,36 @@ class CalendarPage extends Component {
                             </Form>
                         </Modal.Content>
                         <Modal.Actions>
-                            <Button onClick={() => this.handleModalClose("showAutoScheduleModal")}>Close</Button>
+                            <Button onClick={() => {
+                                this.handleModalClose("showAutoScheduleModal")
+                                this.setState({
+                                    autoSchedule: {
+                                        start: moment(),
+                                        end: moment(),
+                                        overwrite: false
+                                    },
+                                })
+                            }}>Close</Button>
                             <Button floated="right" onClick={() => {
-                                this.props.autoSchedule(moment(new Date(this.state.autoSchedule.start)), moment(new Date(this.state.autoSchedule.end), this.state.autoSchedule.overwrite)).then(() => {
-                                    this.loadCalendarEventsToState();
+                                console.log("CALENDAR COMPONENT -- ONCLICK AUTOSCHEDULE -- OVERWRITE -- ", this.state.autoSchedule.overwrite)
+                                this.props.autoSchedule(moment(new Date(this.state.autoSchedule.start)), moment(new Date(this.state.autoSchedule.end)), this.state.autoSchedule.overwrite).then(() => {
+                                    this.setState({
+                                        autoSchedule: {
+                                            start: moment(),
+                                            end: moment(),
+                                            overwrite: false
+                                        },
+                                    }, () => {
+                                        this.loadCalendarEventsToState();
+                                        this.handleModalClose("showAutoScheduleModal");
+                                        this.handleChangeMessages("Auto schedule executed correctly", toast.TYPE.SUCCESS);
+                                    });
                                 });
                             }}>Add events</Button>
                         </Modal.Actions>
                     </Modal>
 
-                    <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} />
+                    <Toast message={this.state.messages.addEditEvents.text} show={this.state.messages.addEditEvents.show} type={this.state.messages.addEditEvents.type} />
                     <ConfirmComponent show={this.state.messages.confirmDelete.open} onConfirm={this.handleOnConfirmCalendar} onClose={this.handleOnCloseCalendar} />
                 </Container>
             </div >
@@ -503,9 +551,9 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         addOnCallEvent: (event) => dispatch(calendarActions.addOnCallEvent(event)),
-        changeOnCall: event => dispatch(calendarActions.changeOnCall(event)),
-        removeOnCall: _id => dispatch(calendarActions.removeOnCall(_id)),
-        autoSchedule: (start, end) => dispatch(calendarActions.autoSchedule(start, end)),
+        changeOnCall: event => dispatch(calendarActions.changeOnCallEvent(event)),
+        removeOnCall: _id => dispatch(calendarActions.removeOnCallEvent(_id)),
+        autoSchedule: (start, end, overwrite) => dispatch(calendarActions.autoSchedule(start, end, overwrite)),
         loadCalendarEvents: () => dispatch(calendarActions.loadEvents()),
         //WORKERS
         getWorkerById: _id => dispatch(workerActions.getWorkerById(_id)),

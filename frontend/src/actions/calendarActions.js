@@ -1,10 +1,10 @@
 import * as types from './actionTypes';
 import calendarApi from '../api/calendarApi';
 
-export function autoSchedule(start, end) {
-  console.log("CALENDAR ACTIONS -- AUTO SCHEDULE -- ", start, "END ", end)
+export function autoSchedule(start, end, overwrite) {
+  console.log("CALENDAR ACTIONS -- AUTO SCHEDULE -- ", start, "END ", end, "OVERWRITE",overwrite)
   return function (dispatch) {
-    return calendarApi.autoSchedule(start, end).then(response => {
+    return calendarApi.autoSchedule(start, end, overwrite).then(response => {
       if (response.status === 201) {
         dispatch(autoScheduleSuccess(start, end, response.data));
       } else {
@@ -75,12 +75,43 @@ export function addOnCallEventSuccess(newEvent) {
   };
 }
 
-export const changeOnCall = event => ({
-  type: 'CHANGE_ONCALL',
+export function changeOnCallEvent(newEvent) {
+  console.log("CALENDAR ACTIONS -- CHANGE ON CALL EVENT -- ", newEvent);
+  return function (dispatch) {
+    return calendarApi.changeOnCallEvent(newEvent).then(response => {
+      if (response.status === 201) {
+        dispatch(changeOnCallEventSuccess(response.data));
+      }else {
+        console.log("CALENDAR ACTIONS -- CHANGE ON CALL EVENT ERROR -- ", response)
+      }
+      return response.status;
+    }).catch(error => {
+      throw (error);
+    });
+  };
+}
+export const changeOnCallEventSuccess = event => ({
+  type: types.CHANGE_ON_CALL_EVENT_SUCCESS,
   event
-})
-export const removeOnCall = _id => ({
-  type: 'REMOVE_ONCALL',
+});
+
+export function removeOnCallEvent(_id) {
+  console.log("CALENDAR ACTIONS -- REMOVE ON CALL EVENT -- ", _id);
+  return function (dispatch) {
+    return calendarApi.removeOnCallEvent(_id).then(response => {
+      if (response.status === 200) {
+        dispatch(removeOnCallSuccess(response.data));
+      }else {
+        console.log("CALENDAR ACTIONS -- CHANGE ON CALL EVENT ERROR -- ", response)
+      }
+      return response.status;
+    }).catch(error => {
+      throw (error);
+    });
+  };
+}
+export const removeOnCallSuccess = _id => ({
+  type: types.REMOVE_ON_CALL_EVENT_SUCCESS,
   _id
 })
 
