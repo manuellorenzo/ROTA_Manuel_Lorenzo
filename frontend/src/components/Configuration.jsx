@@ -261,5 +261,4 @@ const mapDispatchToProps = (dispatch) => {
         editConf: newConf => dispatch(configurationsActions.editConf(newConf)),
     }
 };
-
 export default connect(mapStateToProps, mapDispatchToProps)(Configuration);

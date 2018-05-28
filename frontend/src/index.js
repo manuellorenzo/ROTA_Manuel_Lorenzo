@@ -10,6 +10,7 @@ import App from './components/App'
 import Login from './components/Login';
 import Calendar from './components/Calendar';
 import HorizontalMenu from './components/Menu';
+import Report from './components/MonthlyReport';
 
 import history from './history';
 import reducer from './reducers';
@@ -29,6 +30,7 @@ ReactDOM.render(
                 <Route path="/home" component={App} />
                 <Route path="/calendar" component={Calendar} />
                 <Route path="/menu" component={HorizontalMenu} />
+                <Route path="/report" component={Report}/>
             </Switch>
         </Router>
     </Provider>, document.getElementById('root')

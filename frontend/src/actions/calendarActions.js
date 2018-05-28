@@ -83,3 +83,8 @@ export const removeOnCall = _id => ({
   type: 'REMOVE_ONCALL',
   _id
 })
+
+export const addWorkerToReport = worker => ({
+  type: 'ADD_WORKER',
+  worker
+})
