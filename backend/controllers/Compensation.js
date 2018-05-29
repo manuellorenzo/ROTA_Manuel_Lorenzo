@@ -8,13 +8,17 @@ const Compensation = require('../models/Compensation');
 function addCompensation(req,res){
 
     let compensation=new Compensation({
-        payment:req.body.payment,
-        dateCompensation:req.body.dateCompensation,
-        type:req.body.type,
-        activity:req.body.activity,
-        worker:req.body.worker
+        payment:{
+            amount: req.body.payment.amount,
+            type: req.body.payment.type,
+            date: req.body.payment.date
+        },
+        worker:req.body.worker,
+        startTime: req.body.startTime,
+        duration: req.body.duration,
+        workReference: req.body.workReference
     });
-
+    console.log(compensation)
     compensation.save((err, result)=>{
         if (err){
             return res.status(500).jsonp({error: 500, message: `${err.message}`});
@@ -45,7 +49,7 @@ function editCompensation (req, res){
         if(err){
 			res.status(500).send({message: 'Error en el servidor' , err});
 		}else{
-			if(!config){
+			if(!compensation){
 				res.status(404).send({message: 'No se ha actualizado la compensacion'});
 			}else{
 				res.status(200).send({compensation: compensation});

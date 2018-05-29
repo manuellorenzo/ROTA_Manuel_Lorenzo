@@ -13,33 +13,28 @@ const calendarReducer = (state = {
                 calendarEvents: [...state.calendarEvents, action.newEvents]
             }
         case types.LOAD_EVENTS_CALENDAR_SUCCESS:
-            console.log("CALENDAR REDUCER -- LOAD EVENTS")
+            console.log("CALENDAR REDUCER -- LOAD EVENTS -- ");
             return {
                 ...state,
-                calendarEvents: action.events
+                calendarEvents: action.events.map(item => {
+                    return { ...item,
+                        start: new Date(item.start),
+                        end: new Date(item.end)
+                    }
+                })
             }
-
-        case types.FIND_EVENTS_BY_WORKER_SUCCESS:
-            console.log('FIND EVENTS BY WORKER');
-            return{
-                ...state,
-                eventWorker: action.eventsWorker
-            }
-
-        case 'ADD_ONCALL':
-            console.log('ADD_ONCALL', state)
+        case types.ADD_ON_CALL_EVENT_SUCCESS:
+            console.log('CALENDAR REDUCER -- ADD ON CALL EVENT', state)
             return {
                 ...state,
-                calendarEvents: [...state.calendarEvents, action.event]
+                calendarEvents: [...state.calendarEvents, action.newEvent]
             }
-        case 'CHANGE_ONCALL':
-            console.log('CHANGE_ONCALL', state)
+        case types.CHANGE_ON_CALL_EVENT_SUCCESS:
+            console.log('CALENDAR REDUCER -- CHANGE ON CALL EVENT', state)
             return {
                 ...state,
                 calendarEvents: state.calendarEvents.map((item, index) => {
-                    console.log('changeOnCall', action.event._id, item._id)
                     if (item._id === action.event._id) {
-                        console.log('change on call if')
                         return {
                             ...item,
                             ...action.event
@@ -48,8 +43,8 @@ const calendarReducer = (state = {
                     return item
                 })
             }
-        case 'REMOVE_ONCALL':
-            console.log('REMOVE_ONCALL', state)
+        case types.REMOVE_ON_CALL_EVENT_SUCCESS:
+            console.log('CALENDAR REDUCER -- REMOVE ON CALL EVENT', state)
             return { ...state,
                 calendarEvents: state.calendarEvents.filter(item => item._id !== action._id)
             }

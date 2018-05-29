@@ -10,6 +10,7 @@ import CompensationPayment from './CompensationPayment';
 
 import history from '../history';
 import Reports from './Report';
+import MonthlyReport from './MonthlyReport';
 
 
 function BasicRouting(props) {
@@ -28,6 +29,8 @@ function BasicRouting(props) {
         return <Reports />;
     }else if (activePage==='compensation_payment'){
         return <CompensationPayment/>
+    }else if (activePage==='monthlyReport'){
+        return <MonthlyReport/>
     }
     return <Workers />;
 }
@@ -57,6 +60,10 @@ class HorizontalMenu extends Component {
                 {
                     section: 'compensation_payment',
                     value: 'Compensation Payment'
+                },
+                {
+                    section: 'monthlyReport',
+                    value: 'Monthly Report'
                 },
                 {
                     section: 'logout',
