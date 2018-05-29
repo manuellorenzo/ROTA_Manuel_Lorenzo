@@ -19,6 +19,12 @@ const compensationsReducer = (state = {
                 ...state,
                 compensationList: action.allCompensations
             }
+        case types.EDIT_COMPENSATION_SUCCESS:
+            console.log('EDIT COMPENSATION');
+            return{
+                ...state,
+                compensationList:action.editCompensations
+            }
         default:
             return state;
     }

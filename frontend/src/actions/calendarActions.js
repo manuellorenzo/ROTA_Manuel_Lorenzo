@@ -26,6 +26,23 @@ export function autoScheduleSuccess(start, end, newEvents) {
   };
 }
 
+export function findEventByWorker(workerId){
+  return function (dispatch){
+    return calendarApi.findEventByWorker(workerId).then(eventsWorker=>{
+        dispatch(findEventByWorkerSuccess(eventsWorker))
+    }).catch(error=>{
+        throw (error);
+    })
+  }
+}
+
+export function findEventByWorkerSuccess(eventsWorker){
+  return{
+    type:types.FIND_EVENTS_BY_WORKER_SUCCESS,
+    eventsWorker
+  }
+}
+
 export function loadEvents() {
   console.log("CALENDAR ACTIONS -- LOAD EVENTS -- ")
   return function (dispatch) {
@@ -65,3 +82,4 @@ export const removeOnCall = _id => ({
   type: 'REMOVE_ONCALL',
   _id
 })
+

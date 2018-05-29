@@ -1,7 +1,9 @@
 import * as types from '../actions/actionTypes';
 
 const calendarReducer = (state = {
-    calendarEvents: []
+    calendarEvents: [],
+    eventWorker: []
+
 }, action) => {
     switch (action.type) {
         case types.AUTO_SCHEDULE_CALENDAR:
@@ -16,6 +18,14 @@ const calendarReducer = (state = {
                 ...state,
                 calendarEvents: action.events
             }
+
+        case types.FIND_EVENTS_BY_WORKER_SUCCESS:
+            console.log('FIND EVENTS BY WORKER');
+            return{
+                ...state,
+                eventWorker: action.eventsWorker
+            }
+
         case 'ADD_ONCALL':
             console.log('ADD_ONCALL', state)
             return {

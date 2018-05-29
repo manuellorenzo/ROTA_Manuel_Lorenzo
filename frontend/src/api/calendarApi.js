@@ -31,6 +31,22 @@ class calendarApi {
             return error;
         });
     }
+
+    static findEventByWorker(workerId){
+        return fetch (urls.URL_JOSE+'/event/findEventByWorker/'+workerId, {
+            method: 'get',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+
+        }).then(response => {
+            return response.json();
+        }).catch(error => {
+            return error;
+        });
+    }
+    
 }
 
 export default calendarApi;

@@ -37,3 +37,20 @@ export function loadCompensationByWorkerSuccess(compensations){
     }
 }
 
+export function editCompensation(_id){
+    return function(dispatch){
+        return compensationApi.editCompensation(_id).then(editCompensations=>{
+            dispatch(editCompensationSuccess(editCompensations))
+        }).catch(error=>{
+            throw (error);
+        })
+    }
+}
+
+export function editCompensationSuccess(editCompensations){
+    return{
+        type:types.EDIT_COMPENSATION_SUCCESS,
+        editCompensations
+    }
+}
+
