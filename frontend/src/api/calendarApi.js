@@ -92,6 +92,7 @@ class calendarApi {
             return error;
         });
     }
+
 }
 
 export default calendarApi;

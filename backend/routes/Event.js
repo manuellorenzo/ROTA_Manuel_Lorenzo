@@ -9,5 +9,6 @@ router.delete('/delete/:id', eventController.deleteEvent);
 router.get('/findEvent/:_id', eventController.findOneEvent);
 router.get('/findEventByWorker/:workerId', eventController.findEventByWorker);
 router.post('/autoSchedule', eventController.autoSchedule);
+router.get('/findCompensationById/:compensationId', eventController.findEventByCompensation);
 
 module.exports = router;

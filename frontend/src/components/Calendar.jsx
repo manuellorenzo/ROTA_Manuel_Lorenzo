@@ -279,6 +279,7 @@ class CalendarPage extends Component {
             }
         })
     }
+    
     ActivitiesTable(props) {
         let columns = [
             {

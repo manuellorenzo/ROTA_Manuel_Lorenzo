@@ -42,6 +42,7 @@ class CompensationApi {
         console.log("COMPENSATION API -- EDIT COMPENSATION -- ",
             _.omit(newComp, "edited")
         );
+        console.log('edit compensation API',newCompensation)
         return fetch(urls.URL_JOSE + '/compensation/editCompensation', {
             method: 'put',
             headers: {

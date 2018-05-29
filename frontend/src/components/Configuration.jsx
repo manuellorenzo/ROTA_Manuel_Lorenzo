@@ -250,7 +250,7 @@ const mapStateToProps = (state, ownProps) => {
     console.log('maptostate', state);
     return {
         // You can now say this.props.workers
-        compensations: state.configurationsReducer.compensations
+        compensations: state.configurationsReducer.configCompensations
     }
 };
 
