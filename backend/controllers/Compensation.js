@@ -45,7 +45,7 @@ function getCompensation(req, res){
 }
 
 function editCompensation (req, res){
-    Compensation.findByIdAndUpdate(req.params.id, req.body, {new:true}, function(err, compensation){
+    Compensation.findByIdAndUpdate(req.body._id, req.body, {new:true}, function(err, compensation){
         if(err){
 			res.status(500).send({message: 'Error en el servidor' , err});
 		}else{

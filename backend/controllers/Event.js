@@ -56,6 +56,19 @@ module.exports.editEvent = (req, res) => {
     });
 };
 
+module.exports.findEventByCompensation = (req, res)=>{
+    Event.find({event:req.params.compensationId}, (err, result)=>{
+        if (err){
+            return res.status(500).jsonp({error:500, message : `${err.message}`})
+        }
+        if (result && result.length){
+            res.status(200).jsonp(result);
+        }else{
+            res.sendStatus(404);
+        }
+    })
+}
+
 module.exports.deleteEvent = (req, res) => {
     Event.findById(req.params.id, function (err, event) {
         if (event === undefined)
