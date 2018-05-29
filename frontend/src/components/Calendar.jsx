@@ -10,20 +10,24 @@ import BigCalendar from 'react-big-calendar';
 import moment from "moment";
 import { DatePicker } from 'antd';
 import { TimePicker } from 'antd';
+import 'antd/dist/antd.css';
 
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
 import "react-big-calendar/lib/css/react-big-calendar.css";
 //import 'react-datepicker/dist/react-datepicker.css';ç
-import 'antd/dist/antd.css';
 import '../style.css';
 
 import * as calendarActions from '../actions/calendarActions';
 import * as workerActions from '../actions/workersActions';
+import * as conmpensationsActions from '../actions/compensationAction';
 
 import Toast from './Toast';
 import ConfirmComponent from './Confirm';
 import ActionButton from "antd/lib/modal/ActionButton";
 import { toast } from "react-toastify";
+
+import ReactTable from 'react-table';
+import "react-table/react-table.css";
 
 moment.locale('ko', {
     week: {
@@ -81,11 +85,11 @@ class CalendarPage extends Component {
         this.handleChangeMessages = this.handleChangeMessages.bind(this);
         this.handleOnConfirmCalendar = this.handleOnConfirmCalendar.bind(this);
         this.handleOnCloseCalendar = this.handleOnCloseCalendar.bind(this);
-        this.handleActivityCheckboxChange = this.handleActivityCheckboxChange.bind(this);
         this.handleStartTimeActivityChange = this.handleStartTimeActivityChange.bind(this);
         this.handleActivityInputOnChange = this.handleActivityInputOnChange.bind(this);
         this.handleAutoScheduleOverwriteCheckboxChange = this.handleAutoScheduleOverwriteCheckboxChange.bind(this);
         this.disabledDateAutoSchedule = this.disabledDateAutoSchedule.bind(this);
+        this.ActivitiesTable = this.ActivitiesTable.bind(this);
     }
 
     handleOnChangeDropdown(e, { value }) {
@@ -134,22 +138,26 @@ class CalendarPage extends Component {
 
     handleOnSelectEventCalendar(evt, e) {
         console.log('handleOnSelectEventCalendar', evt)
-        this.setState({
+        let compensations = [];
+        Promise.all(evt.compensations.map(item => {
+            return this.props.getCompensationById(item).then(result => compensations = [...compensations, result.compensation]);
+        })).then(() => this.setState({
             newEvent: {
                 workerId: evt.workerId,
                 startDate: evt.start,
                 _id: evt._id,
-                compensations: evt.compensations
+                compensations
             }
         }, () => {
+            console.log("CALENDAR COMPONENT -- HANDLE ON SELECT EVENT CALENDAR -- COMPENSATIONS -- ", this.state.newEvent)
             this.setState({ modals: { ...this.state.modals, showModalEditEvent: true } });
-        })
+        }))
     }
 
     moveEvent({ event, start, end }) {
         const updatedEvent = { ...event, start, end }
         console.log('updatedEvents', updatedEvent)
-        this.props.changeOnCall(updatedEvent).then(() => {
+        this.props.changeOnCallEvent(updatedEvent).then(() => {
             this.loadCalendarEventsToState();
         })
         console.log('state events', this.props.calendarEvents);
@@ -157,7 +165,7 @@ class CalendarPage extends Component {
 
     /*resizeEvent = (resizeType, { event, start, end }) => {
         const updatedEvent = { ...event, start, end }
-        this.props.AchangeOnCall(updatedEvent);
+        this.props.AchangeOnCallEvent(updatedEvent);
     }*/
 
     componentWillUpdate(props, state) {
@@ -193,7 +201,7 @@ class CalendarPage extends Component {
     }
 
     handleOnConfirmCalendar = () => {
-        this.props.removeOnCall(this.state.newEvent._id).then(() => {
+        this.props.removeOnCallEvent(this.state.newEvent._id).then(() => {
             this.loadCalendarEventsToState();
             this.handleChangeMessages("Event deleted successfully", toast.TYPE.SUCCESS);
             this.handleModalClose("showModalEditEvent");
@@ -218,15 +226,6 @@ class CalendarPage extends Component {
                 }
             }
         });
-    }
-
-    handleActivityCheckboxChange() {
-        this.setState((prevState, props) => {
-            return { newEvent: { ...prevState.newEvent, activities: prevState.newEvent.activities } };
-        }, () => {
-            console.log("Activity post state checkbox", this.state.newEvent.activities);
-        }
-        )
     }
 
     handleAutoScheduleOverwriteCheckboxChange() {
@@ -269,6 +268,51 @@ class CalendarPage extends Component {
     handleDisabledButtonEditEvent() {
         console.log("CALENDAR COMPONENT -- HANDLE DISABLED BUTTON EDIT EVENT -- ");
         return (this.state.newEvent.workerId === '' && this.state.newEvent.startDate === '');
+    }
+
+    handleActivitiesTableChange(key, value, _id) {
+        console.log("CALENDAR COMPONENT -- HANDLE ACTIVITIES TABLE CHANGE -- ", value, _id)
+        this.setState({
+            newEvent: {
+                ...this.state.newEvent,
+                compensations: this.state.newEvent.compensations.map(item => item._id === _id ? { ...item, [key]: value, edited: true } : item)
+            }
+        })
+    }
+    ActivitiesTable(props) {
+        let columns = [
+            {
+                Header: "Start",
+                id: "startTime",
+                Cell: row => {
+                    return (<TimePicker style={{ width: "100%" }} size="large" value={moment(new Date(row.original.startTime))} onChange={(e) => this.handleActivitiesTableChange("startTime", e, row.original._id)} />)
+                }
+            },
+            {
+                Header: "Duration",
+                id: "duration",
+                Cell: row => {
+                    return (<Form.Input type="number" step={.01} value={row.original.duration} onChange={(e) => this.handleActivitiesTableChange("duration", e.target.value, row.original._id)} />)
+                }
+            },
+            {
+                Header: "Work Reference",
+                id: "workReference",
+                Cell: row => {
+                    return (<Form.Input value={row.original.workReference} onChange={(e) => this.handleActivitiesTableChange("workReference", e.target.value, row.original._id)} />)
+                }
+
+            }
+        ]
+        return <div>
+            <ReactTable
+                data={props.data}
+                noDataText="No activities"
+                columns={columns}
+                defaultPageSize={3}
+                className="-striped -highlight"
+            />
+        </div>
     }
 
     render() {
@@ -350,7 +394,7 @@ class CalendarPage extends Component {
                             <Button onClick={() => this.handleModalClose("showModalAddEvent")}>Close</Button>
                             <Button floated="right" disabled={this.state.newEvent.workerId === ''} onClick={() => {
                                 this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
-                                    console.log("CALENDAR CALENDAR CALENDAR ", this.props)
+                                    console.log("CALENDAR COMPONENT -- ADD EVENT BUTTON PRESSED -- ", this.state.newEvent)
                                     this.props.addOnCallEvent({
                                         start: new Date(this.state.newEvent.startDate),
                                         end: new Date(this.state.newEvent.startDate),
@@ -382,7 +426,7 @@ class CalendarPage extends Component {
                     <Modal
                         open={this.state.modals.showModalEditEvent}
                         onClose={() => this.handleModalClose("showModalEditEvent")}
-                        size='tiny'
+                        size='small'
                         closeOnRootNodeClick={false}
                         //FIX MODAL FIXED TO TOP
                         style={{
@@ -396,38 +440,13 @@ class CalendarPage extends Component {
                             <Form>
                                 <Form.Field>
                                     <label>Developer</label>
-                                    <Form.Dropdown placeholder='Worker' onChange={this.handleOnChangeDropdown} value={this.state.newEvent.workerId} fluid search selection options={this.state.onCallOptions} />
+                                    <Form.Dropdown placeholder='Worker' min={0} onChange={this.handleOnChangeDropdown} value={this.state.newEvent.workerId} fluid search selection options={this.state.onCallOptions} />
                                 </Form.Field>
                                 <Form.Field>
                                     <label>Start Date</label>
                                     <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e)} />
                                 </Form.Field>
-                                <Form.Field>
-                                    <Checkbox label={{ children: 'Activity' }} onChange={this.handleActivityCheckboxChange} />
-                                </Form.Field>
-                                {this.state.newEvent.compensations.length > 0 ?
-                                    <div>
-                                        {/*<Form.Field>
-                                            <label>Start Time</label>
-                                            <TimePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startTime)}
-                                                onChange={this.handleStartTimeActivityChange} format={"HH:mm"} allowEmpty={false} inputReadOnly />
-                                        </Form.Field>
-                                        <Form.Field>
-                                            <Form.Input label="Duration" type='number' placeholder="Duration" name="duration" value={this.state.newEvent.duration} onChange={this.handleActivityInputOnChange} />
-                                        </Form.Field>
-                                        <Form.Field>
-                                            <Form.Input label="Work Reference" name="workReference" type='text' placeholder="Work Reference" value={this.state.newEvent.workReference} onChange={this.handleActivityInputOnChange} />
-                                        </Form.Field>*/}
-                                        {/*<ReactTable
-                                            filterable
-                                            data={props.data}
-                                            noDataText="No workers"
-                                            columns={props.columns}
-                                            defaultPageSize={10}
-                                            className="-striped -highlight"
-                                        />*/}
-                                    </div>
-                                    : null}
+                                <this.ActivitiesTable data={this.state.newEvent.compensations} />
                             </Form>
                         </Modal.Content>
                         <Modal.Actions>
@@ -445,27 +464,30 @@ class CalendarPage extends Component {
                             }}>Remove</Button>
                             <Button floated="right" disabled={this.handleDisabledButtonEditEvent() ? true : false} onClick={() => {
                                 this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
-                                    this.props.changeOnCall({
-                                        start: new Date(this.state.newEvent.startDate),
-                                        end: new Date(this.state.newEvent.startDate),
-                                        title: workerData.name,
-                                        _id: this.state.newEvent._id,
-                                        workerId: this.state.newEvent.workerId,
-                                        type: this.state.newEvent.compensations.length > 0 ? "Activity" : "On Call",
-                                        compensations: this.state.newEvent.compensations
-                                    }).then(() => {
-                                        this.setState({
-                                            newEvent: {
-                                                workerId: '',
-                                                startDate: moment(),
-                                                compensations: []
-                                            }
-                                        }, () => {
-                                            this.loadCalendarEventsToState();
-                                            this.handleModalClose("showModalEditEvent");
-                                            this.handleChangeMessages("Event edited successfully", toast.TYPE.SUCCESS);
+                                    Promise.all(this.state.newEvent.compensations.filter(item => item.edited === true).map(item => this.props.editCompensation(item))).then(() => {
+                                        this.props.changeOnCallEvent({
+                                            start: new Date(this.state.newEvent.startDate),
+                                            end: new Date(this.state.newEvent.startDate),
+                                            title: workerData.name,
+                                            _id: this.state.newEvent._id,
+                                            workerId: this.state.newEvent.workerId,
+                                            type: this.state.newEvent.compensations.length > 0 ? "Activity" : "On Call",
+                                            compensations: this.state.newEvent.compensations.map(item => item._id)
+                                        }).then((result) => {
+                                            console.log("CALENDAR COMPONENT -- EDIT BUTTON RESULT -- ", result);
+                                            this.setState({
+                                                newEvent: {
+                                                    workerId: '',
+                                                    startDate: moment(),
+                                                    compensations: []
+                                                }
+                                            }, () => {
+                                                this.loadCalendarEventsToState();
+                                                this.handleModalClose("showModalEditEvent");
+                                                this.handleChangeMessages("Event edited successfully", toast.TYPE.SUCCESS);
+                                            });
                                         });
-                                    });
+                                    })
                                 })
                             }}>Edit event</Button>
                         </Modal.Actions>
@@ -551,13 +573,16 @@ const mapDispatchToProps = (dispatch) => {
     return {
         // You can now say this.props.createBook
         addOnCallEvent: (event) => dispatch(calendarActions.addOnCallEvent(event)),
-        changeOnCall: event => dispatch(calendarActions.changeOnCallEvent(event)),
-        removeOnCall: _id => dispatch(calendarActions.removeOnCallEvent(_id)),
+        changeOnCallEvent: event => dispatch(calendarActions.changeOnCallEvent(event)),
+        removeOnCallEvent: _id => dispatch(calendarActions.removeOnCallEvent(_id)),
         autoSchedule: (start, end, overwrite) => dispatch(calendarActions.autoSchedule(start, end, overwrite)),
         loadCalendarEvents: () => dispatch(calendarActions.loadEvents()),
         //WORKERS
         getWorkerById: _id => dispatch(workerActions.getWorkerById(_id)),
-        loadOnCallWorkers: () => dispatch(workerActions.loadOnCallWorkers())
+        loadOnCallWorkers: () => dispatch(workerActions.loadOnCallWorkers()),
+        //COMPENSATIONS
+        getCompensationById: _id => dispatch(conmpensationsActions.getCompensationById(_id)),
+        editCompensation: newComp => dispatch(conmpensationsActions.editCompensation(newComp))
     };
 };
 

@@ -114,8 +114,3 @@ export const removeOnCallSuccess = _id => ({
   type: types.REMOVE_ON_CALL_EVENT_SUCCESS,
   _id
 })
-
-export const addWorkerToReport = worker => ({
-  type: 'ADD_WORKER',
-  worker
-})

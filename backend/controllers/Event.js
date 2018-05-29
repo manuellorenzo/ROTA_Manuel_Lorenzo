@@ -5,9 +5,14 @@ const moment = require('moment');
 const workerController = require('../controllers/Worker');
 
 module.exports.addEvent = (req, res) => {
-    Worker.findOne({ _id: req.body.workerId }, function (err, worker) {
+    Worker.findOne({
+        _id: req.body.workerId
+    }, function (err, worker) {
         if (err) {
-            return res.status(500).jsonp({ error: 500, message: `${err.message}` });
+            return res.status(500).jsonp({
+                error: 500,
+                message: `${err.message}`
+            });
         }
 
         let event = new Event({
@@ -20,7 +25,10 @@ module.exports.addEvent = (req, res) => {
         });
         event.save((err, result) => {
             if (err)
-                return res.status(500).jsonp({ error: 500, message: `${err.message}` });
+                return res.status(500).jsonp({
+                    error: 500,
+                    message: `${err.message}`
+                });
 
             return res.status(200).jsonp(result);
         })
@@ -31,7 +39,10 @@ module.exports.addEvent = (req, res) => {
 module.exports.listEvent = (req, res) => {
     Event.find().exec((err, result) => {
         if (err)
-            return res.status(500).jsonp({ error: 500, message: `${err.message}` });
+            return res.status(500).jsonp({
+                error: 500,
+                message: `${err.message}`
+            });
 
         if (result.length > 0) {
             return res.status(200).jsonp(result);
@@ -42,14 +53,22 @@ module.exports.listEvent = (req, res) => {
 };
 
 module.exports.editEvent = (req, res) => {
-    Event.findByIdAndUpdate(req.body._id, req.body, {new: true}, function (err, event) {
+    Event.findByIdAndUpdate(req.body._id, req.body, {
+        new: true
+    }, function (err, event) {
         if (err) {
-            return res.status(400).jsonp({ error: 500, message: `${err.message}` })
+            return res.status(400).jsonp({
+                error: 500,
+                message: `${err.message}`
+            })
         }
 
         event.save((err, result) => {
             if (err)
-                return res.status(500).jsonp({ error: 500, message: `${err.message}` });
+                return res.status(500).jsonp({
+                    error: 500,
+                    message: `${err.message}`
+                });
 
             return res.status(201).jsonp(result);
         })
@@ -73,7 +92,9 @@ module.exports.deleteEvent = (req, res) => {
 };
 
 module.exports.findOneEvent = (req, res) => {
-    Event.find({ _id: req.params._id }, (err, event) => {
+    Event.find({
+        _id: req.params._id
+    }, (err, event) => {
         if (event === undefined)
             return res.status(500).jsonp({
                 error: 500,
@@ -84,9 +105,14 @@ module.exports.findOneEvent = (req, res) => {
 };
 
 module.exports.findEventByWorker = function (req, res) {
-    Event.find({ workerId: req.params.workerId }, (err, result) => {
+    Event.find({
+        workerId: req.params.workerId
+    }, (err, result) => {
         if (err) {
-            return res.status(500).jsonp({ error: 500, message: `${err.message}` })
+            return res.status(500).jsonp({
+                error: 500,
+                message: `${err.message}`
+            })
         }
         if (result && result.length) {
             res.status(200).jsonp(result);
@@ -111,15 +137,23 @@ module.exports.autoSchedule = function (req, res) {
     }
     if (overwrite === true) {
         console.log(moment(end))
-        Event.find({start: {$gte: start, $lte: end}}).then((result, err) =>
+        Event.find({
+            start: {
+                $gte: start,
+                $lte: end
+            }
+        }).then((result, err) =>
             Promise.all(result.map(item => item.remove())));
     }
     let onCall = [];
-    Worker.find({ onCall: true, inactive: false }, function (err, worker) {
-        if (err)
-            return `${err.message}`
-        return worker;
-    }).then(result => result.length > 0 ? autoScheduleArrays(result) : [])
+    Worker.find({
+            onCall: true,
+            inactive: false
+        }, function (err, worker) {
+            if (err)
+                return `${err.message}`
+            return worker;
+        }).then(result => result.length > 0 ? autoScheduleArrays(result) : [])
         .then((result) => {
             let eventos = [];
             let eventoSingle = {};
@@ -180,8 +214,7 @@ module.exports.autoSchedule = function (req, res) {
             } else {
                 return res.status(404).jsonp("No se encuentra ningún trabajador on call");
             }
-        }
-        );
+        });
 
 
     function autoScheduleArrays(arrayOnCall) {
@@ -205,4 +238,5 @@ module.exports.autoSchedule = function (req, res) {
         });
         return [base, finDeSemana, SegundoSabado];
     }
+
 }
