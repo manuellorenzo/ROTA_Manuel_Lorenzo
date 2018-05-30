@@ -1,10 +1,10 @@
 import * as urls from '../api/urls';
-import _ from 'lodash'
+import handlePromise from './globalApiFunctions';
 
 class CompensationApi {
     static getAllCompensations() {
         return fetch(urls.URL_JOSE + '/compensation/getCompensations').then(response => {
-            return response.json();
+            return handlePromise(response);
         }).catch(error => {
             return (error);
         });
@@ -18,7 +18,7 @@ class CompensationApi {
                 'Content-Type': 'application/json'
             }
         }).then(response => {
-            return response.json();
+            return handlePromise(response);
         }).catch(error => {
             return error;
         });
@@ -32,17 +32,14 @@ class CompensationApi {
                 'Content-Type': 'application/json'
             }
         }).then(response => {
-            return response.json();
+            return handlePromise(response);
         }).catch(error => {
             return error;
         });
     }
 
     static editCompensation(newComp) {
-        console.log("COMPENSATION API -- EDIT COMPENSATION -- ",
-            _.omit(newComp, "edited")
-        );
-        console.log('edit compensation API',newCompensation)
+        console.log('edit compensation API', newComp)
         return fetch(urls.URL_JOSE + '/compensation/editCompensation', {
             method: 'put',
             headers: {
@@ -50,10 +47,28 @@ class CompensationApi {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(
-                _.omit(newComp, "edited")
+                newComp
             )
         }).then(response => {
-            return response.json();
+            return handlePromise(response);
+        }).catch(error => {
+            return error;
+        });
+    }
+
+    static addCompensation(newComp) {
+        console.log('add compensation API', newComp)
+        return fetch(urls.URL_JOSE + '/compensation/addCompensation', {
+            method: 'post',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(
+                newComp
+            )
+        }).then(response => {
+            return handlePromise(response);
         }).catch(error => {
             return error;
         });

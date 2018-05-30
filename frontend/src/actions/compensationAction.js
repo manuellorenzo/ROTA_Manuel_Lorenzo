@@ -57,9 +57,12 @@ export function editCompensation(newComp) {
     }
 }
 
-/*export function getCompensationByIdSuccess(compensation) {
-    return {
-        type: types.GET_COMPENSATION_BY_ID,
-        compensation
+export function addCompensation(newComp) {
+    return function (dispatch) {
+        return compensationApi.addCompensation(newComp).then(compensation => {
+            return compensation;
+        }).catch(error => {
+            throw (error);
+        })
     }
-}*/
+}

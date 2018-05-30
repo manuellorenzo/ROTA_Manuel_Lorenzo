@@ -19,7 +19,7 @@ import '../style.css';
 
 import * as calendarActions from '../actions/calendarActions';
 import * as workerActions from '../actions/workersActions';
-import * as conmpensationsActions from '../actions/compensationAction';
+import * as compensationsActions from '../actions/compensationAction';
 
 import Toast from './Toast';
 import ConfirmComponent from './Confirm';
@@ -28,6 +28,8 @@ import { toast } from "react-toastify";
 
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
+
+import _ from 'lodash'
 
 moment.locale('ko', {
     week: {
@@ -140,7 +142,10 @@ class CalendarPage extends Component {
         console.log('handleOnSelectEventCalendar', evt)
         let compensations = [];
         Promise.all(evt.compensations.map(item => {
-            return this.props.getCompensationById(item).then(result => compensations = [...compensations, result.compensation]);
+            return this.props.getCompensationById(item).then(result => {
+                console.log("CALENDAR COMPONENT -- HANDLE ON SELECT EVENT CALENDAR -- COMPENSATIONS -- ", result);
+                compensations = [...compensations, result.data.compensation]
+            })
         })).then(() => this.setState({
             newEvent: {
                 workerId: evt.workerId,
@@ -149,7 +154,6 @@ class CalendarPage extends Component {
                 compensations
             }
         }, () => {
-            console.log("CALENDAR COMPONENT -- HANDLE ON SELECT EVENT CALENDAR -- COMPENSATIONS -- ", this.state.newEvent)
             this.setState({ modals: { ...this.state.modals, showModalEditEvent: true } });
         }))
     }
@@ -279,7 +283,7 @@ class CalendarPage extends Component {
             }
         })
     }
-    
+
     ActivitiesTable(props) {
         let columns = [
             {
@@ -447,7 +451,16 @@ class CalendarPage extends Component {
                                     <label>Start Date</label>
                                     <DatePicker style={{ width: "100%" }} value={moment(this.state.newEvent.startDate)} format={dateFormat} size="large" onChange={(e) => this.handleChangeNewEventDates(e)} />
                                 </Form.Field>
-                                <this.ActivitiesTable data={this.state.newEvent.compensations} />
+                                <Form.Field>
+                                    <label>Activities</label>
+                                    <Button icon='add' floated="right" onClick={() => this.setState({
+                                        newEvent: {
+                                            ...this.state.newEvent,
+                                            compensations: [...this.state.newEvent.compensations, { _id: Math.random(), payment: { _id: Math.random(), amount: "", type: "", date: moment() }, startTime: moment(), duration: "1", workReference: "...", created: true }]
+                                        }
+                                    }, () => console.log("CALENDAR COMPONENT --- EDIT EVENT ADD COMP --- ", this.state.newEvent.compensations))} />
+                                    <this.ActivitiesTable data={this.state.newEvent.compensations} />
+                                </Form.Field>
                             </Form>
                         </Modal.Content>
                         <Modal.Actions>
@@ -465,30 +478,41 @@ class CalendarPage extends Component {
                             }}>Remove</Button>
                             <Button floated="right" disabled={this.handleDisabledButtonEditEvent() ? true : false} onClick={() => {
                                 this.props.getWorkerById(this.state.newEvent.workerId).then((workerData) => {
-                                    Promise.all(this.state.newEvent.compensations.filter(item => item.edited === true).map(item => this.props.editCompensation(item))).then(() => {
-                                        this.props.changeOnCallEvent({
-                                            start: new Date(this.state.newEvent.startDate),
-                                            end: new Date(this.state.newEvent.startDate),
-                                            title: workerData.name,
-                                            _id: this.state.newEvent._id,
-                                            workerId: this.state.newEvent.workerId,
-                                            type: this.state.newEvent.compensations.length > 0 ? "Activity" : "On Call",
-                                            compensations: this.state.newEvent.compensations.map(item => item._id)
-                                        }).then((result) => {
-                                            console.log("CALENDAR COMPONENT -- EDIT BUTTON RESULT -- ", result);
-                                            this.setState({
-                                                newEvent: {
-                                                    workerId: '',
-                                                    startDate: moment(),
-                                                    compensations: []
-                                                }
-                                            }, () => {
-                                                this.loadCalendarEventsToState();
-                                                this.handleModalClose("showModalEditEvent");
-                                                this.handleChangeMessages("Event edited successfully", toast.TYPE.SUCCESS);
-                                            });
-                                        });
-                                    })
+                                    Promise.all(this.state.newEvent.compensations.filter(item => item.edited === true).map(item => this.props.editCompensation(_.omit(item, "edited"))))
+                                        .then(() => {
+                                            Promise.all(this.state.newEvent.compensations.filter(item => item.created === true)
+                                                .map(filterComp => this.props.addCompensation(_.omit(filterComp, "created")).then(newComp => {
+                                                    this.setState({
+                                                        newEvent: {
+                                                            ...this.state.newEvent,
+                                                            compensations: this.state.newEvent.compensations.map(oldComp => oldComp._id === filterComp._id ? newComp.data : oldComp)
+                                                        }
+                                                    })
+                                                }))).then(() => {
+                                                    this.props.changeOnCallEvent({
+                                                        start: new Date(this.state.newEvent.startDate),
+                                                        end: new Date(this.state.newEvent.startDate),
+                                                        title: workerData.name,
+                                                        _id: this.state.newEvent._id,
+                                                        workerId: this.state.newEvent.workerId,
+                                                        type: this.state.newEvent.compensations.length > 0 ? "Activity" : "On Call",
+                                                        compensations: this.state.newEvent.compensations.map(item => item._id)
+                                                    }).then((result) => {
+                                                        console.log("CALENDAR COMPONENT -- EDIT BUTTON RESULT -- ", result);
+                                                        this.setState({
+                                                            newEvent: {
+                                                                workerId: '',
+                                                                startDate: moment(),
+                                                                compensations: []
+                                                            }
+                                                        }, () => {
+                                                            this.loadCalendarEventsToState();
+                                                            this.handleModalClose("showModalEditEvent");
+                                                            this.handleChangeMessages("Event edited successfully", toast.TYPE.SUCCESS);
+                                                        });
+                                                    });
+                                                })
+                                        })
                                 })
                             }}>Edit event</Button>
                         </Modal.Actions>
@@ -582,8 +606,9 @@ const mapDispatchToProps = (dispatch) => {
         getWorkerById: _id => dispatch(workerActions.getWorkerById(_id)),
         loadOnCallWorkers: () => dispatch(workerActions.loadOnCallWorkers()),
         //COMPENSATIONS
-        getCompensationById: _id => dispatch(conmpensationsActions.getCompensationById(_id)),
-        editCompensation: newComp => dispatch(conmpensationsActions.editCompensation(newComp))
+        getCompensationById: _id => dispatch(compensationsActions.getCompensationById(_id)),
+        editCompensation: newComp => dispatch(compensationsActions.editCompensation(newComp)),
+        addCompensation: newComp => dispatch(compensationsActions.addCompensation(newComp))
     };
 };
 
