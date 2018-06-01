@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { Grid, Form, Button, Icon, Modal, Header, Divider } from 'semantic-ui-react';
+import { Grid, Form, Button, Icon, Modal, Header, Divider, Checkbox, Select, Input } from 'semantic-ui-react';
 
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
@@ -30,7 +30,8 @@ class CompensationPayment extends Component {
             config: [],
             editCompensation: [],
             modalOpen: false,
-            workerId: ''
+            workerId: '',
+            payment: 0
         }
     }
 
@@ -80,9 +81,9 @@ class CompensationPayment extends Component {
 
     handleMoneyButton = () => {
         console.log('Configuración => ', this.props.config, this.state.editCompensation)
-        const moneyWeekend = this.props.config.onCallWeekendMoney;
-        const moneyWeek = this.props.config.onCallWeekMoney;
-        const weekDay = moment(this.state.editCompensation.startTime).isoWeekday();
+        /*const moneyWeekend = this.props.config.onCallWeekendMoney;
+        const moneyWeek = this.props.config.onCallWeekMoney;*/
+        /*const weekDay = moment(this.state.editCompensation.startTime).isoWeekday();
         const hour = moment(new Date(this.state.editCompensation.startTime));
         const startTime = moment('09:00 pm', "HH:mm a");
         let moneyFinal = 1;
@@ -114,7 +115,7 @@ class CompensationPayment extends Component {
         }, () => {
             console.log('compensacion justoi antes de ser modificada', this.state.editCompensation)
             this.props.editCompensations(this.state.editCompensation);
-        })
+        })*/
 
     }
 
@@ -163,7 +164,6 @@ class CompensationPayment extends Component {
                                             accessor: d => d.compenData.duration
                                         },
                                         {
-                                            accessor: 'payment._id',
                                             filterable: false,
                                             Cell: row => (
                                                 <Modal
@@ -180,6 +180,7 @@ class CompensationPayment extends Component {
                                                             <Button.Or />
                                                             <Button positive>Time</Button>
                                                         </Button.Group>
+                                                        <span>{this.state.payment}</span>
                                                     </Modal.Content>
                                                     <Modal.Actions>
                                                         <Button color='red' onClick={this.handleClose} inverted>
