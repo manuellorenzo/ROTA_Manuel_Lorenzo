@@ -23,19 +23,19 @@ export function loadAllCompensationSuccess(allCompensations) {
 export function loadCompensationByWorker(_id) {
     return function (dispatch) {
         return compensationApi.findCompensationByWorker(_id).then(compensations => {
-            dispatch(loadCompensationByWorkerSuccess(compensations))
+           return compensations
         }).catch(error => {
             throw (error);
         })
     }
 }
 
-export function loadCompensationByWorkerSuccess(compensations) {
+/*export function loadCompensationByWorkerSuccess(compensations) {
     return {
         type: types.ADD_COMPENSATION_BY_WORKER,
         compensations
     }
-}
+}*/
 
 export function getCompensationById(_id) {
     return function (dispatch) {

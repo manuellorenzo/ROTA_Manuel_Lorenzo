@@ -93,6 +93,15 @@ class calendarApi {
         });
     }
 
+    static findEventsByWorker(_id) {
+        console.log("CALENDAR API -- GET EVENTS BY WORKER -- ", _id);
+        return fetch(urls.URL_FERN + '/event/findEventByWorker/' + _id).then(response => {
+            return handlePromise(response);
+        }).catch(error => {
+            return error;
+        });
+    }
+
 }
 
 export default calendarApi;

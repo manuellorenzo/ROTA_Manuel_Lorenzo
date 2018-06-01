@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import { Grid, Form, Button, Icon, Modal, Header } from 'semantic-ui-react';
+import { Grid, Form, Button, Icon, Modal, Header, Divider } from 'semantic-ui-react';
 
 import ReactTable from 'react-table';
 import "react-table/react-table.css";
@@ -12,6 +12,7 @@ import * as configurationsActions from '../actions/configurationsActions';
 
 import { formatDate, compareHours } from '../global_functions/global_function'
 import moment from "moment";
+import _ from 'lodash';
 
 class CompensationPayment extends Component {
 
@@ -43,42 +44,32 @@ class CompensationPayment extends Component {
     componentDidMount() {
         console.log("COMPENSATIONSPAYMENT COMPONENT -- COMPONENT DID MOUNT -- ", this.props.config)
         this.loadConfigState();
-        this.loadCompensationState();
-
-    }
-
-
-
-    loadCompensationState() {
-        this.props.loadCompensationByWorker('5b03ed9685c16d306c24cdeb').then(() => {
-            if (Array.isArray(this.props.compensations)) {
-                console.log('Array es array')
-                this.setState({
-                    compensations: this.props.compensationsFilter
-                });
-            }
-        });
+        this.loadEventsState();
     }
 
     loadEventsState() {
-        this.props.loadEventByWorker('5b03ed9685c16d306c24cdeb').then(() => {
-            if (Array.isArray(this.props.events)) {
-                console.log('Event array es array');
-                this.setState({
-                    events: this.props.events
+        this.props.loadEventsByWorker('5b03ed9685c16d306c24cdeb').then((result) => {
+            Promise.all(_.flatten(result.data.map(event => {
+                return event.compensations.map(idCompen => {
+                    return { idCompen, startDate: event.start }
                 })
-            }
+            }))
+                .map(formattedCompen => this.props.getCompensationById(formattedCompen.idCompen).then(response => {
+                    return { startDate: formattedCompen.startDate, compenData: response.data }
+                })))
+                .then(compensations => {
+                    return compensations.map(compensation => {
+                        return { startDate: compensation.startDate, compenData: compensation.compenData.compensation }
+                    });
+                }).then(compensationsArray => this.setState({ compensations: compensationsArray }, () => console.log('COMPENSATIONS COMPONENT -- COMPENSATIONS STATE -- ', this.state.compensations)))
         })
     }
 
     loadConfigState() {
         this.props.loadAllConfig().then(() => {
-            if (Array.isArray(this.props.config)) {
-                console.log('Config Array es array', console.log(this.props.configCompensations))
-                this.setState({
-                    config: this.props.configCompensations
-                })
-            }
+            this.setState({
+                config: this.props.config
+            }, () => console.log('Config Array es array', this.state))
         })
     }
 
@@ -88,7 +79,7 @@ class CompensationPayment extends Component {
     }
 
     handleMoneyButton = () => {
-        console.log('Configuración => ',this.props.config, this.state.editCompensation)
+        console.log('Configuración => ', this.props.config, this.state.editCompensation)
         const moneyWeekend = this.props.config.onCallWeekendMoney;
         const moneyWeek = this.props.config.onCallWeekMoney;
         const weekDay = moment(this.state.editCompensation.startTime).isoWeekday();
@@ -97,61 +88,58 @@ class CompensationPayment extends Component {
         let moneyFinal = 1;
         console.log('moneyFinal1', moneyFinal)
         if (weekDay < 5) {
-            if (compareHours(hour)>compareHours(startTime)) {
+            if (compareHours(hour) > compareHours(startTime)) {
                 console.log('Después de las nueve, dia entre semana')
-                moneyFinal=moneyWeek*this.props.config.afNtWeekMoneyMult;
+                moneyFinal = moneyWeek * this.props.config.afNtWeekMoneyMult;
             } else {
                 console.log('Antes de las nueve, dia entre semana')
-                moneyFinal=moneyWeek*this.props.config.bfNtWeekMoneyMult;
+                moneyFinal = moneyWeek * this.props.config.bfNtWeekMoneyMult;
 
             }
-        }else{
-            if (compareHours(hour)>compareHours(startTime)) {
+        } else {
+            if (compareHours(hour) > compareHours(startTime)) {
                 console.log('Después de las nueve, fin de semana')
-                moneyFinal=moneyWeekend*this.props.config.afNtWeekendMoneyMult;
+                moneyFinal = moneyWeekend * this.props.config.afNtWeekendMoneyMult;
             } else {
                 console.log('Antes de las nueve, fin de semana')
-                moneyFinal=moneyWeekend*this.props.config.bfNtWeekendMoneyMult;
+                moneyFinal = moneyWeekend * this.props.config.bfNtWeekendMoneyMult;
             }
         }
-        console.log('moneyFinal2', moneyFinal, moneyWeek,this.props.config.afNtWeekMoneyMult)
+        console.log('moneyFinal2', moneyFinal, moneyWeek, this.props.config.afNtWeekMoneyMult)
         this.setState({
             editCompensation: {
                 ...this.state.editCompensation,
-                payment: { ...this.state.editCompensation.payment, amount: moneyFinal, type: 'money', date:new Date() }
+                payment: { ...this.state.editCompensation.payment, amount: moneyFinal, type: 'money', date: new Date() }
             }
         }, () => {
-            console.log('compensacion justoi antes de ser modificada',this.state.editCompensation)
+            console.log('compensacion justoi antes de ser modificada', this.state.editCompensation)
             this.props.editCompensations(this.state.editCompensation);
         })
 
     }
 
-    handleTimeButton=()=>{
-        
+    handleTimeButton = () => {
+
     }
 
     render() {
         return (
             <Grid columns={2}>
                 <Grid.Row centered>
-                    <Grid.Column width={4}>
-                        <h3>Compensation Payment</h3>
-                        <hr />
-                        <Form>
-                            <Form.Input label='Worker name' value='Pepe' />
-                            <Form.Input label='Worker DNI' value='29533302H' />
-                            <Form.Input label='Worker ID' value='1' />
-                            <Form.Button onClick={this.handleSeeCompensationsButton}>Ver compensaciones</Form.Button>
-
-                        </Form>
-
-                    </Grid.Column>
-                    <Grid.Column width={5}>
+                    <Grid.Column>
+                        <Header as="h3">Compensations</Header>
+                        <Divider />
                         <ReactTable
                             filterable
                             getTdProps={(state, rowInfo, column, instance) => {
                                 return {
+                                    style: {
+                                        "whiteSpace": "normal",
+                                        "display": "flex",
+                                        "alignItems": "center",
+                                        "justifyContent": "center"
+
+                                    },
                                     onClick: (e, handleOriginal) => {
                                         console.log(rowInfo.original)
                                         this.setState({ editCompensation: rowInfo.original })
@@ -166,16 +154,17 @@ class CompensationPayment extends Component {
                                         {
                                             Header: "Fecha compensacion",
                                             id: 'dateCompensation',
-                                            accessor: d => formatDate(d.startTime)
+                                            accessor: d => formatDate(d.startDate)
                                         },
 
                                         {
                                             Header: "Duración tarea",
-                                            accessor: "duration",
+                                            id: 'duration',
+                                            accessor: d => d.compenData.duration
                                         },
                                         {
-                                            Header: 'Cobrar',
                                             accessor: 'payment._id',
+                                            filterable: false,
                                             Cell: row => (
                                                 <Modal
                                                     trigger={<Button onClick={this.handleOpen}>Show Modal</Button>}
@@ -239,9 +228,10 @@ const mapDispatchToProps = (dispatch) => {
         loadAllCompensations: () => dispatch(compensationAction.loadAllCompensations()),
         loadCompensationByWorker: worker => dispatch(compensationAction.loadCompensationByWorker(worker)),
         editCompensations: _id => dispatch(compensationAction.editCompensation(_id)),
+        getCompensationById: _id => dispatch(compensationAction.getCompensationById(_id)),
 
         //EVENTOS
-        loadEventByWorker: workerId => dispatch(eventAction.findEventByWorker(workerId)),
+        loadEventsByWorker: workerId => dispatch(eventAction.findEventsByWorker(workerId)),
 
         //CONFIG
         loadAllConfig: () => dispatch(configurationsActions.loadConf())
