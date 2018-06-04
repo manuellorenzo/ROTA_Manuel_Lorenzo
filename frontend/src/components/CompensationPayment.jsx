@@ -80,43 +80,18 @@ class CompensationPayment extends Component {
     }
 
     handleMoneyButton = () => {
-        console.log('Configuración => ', this.props.config, this.state.editCompensation)
-        /*const moneyWeekend = this.props.config.onCallWeekendMoney;
-        const moneyWeek = this.props.config.onCallWeekMoney;*/
-        /*const weekDay = moment(this.state.editCompensation.startTime).isoWeekday();
-        const hour = moment(new Date(this.state.editCompensation.startTime));
-        const startTime = moment('09:00 pm', "HH:mm a");
-        let moneyFinal = 1;
-        console.log('moneyFinal1', moneyFinal)
-        if (weekDay < 5) {
-            if (compareHours(hour) > compareHours(startTime)) {
-                console.log('Después de las nueve, dia entre semana')
-                moneyFinal = moneyWeek * this.props.config.afNtWeekMoneyMult;
-            } else {
-                console.log('Antes de las nueve, dia entre semana')
-                moneyFinal = moneyWeek * this.props.config.bfNtWeekMoneyMult;
+        const startDateDayNumber = moment(this.state.editCompensation.startDate).isoWeekday();
+        const weekDay = startDateDayNumber <= 4;
+        const afterNightTime = false;
+        const nightStartTime = this.getTime(moment(this.props.config.nightStartTime, "HH:mm"));
+        const nightEndTime = this.getTime(moment(this.props.config.nightEndTime, "HH:mm"));
+        const startTime = this.getTime(moment(this.state.editCompensation.compenData.startTime));
+        console.log('COMPENSATIONS COMPONENT -- Configuración => ', startTime.isBefore(nightEndTime));
+    }
 
-            }
-        } else {
-            if (compareHours(hour) > compareHours(startTime)) {
-                console.log('Después de las nueve, fin de semana')
-                moneyFinal = moneyWeekend * this.props.config.afNtWeekendMoneyMult;
-            } else {
-                console.log('Antes de las nueve, fin de semana')
-                moneyFinal = moneyWeekend * this.props.config.bfNtWeekendMoneyMult;
-            }
-        }
-        console.log('moneyFinal2', moneyFinal, moneyWeek, this.props.config.afNtWeekMoneyMult)
-        this.setState({
-            editCompensation: {
-                ...this.state.editCompensation,
-                payment: { ...this.state.editCompensation.payment, amount: moneyFinal, type: 'money', date: new Date() }
-            }
-        }, () => {
-            console.log('compensacion justoi antes de ser modificada', this.state.editCompensation)
-            this.props.editCompensations(this.state.editCompensation);
-        })*/
-
+    getTime(dateTime) {
+        console.log("COMPENSATIONS COMPONENT -- GET TIME -- ", dateTime.hours(), dateTime.minutes());
+        return moment({ h: dateTime.hours(), m: dateTime.minutes() });
     }
 
     handleTimeButton = () => {
