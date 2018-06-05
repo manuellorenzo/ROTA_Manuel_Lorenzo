@@ -31,7 +31,8 @@ class CompensationPayment extends Component {
             editCompensation: [],
             modalOpen: false,
             workerId: '',
-            payment: 0
+            payment: 0,
+            choose: false
         }
     }
 
@@ -40,7 +41,7 @@ class CompensationPayment extends Component {
         this.setState({ modalOpen: true })
     }
 
-    handleClose = () => this.setState({ modalOpen: false })
+    handleClose = () => this.setState({ modalOpen: false, payment: 0, choose: false })
 
     componentDidMount() {
         console.log("COMPENSATIONSPAYMENT COMPONENT -- COMPONENT DID MOUNT -- ", this.props.config)
@@ -112,21 +113,60 @@ class CompensationPayment extends Component {
         if (isNightTime && isWeekend) {
             let afNtWeekendMoneyMult = this.props.config.afNtWeekendMoneyMult;
             finalMoney = onCallWeekendMoney + (duration * afNtWeekendMoneyMult);
-        }else if(isNightTime){
+        } else if (isNightTime) {
             let afNtWeekMoneyMult = this.props.config.afNtWeekMoneyMult;
             finalMoney = onCallWeekMoney + (duration * afNtWeekMoneyMult);
-        }else if(isWeekend){
+        } else if (isWeekend) {
             let bfNtWeekendMoneyMult = this.props.config.bfNtWeekendMoneyMult;
             finalMoney = onCallWeekendMoney + (duration * bfNtWeekendMoneyMult);
-        }else{
+        } else {
             let bfNtWeekMoneyMult = this.props.config.bfNtWeekMoneyMult;
             finalMoney = onCallWeekMoney + (duration * bfNtWeekMoneyMult);
         }
-        console.log('COMPENSATIONS COMPONENT -- Configuración => ', isNightTime, isWeekend, finalMoney);
+        this.setState({ payment: finalMoney })
     }
 
     handleTimeButton = () => {
+        const startDateDayNumber = moment(this.state.editCompensation.startDate).isoWeekday();
+        const startTime = moment(this.state.editCompensation.startDate)
+            .set({
+                hour: moment(new Date(this.state.editCompensation.compenData.startTime)).get('hour'),
+                minute: moment(new Date(this.state.editCompensation.compenData.startTime)).get('minute')
+            });
+        const nightStartTime = moment(this.state.editCompensation.startDate)
+            .set({
+                hour: moment(this.props.config.nightStartTime, "HH:mm").get('hour'),
+                minute: moment(this.props.config.nightStartTime, "HH:mm").get('minute')
+            });
+        const nightEndTime = moment(this.state.editCompensation.startDate)
+            .set({
+                hour: moment(this.props.config.nightEndTime, "HH:mm").get('hour'),
+                minute: moment(this.props.config.nightEndTime, "HH:mm").get('minute')
+            });
+        const duration = this.state.editCompensation.compenData.duration;
+        const onCallWeekendMoney = this.props.config.onCallWeekendMoney;
+        const onCallWeekMoney = this.props.config.onCallWeekMoney;
 
+        if (nightEndTime.isBefore(nightStartTime)) {
+            nightEndTime.add(1, 'day');
+        }
+        let isNightTime = startTime.isBetween(nightStartTime, nightEndTime);
+        let isWeekend = startDateDayNumber >= 5;
+        let finalMoney = 0;
+        if (isNightTime && isWeekend) {
+            let afNtWeekendTimeMult = this.props.config.afNtWeekendTimeMult;
+            finalMoney = onCallWeekendMoney + (duration * afNtWeekendTimeMult);
+        } else if (isNightTime) {
+            let afNtWeekTimeMult = this.props.config.afNtWeekTimeMult;
+            finalMoney = onCallWeekMoney + (duration * afNtWeekTimeMult);
+        } else if (isWeekend) {
+            let bfNtWeekendTimeMult = this.props.config.bfNtWeekendTimeMult;
+            finalMoney = onCallWeekendMoney + (duration * bfNtWeekendTimeMult);
+        } else {
+            let bfNtWeekTimeMult = this.props.config.bfNtWeekTimeMult;
+            finalMoney = onCallWeekMoney + (duration * bfNtWeekTimeMult);
+        }
+        this.setState({ payment: finalMoney, choose: true })
     }
 
     render() {
@@ -148,7 +188,7 @@ class CompensationPayment extends Component {
 
                                     },
                                     onClick: (e, handleOriginal) => {
-                                        if(rowInfo !== undefined){
+                                        if (rowInfo !== undefined) {
                                             console.log(rowInfo.original)
                                             this.setState({ editCompensation: rowInfo.original })
                                         }
@@ -186,11 +226,14 @@ class CompensationPayment extends Component {
                                                         <Button.Group>
                                                             <Button onClick={this.handleMoneyButton}>Money</Button>
                                                             <Button.Or />
-                                                            <Button positive>Time</Button>
+                                                            <Button positive onClick={this.handleTimeButton}>Time</Button>
                                                         </Button.Group>
                                                         <span>{this.state.payment}</span>
                                                     </Modal.Content>
                                                     <Modal.Actions>
+                                                        <Button disabled={this.state.choose} onClick={this.handleClose} inverted>
+                                                            <Icon name='add' /> Add
+                                                        </Button>
                                                         <Button color='red' onClick={this.handleClose} inverted>
                                                             <Icon name='remove' /> Close
                                                         </Button>
