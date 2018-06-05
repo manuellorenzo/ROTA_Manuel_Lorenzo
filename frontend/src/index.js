@@ -18,7 +18,6 @@ import configureStore from './store/configureStore';
 import { loadConf } from './actions/configurationsActions';
 
 const store = configureStore();
-store.dispatch(loadConf());
 
 ReactDOM.render(
     <Provider store={store}>

@@ -50,11 +50,14 @@ class CompensationPayment extends Component {
 
     loadEventsState() {
         this.props.loadEventsByWorker('5b03ed9685c16d306c24cdeb').then((result) => {
+            //Obtenemos los eventos por trabajador y por cada evento, sacamos el id de sus compensaciones y la fecha del evento
+            //_.flatten se utiliza para evitar que se nos genere un array con demasiadas profundidades
             Promise.all(_.flatten(result.data.map(event => {
                 return event.compensations.map(idCompen => {
                     return { idCompen, startDate: event.start }
                 })
             }))
+                //Por cada id de compensación sacado, conseguimos el objecto completo y lo cargamos en el array
                 .map(formattedCompen => this.props.getCompensationById(formattedCompen.idCompen).then(response => {
                     return { startDate: formattedCompen.startDate, compenData: response.data }
                 })))
@@ -81,17 +84,45 @@ class CompensationPayment extends Component {
 
     handleMoneyButton = () => {
         const startDateDayNumber = moment(this.state.editCompensation.startDate).isoWeekday();
-        const weekDay = startDateDayNumber <= 4;
-        const afterNightTime = false;
-        const nightStartTime = this.getTime(moment(this.props.config.nightStartTime, "HH:mm"));
-        const nightEndTime = this.getTime(moment(this.props.config.nightEndTime, "HH:mm"));
-        const startTime = this.getTime(moment(this.state.editCompensation.compenData.startTime));
-        console.log('COMPENSATIONS COMPONENT -- Configuración => ', startTime.isBefore(nightEndTime));
-    }
+        const startTime = moment(this.state.editCompensation.startDate)
+            .set({
+                hour: moment(new Date(this.state.editCompensation.compenData.startTime)).get('hour'),
+                minute: moment(new Date(this.state.editCompensation.compenData.startTime)).get('minute')
+            });
+        const nightStartTime = moment(this.state.editCompensation.startDate)
+            .set({
+                hour: moment(this.props.config.nightStartTime, "HH:mm").get('hour'),
+                minute: moment(this.props.config.nightStartTime, "HH:mm").get('minute')
+            });
+        const nightEndTime = moment(this.state.editCompensation.startDate)
+            .set({
+                hour: moment(this.props.config.nightEndTime, "HH:mm").get('hour'),
+                minute: moment(this.props.config.nightEndTime, "HH:mm").get('minute')
+            });
+        const duration = this.state.editCompensation.compenData.duration;
+        const onCallWeekendMoney = this.props.config.onCallWeekendMoney;
+        const onCallWeekMoney = this.props.config.onCallWeekMoney;
 
-    getTime(dateTime) {
-        console.log("COMPENSATIONS COMPONENT -- GET TIME -- ", dateTime.hours(), dateTime.minutes());
-        return moment({ h: dateTime.hours(), m: dateTime.minutes() });
+        if (nightEndTime.isBefore(nightStartTime)) {
+            nightEndTime.add(1, 'day');
+        }
+        let isNightTime = startTime.isBetween(nightStartTime, nightEndTime);
+        let isWeekend = startDateDayNumber >= 5;
+        let finalMoney = 0;
+        if (isNightTime && isWeekend) {
+            let afNtWeekendMoneyMult = this.props.config.afNtWeekendMoneyMult;
+            finalMoney = onCallWeekendMoney + (duration * afNtWeekendMoneyMult);
+        }else if(isNightTime){
+            let afNtWeekMoneyMult = this.props.config.afNtWeekMoneyMult;
+            finalMoney = onCallWeekMoney + (duration * afNtWeekMoneyMult);
+        }else if(isWeekend){
+            let bfNtWeekendMoneyMult = this.props.config.bfNtWeekendMoneyMult;
+            finalMoney = onCallWeekendMoney + (duration * bfNtWeekendMoneyMult);
+        }else{
+            let bfNtWeekMoneyMult = this.props.config.bfNtWeekMoneyMult;
+            finalMoney = onCallWeekMoney + (duration * bfNtWeekMoneyMult);
+        }
+        console.log('COMPENSATIONS COMPONENT -- Configuración => ', isNightTime, isWeekend, finalMoney);
     }
 
     handleTimeButton = () => {
@@ -117,8 +148,10 @@ class CompensationPayment extends Component {
 
                                     },
                                     onClick: (e, handleOriginal) => {
-                                        console.log(rowInfo.original)
-                                        this.setState({ editCompensation: rowInfo.original })
+                                        if(rowInfo !== undefined){
+                                            console.log(rowInfo.original)
+                                            this.setState({ editCompensation: rowInfo.original })
+                                        }
                                     }
                                 };
                             }}
@@ -128,13 +161,13 @@ class CompensationPayment extends Component {
                                     Header: "Compensation payment",
                                     columns: [
                                         {
-                                            Header: "Fecha compensacion",
+                                            Header: "Date",
                                             id: 'dateCompensation',
                                             accessor: d => formatDate(d.startDate)
                                         },
 
                                         {
-                                            Header: "Duración tarea",
+                                            Header: "Duration",
                                             id: 'duration',
                                             accessor: d => d.compenData.duration
                                         },

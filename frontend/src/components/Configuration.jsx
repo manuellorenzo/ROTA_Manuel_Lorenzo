@@ -55,10 +55,6 @@ class Configuration extends Component {
         this.props.loadAllConf().then(() =>
             this.setState((prevState, props) => {
                 return props.compensations
-            }, () => {
-                /*Object.keys(this.state).map((key) => {
-                    console.log("Compensation state",{[key]:this.state[key]});
-                })*/
             }));
     }
 
@@ -81,26 +77,8 @@ class Configuration extends Component {
             bfNtWeekMoneyMult, afNtWeekMoneyMult, bfNtWeekTimeMult, afNtWeekTimeMult,
             bfNtWeekendMoneyMult, afNtWeekendMoneyMult, bfNtWeekendTimeMult, afNtWeekendTimeMult,
             nightEndTime, nightStartTime } = this.state
+            console.log("CONFIGURATION COMPONENT -- HANDLE SUBMIT COMPENSATIONS ID -- ", this.props.compensations);
         this.props.editConf({ ...this.state, _id: this.props.compensations._id });
-        /*//ON CALL MONEY
-        this.props.changeOnCallWeekMoney(onCallWeekMoney);
-        this.props.changeOnCallWeekendMoney(onCallWeekendMoney);
-
-        //WEEK
-        this.props.changeBeforeNTWeekMoneyMult(bfNtWeekMoneyMult);
-        this.props.changeAfterNTWeekMoneyMult(afNtWeekMoneyMult);
-        this.props.changeBeforeNTWeekTimeMult(bfNtWeekTimeMult);
-        this.props.changeAfterNTWeekTimeMult(afNtWeekTimeMult);
-
-        //WEEKEND
-        this.props.changeBeforeNTWeekendMoneyMult(bfNtWeekendMoneyMult);
-        this.props.changeAfterNTWeekendMoneyMult(afNtWeekendMoneyMult);
-        this.props.changeBeforeNTWeekendTimeMult(bfNtWeekendTimeMult);
-        this.props.changeAfterNTWeekendTimeMult(afNtWeekendTimeMult);
-
-        //TIME
-        this.props.changeNightEndTime(nightEndTime);
-        this.props.changeNightStartTime(nightStartTime);*/
     }
 
     handleBlur = (e) => {
@@ -129,7 +107,7 @@ class Configuration extends Component {
                                         <Grid.Row>
                                             <Grid.Column width={8} floated="left">
                                                 <Form.Field >
-                                                    <Form.Input label="On Call Base Weekend Money" name="onCallWeekMoney" type='number' min={0} placeholder="On Call Base Week Money"
+                                                    <Form.Input label="On Call Base Week Money" name="onCallWeekMoney" type='number' min={0} placeholder="On Call Base Week Money"
                                                         value={this.state.onCallWeekMoney} onChange={this.handleChange} onBlur={this.handleBlur} />
                                                 </Form.Field>
                                             </Grid.Column>
