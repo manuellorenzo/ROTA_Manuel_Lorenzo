@@ -44,7 +44,7 @@
     "watch-css": "npm run build-css && node-less-chokidar src/ -o src/ --watch --recursive"
   },
   "devDependencies": {
-    "less": "^3.0.4",
+    "less": "^2.7.3",
     "less-plugin-autoprefix": "^1.5.1"
   }
 }

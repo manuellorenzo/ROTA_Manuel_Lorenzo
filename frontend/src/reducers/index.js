@@ -3,6 +3,7 @@ import configurationsReducer from './configurationsReducer';
 import reportsReducer from './reportsReducer';
 import calendarReducer from './calendarReducer';
 import compensationsReducer from'./compensationsReducer';
+import loginReducer from './loginReducer';
 
 import {
   combineReducers
@@ -13,5 +14,6 @@ export default combineReducers({
   configurationsReducer,
   reportsReducer,
   calendarReducer,
-  compensationsReducer
+  compensationsReducer,
+  loginReducer
 })

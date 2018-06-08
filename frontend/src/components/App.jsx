@@ -1,28 +1,60 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+
 import Login from './Login';
 import HorizontalMenu from './Menu';
+
+import * as loginActions from '../actions/loginActions';
+import firebase, { auth, provider } from '../firebase.js';
 
 function Logged(props) {
     const isLogged = props.isLogged;
     if (isLogged === true) {
         return <HorizontalMenu />;
+    } else {
+        return <Login />; 
     }
-    return <Login />;
 }
 
 class App extends Component {
-    constructor(props){
+    constructor(props) {
         super(props);
-        this.state = {
-            isLogged : false
-        }
+
+        this.checkLastLogin = this.checkLastLogin.bind(this);
+    }
+
+    componentDidMount() {
+        this.checkLastLogin();
+    }
+
+    checkLastLogin() {
+        auth.onAuthStateChanged((user) => {
+            console.log("APP COMPONENT -- USER -- ", user)
+            if (user) {
+                this.props.editUser(user);
+            }
+        });
     }
     render() {
         return (
             <div>
-                <Logged isLogged = {this.state.isLogged}/>
+                <Logged isLogged={this.props.user !== null} />
             </div>
         )
     }
 }
-export default App;
+const mapStateToProps = (state, ownProps) => {
+    console.log('maptostate', state);
+    return {
+        // You can now say this.props.workers
+        user: state.loginReducer.loggedUser,
+    }
+};
+const mapDispatchToProps = (dispatch) => {
+    return {
+        // You can now say this.props.createBook
+        editUser: user => dispatch(loginActions.editUser(user)),
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);

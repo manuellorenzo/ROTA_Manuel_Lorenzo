@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Input, Button, Grid, Form, Image, Menu } from 'semantic-ui-react'
+import { connect } from 'react-redux';
 
 import CalendarPage from './Calendar';
 import Login from './Login';
@@ -12,28 +13,9 @@ import history from '../history';
 import Reports from './Report';
 import MonthlyReport from './MonthlyReport';
 
+import firebase, { auth, provider } from '../firebase.js';
+import * as loginActions from '../actions/loginActions';
 
-function BasicRouting(props) {
-    const activePage = props.activePage;
-    console.log('activePage', activePage);
-    if (activePage === 'home') {
-        return <CalendarPage />;
-    } else if(activePage === 'workers'){
-        return <Workers />;
-    }else if(activePage === 'logout'){
-        history.push("/login");
-        return null;
-    }else if(activePage === 'confi'){
-        return <Configuration />
-    }else if(activePage === 'reports'){
-        return <Reports />;
-    }else if (activePage==='compensation_payment'){
-        return <CompensationPayment/>
-    }else if (activePage==='monthlyReport'){
-        return <MonthlyReport/>
-    }
-    return <Workers />;
-}
 
 class HorizontalMenu extends Component {
     constructor(props) {
@@ -53,25 +35,58 @@ class HorizontalMenu extends Component {
                     section: 'confi',
                     value: 'Configuration'
                 },
-                {
+                /*{
                     section: 'reports',
                     value: 'Reports'
-                },
+                },*/
                 {
                     section: 'compensation_payment',
                     value: 'Compensation Payment'
                 },
-                {
+                /*{
                     section: 'monthlyReport',
                     value: 'Monthly Report'
-                },
+                },*/
                 {
                     section: 'logout',
                     value: 'Logout'
                 }
-                
+
             ]
         };
+        this.BasicRouting = this.BasicRouting.bind(this);
+        this.logOut = this.logOut.bind(this);
+    }
+
+    BasicRouting(props) {
+        const activePage = props.activePage;
+        console.log('activePage', activePage);
+        if (activePage === 'home') {
+            return <CalendarPage />;
+        } else if (activePage === 'workers') {
+            return <Workers />;
+        } else if (activePage === 'logout') {
+            this.logOut();
+            return null;
+            /*history.push("/login");
+            return null;*/
+        } else if (activePage === 'confi') {
+            return <Configuration />
+        } else if (activePage === 'reports') {
+            return <Reports />;
+        } else if (activePage === 'compensation_payment') {
+            return <CompensationPayment />
+        } else if (activePage === 'monthlyReport') {
+            return <MonthlyReport />
+        }
+        return <Workers />;
+    }
+
+    logOut() {
+        auth.signOut()
+            .then(() => {
+                this.props.editUser(null)
+            });
     }
 
     handleItemClick = (e, { name }) => this.setState({ activeItem: name })
@@ -91,10 +106,26 @@ class HorizontalMenu extends Component {
                     }
                 </Menu>
                 <div className="paddingTopContent">
-                    <BasicRouting activePage={activeItem} />
+                    <this.BasicRouting activePage={activeItem} />
                 </div>
             </div>
         )
     }
 }
-export default HorizontalMenu;
+const mapStateToProps = (state, ownProps) => {
+    console.log('maptostate', state);
+    return {
+        // You can now say this.props.workers
+        user: state.loginReducer.loggedUser,
+    }
+};
+
+// Maps actions to props
+const mapDispatchToProps = (dispatch) => {
+    return {
+        // You can now say this.props.createBook
+        editUser: user => dispatch(loginActions.editUser(user)),
+    }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(HorizontalMenu);
