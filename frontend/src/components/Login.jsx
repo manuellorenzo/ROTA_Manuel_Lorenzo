@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import history from '../history';
 import firebase, { auth, provider } from '../firebase.js';
 import * as loginActions from '../actions/loginActions';
+import authApi from '../api/authApi';
 
 class Login extends Component {
     constructor(props) {
@@ -34,11 +35,11 @@ class Login extends Component {
     logIn() {
         auth.signInWithEmailAndPassword(this.state.username, this.state.password)
             .then((result) => {
-                console.log("LOGIN COMPONENT -- LOGIN -- RESULT -- ", result)
+                console.log("LOGIN COMPONENT -- LOGIN -- RESULT -- ", result.user)
                 const user = result.user;
                 this.setState({
                     err: ''
-                }, () => this.props.editUser(user));
+                }, () => authApi.createJWT(user.uid).then(result => console.log("LOGIN COMPONENT TOKEN -- ",result.data.token)).then(() => this.props.editUser(user)));
             }).catch(err => this.setState({ err: err.message })
             );
     }

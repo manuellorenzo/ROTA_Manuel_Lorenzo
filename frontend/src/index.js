@@ -4,7 +4,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
-import { Router, Route, Switch } from 'react-router-dom'
+import { Router, Route, Switch, Redirect } from 'react-router-dom'
 
 import App from './components/App'
 import Login from './components/Login';
@@ -24,12 +24,7 @@ ReactDOM.render(
         <Router history={history}>
             <Switch>
                 <Route exact path="/" component={App} />
-                <Route path="/app" component={App} />
-                <Route path="/login" component={Login} />
-                <Route path="/home" component={App} />
-                <Route path="/calendar" component={Calendar} />
-                <Route path="/menu" component={HorizontalMenu} />
-                <Route path="/report" component={Report}/>
+                <Redirect to="/" />
             </Switch>
         </Router>
     </Provider>, document.getElementById('root')

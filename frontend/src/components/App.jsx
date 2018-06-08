@@ -6,13 +6,14 @@ import HorizontalMenu from './Menu';
 
 import * as loginActions from '../actions/loginActions';
 import firebase, { auth, provider } from '../firebase.js';
+import authApi from '../api/authApi';
 
 function Logged(props) {
     const isLogged = props.isLogged;
     if (isLogged === true) {
         return <HorizontalMenu />;
     } else {
-        return <Login />; 
+        return <Login />;
     }
 }
 
@@ -31,7 +32,7 @@ class App extends Component {
         auth.onAuthStateChanged((user) => {
             console.log("APP COMPONENT -- USER -- ", user)
             if (user) {
-                this.props.editUser(user);
+                authApi.createJWT(user.uid).then(result => console.log("LOGIN COMPONENT TOKEN -- ", result.data.token)).then(() => this.props.editUser(user))
             }
         });
     }
