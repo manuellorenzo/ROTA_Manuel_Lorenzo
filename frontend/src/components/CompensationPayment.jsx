@@ -31,8 +31,10 @@ class CompensationPayment extends Component {
             editCompensation: [],
             modalOpen: false,
             workerId: '',
-            payment: 0,
-            choose: false
+            payment: {
+                value: 0,
+                type: ''
+            }
         }
     }
 
@@ -41,7 +43,7 @@ class CompensationPayment extends Component {
         this.setState({ modalOpen: true })
     }
 
-    handleClose = () => this.setState({ modalOpen: false, payment: 0, choose: false })
+    handleClose = () => this.setState({ modalOpen: false, payment: { value: 0, type: '' } })
 
     componentDidMount() {
         console.log("COMPENSATIONSPAYMENT COMPONENT -- COMPONENT DID MOUNT -- ", this.props.config)
@@ -123,7 +125,7 @@ class CompensationPayment extends Component {
             let bfNtWeekMoneyMult = this.props.config.bfNtWeekMoneyMult;
             finalMoney = onCallWeekMoney + (duration * bfNtWeekMoneyMult);
         }
-        this.setState({ payment: finalMoney })
+        this.setState({ payment: { value: finalMoney, type: 'euros' } })
     }
 
     handleTimeButton = () => {
@@ -166,7 +168,18 @@ class CompensationPayment extends Component {
             let bfNtWeekTimeMult = this.props.config.bfNtWeekTimeMult;
             finalMoney = onCallWeekMoney + (duration * bfNtWeekTimeMult);
         }
-        this.setState({ payment: finalMoney, choose: true })
+        this.setState({ payment: { value: finalMoney, type: 'hours' } })
+    }
+
+    handleAddPayment = () => {
+        console.log("COMPENSATIONS COMPONENT ADD PAYMENT")
+        this.props.editCompensation({
+            ...this.state.editCompensation.compenData, 'payment': {
+                'amount': this.state.payment.value,
+                'type': this.state.payment.type === 'hours' ? 'time' : 'money',
+                'date': moment()
+            }
+        }).then(() => this.setState({ 'modalOpen': false, 'payment': { 'value': 0, 'type': '' } }, () => this.loadEventsState()));
     }
 
     render() {
@@ -213,35 +226,41 @@ class CompensationPayment extends Component {
                                         },
                                         {
                                             filterable: false,
-                                            Cell: row => (
-                                                <Modal
-                                                    trigger={<Button onClick={this.handleOpen}>Show Modal</Button>}
-                                                    open={this.state.modalOpen}
-                                                    onClose={this.handleClose}
-                                                    size='small'
-                                                >
-                                                    <Header icon='money' content='Compensation payment' />
-                                                    <Modal.Content>
-                                                        <h3>How do you want to get payed your compensation?</h3>
-                                                        <Button.Group>
-                                                            <Button onClick={this.handleMoneyButton}>Money</Button>
-                                                            <Button.Or />
-                                                            <Button positive onClick={this.handleTimeButton}>Time</Button>
-                                                        </Button.Group>
-                                                        <span>{this.state.payment}</span>
-                                                    </Modal.Content>
-                                                    <Modal.Actions>
-                                                        <Button disabled={this.state.choose} onClick={this.handleClose} inverted>
-                                                            <Icon name='add' /> Add
-                                                        </Button>
-                                                        <Button color='red' onClick={this.handleClose} inverted>
-                                                            <Icon name='remove' /> Close
-                                                        </Button>
-                                                    </Modal.Actions>
-                                                </Modal>
-                                            )
+                                            Cell: row => {
+                                                console.log("COMPENSATIONS PAYMENT COMPONENT -- ROW ORIGINAL ", row.original);
+                                                if (row.original.compenData.payment.type === '') {
+                                                    return (
+                                                        <Modal
+                                                            trigger={<Button onClick={this.handleOpen}>Pay</Button>}
+                                                            open={this.state.modalOpen}
+                                                            onClose={this.handleClose}
+                                                            size='small'
+                                                        >
+                                                            <Header icon='money' content='Compensation payment' />
+                                                            <Modal.Content>
+                                                                <h3>How do you want to get payed your compensation?</h3>
+                                                                <Button.Group>
+                                                                    <Button onClick={this.handleMoneyButton}>Money</Button>
+                                                                    <Button.Or />
+                                                                    <Button positive onClick={this.handleTimeButton}>Time</Button>
+                                                                </Button.Group>
+                                                                {this.state.payment.type !== '' ? <span>{this.state.payment.value} {this.state.payment.type}</span> : null}
+                                                            </Modal.Content>
+                                                            <Modal.Actions>
+                                                                <Button color='red' onClick={this.handleClose} inverted>
+                                                                    <Icon name='remove' /> Close
+                                                                </Button>
+                                                                <Button disabled={this.state.payment.type === ''} onClick={this.handleAddPayment}>
+                                                                    <Icon name='add' /> Add
+                                                                </Button>
+                                                            </Modal.Actions>
+                                                        </Modal>
+                                                    )
+                                                } else {
+                                                    return <p>{row.original.compenData.payment.amount} {row.original.compenData.payment.type === 'time' ? 'hours' : 'euros'}</p>
+                                                }
+                                            }
                                         }
-
                                     ]
                                 },
                             ]}
@@ -279,7 +298,7 @@ const mapDispatchToProps = (dispatch) => {
         //COMPENSACIONES
         loadAllCompensations: () => dispatch(compensationAction.loadAllCompensations()),
         loadCompensationByWorker: worker => dispatch(compensationAction.loadCompensationByWorker(worker)),
-        editCompensations: _id => dispatch(compensationAction.editCompensation(_id)),
+        editCompensation: _id => dispatch(compensationAction.editCompensation(_id)),
         getCompensationById: _id => dispatch(compensationAction.getCompensationById(_id)),
 
         //EVENTOS
