@@ -39,7 +39,12 @@ class Login extends Component {
                 const user = result.user;
                 this.setState({
                     err: ''
-                }, () => authApi.createJWT(user.uid).then(result => console.log("LOGIN COMPONENT TOKEN -- ",result.data.token)).then(() => this.props.editUser(user)));
+                }, () => auth.currentUser.getIdToken(true).then(idToken => {
+                    console.log("LOGIN COMPONENT ID TOKEN -- ", idToken);
+                    authApi.createJWT(idToken)
+                        .then(result => localStorage.setItem('jwt', result.data.token))
+                        .then(() => this.props.editUser(user))
+                }).catch(err => this.setState({ "err": err.message })))
             }).catch(err => this.setState({ err: err.message })
             );
     }

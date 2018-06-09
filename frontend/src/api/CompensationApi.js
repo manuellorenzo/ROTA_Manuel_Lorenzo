@@ -3,7 +3,14 @@ import handlePromise from './globalApiFunctions';
 
 class CompensationApi {
     static getAllCompensations() {
-        return fetch(urls.URL_JOSE + '/compensation/getCompensations').then(response => {
+        let jwt = localStorage.getItem('jwt');
+        return fetch(urls.URL_JOSE + '/compensation/getCompensations', {
+            headers: {
+                'x-access-token': jwt,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
             return handlePromise(response);
         }).catch(error => {
             return (error);
@@ -11,9 +18,11 @@ class CompensationApi {
     }
 
     static findCompensationByWorker(_id) {
+        let jwt = localStorage.getItem('jwt');
         return fetch(urls.URL_JOSE + '/compensation/getCompensationByWorker/' + _id, {
             method: 'get',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
@@ -25,9 +34,11 @@ class CompensationApi {
     }
 
     static getCompensationById(_id) {
+        let jwt = localStorage.getItem('jwt');
         return fetch(urls.URL_JOSE + '/compensation/getCompensation/' + _id, {
             method: 'get',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
@@ -39,10 +50,12 @@ class CompensationApi {
     }
 
     static editCompensation(newComp) {
+        let jwt = localStorage.getItem('jwt');
         console.log('edit compensation API', newComp)
         return fetch(urls.URL_JOSE + '/compensation/editCompensation', {
             method: 'put',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -57,10 +70,12 @@ class CompensationApi {
     }
 
     static addCompensation(newComp) {
+        let jwt = localStorage.getItem('jwt');
         console.log('add compensation API', newComp)
         return fetch(urls.URL_JOSE + '/compensation/addCompensation', {
             method: 'post',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },

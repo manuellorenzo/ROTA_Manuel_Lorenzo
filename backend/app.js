@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const config = require('./config');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const firebase = require('./firebase');
 
 const app = express();
 mongoose.connect(config.MONGODB_URI);
@@ -16,6 +17,8 @@ const event = require('./routes/Event');
 const worker = require('./routes/Worker');
 const compensation=require('./routes/Compensation');
 const configuration=require('./routes/Configuration')
+const auth=require('./routes/Auth')
+
 
 app.use(cors());
 app.use(logger('dev'));
@@ -29,5 +32,6 @@ app.use('/worker', worker);
 app.use('/activity', activity);
 app.use('/compensation', compensation);
 app.use('/configuration', configuration);
+app.use('/auth', auth);
 
 module.exports = app;

@@ -5,7 +5,9 @@ class WorkerApi {
 
     //WORKERS
     static getAllWorkers() {
-        return fetch(urls.URL_FERN + '/worker/list').then(response => {
+        let jwt = localStorage.getItem('jwt');
+        let headerObj = { 'x-access-token': jwt };
+        return fetch(urls.URL_FERN + '/worker/list', { headers: headerObj }).then(response => {
             console.log("WORKERS API -- GET ALL WORKERS --", response)
             return handlePromise(response);
         }).catch(error => {
@@ -15,7 +17,9 @@ class WorkerApi {
     }
 
     static getWorkerById(_id) {
-        return fetch(urls.URL_FERN + '/worker/findWorker/'+_id).then(response => {
+        let jwt = localStorage.getItem('jwt');
+        let headerObj = { 'x-access-token': jwt };
+        return fetch(urls.URL_FERN + '/worker/findWorker/' + _id, { headers: headerObj }).then(response => {
             console.log("WORKERS API -- GET WORKER BY ID --", response)
             return handlePromise(response);
         }).catch(error => {
@@ -24,10 +28,12 @@ class WorkerApi {
     }
 
     static editWorker(worker) {
+        let jwt = localStorage.getItem('jwt');
         console.log("Edit worker api", worker);
         return fetch(urls.URL_FERN + '/worker/edit', {
             method: 'put',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -40,10 +46,12 @@ class WorkerApi {
     }
 
     static addWorker(worker) {
+        let jwt = localStorage.getItem('jwt');
         console.log("Add worker api", worker);
         return fetch(urls.URL_FERN + '/worker/new', {
             method: 'post',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -56,10 +64,11 @@ class WorkerApi {
     }
 
     static deleteWorker(_id) {
-        console.log("Delete worker api", _id);
+        let jwt = localStorage.getItem('jwt');
         return fetch(urls.URL_FERN + '/worker/delete/' + _id, {
             method: 'put',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
@@ -74,7 +83,9 @@ class WorkerApi {
 
     //ON CALL WORKERS
     static getAllOnCallWorkers() {
-        return fetch(urls.URL_FERN + '/worker/findWorkerOnCall').then(response => {
+        let jwt = localStorage.getItem('jwt');
+        let headerObj = { 'x-access-token': jwt };
+        return fetch(urls.URL_FERN + '/worker/findWorkerOnCall', { headers: headerObj }).then(response => {
             console.log("WORKERS API -- GET ON CALL WORKERS --", response)
             return handlePromise(response);
         }).catch(error => {
@@ -84,10 +95,11 @@ class WorkerApi {
     }
 
     static addToOnCallWorker(_id) {
-        console.log("WORKERS API --addToOnCallWorker -- " + _id)
+        let jwt = localStorage.getItem('jwt');
         return fetch(urls.URL_FERN + '/worker/addOnCallWorker/' + _id, {
             method: 'put',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
@@ -101,9 +113,11 @@ class WorkerApi {
     }
 
     static removeFromOnCallWorker(_id) {
+        let jwt = localStorage.getItem('jwt');
         return fetch(urls.URL_FERN + '/worker/removeOnCallWorker/' + _id, {
             method: 'put',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }

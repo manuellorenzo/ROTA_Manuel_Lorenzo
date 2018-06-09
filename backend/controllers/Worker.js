@@ -23,6 +23,7 @@ module.exports.addWorker = (req, res) => {
 };
 
 module.exports.listWorker = (req, res) => {
+    console.log("workers")
     Worker.find().select().exec((err, result) => {
         if (err)
             return res.status(500).jsonp({error: 500, message: `${err.message}`});

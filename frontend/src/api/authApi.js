@@ -4,7 +4,7 @@ import handlePromise from './globalApiFunctions';
 class authApi {
 
     //AUTH
-    static createJWT(uid) {
+    static createJWT(idToken) {
         return fetch(urls.URL_FERN + '/auth/createjwt', {
             method: 'post',
             headers: {
@@ -12,7 +12,7 @@ class authApi {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                uid
+                idToken
             })
         }).then(response => {
             console.log("AUTH API -- CREATE JWT RESPONSE --", response)

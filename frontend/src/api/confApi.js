@@ -2,7 +2,14 @@ import * as urls from '../api/urls';
 
 class ConfApi {
     static getAllConf() {
-        return fetch(urls.URL_JOSE+'/configuration/getConfiguration').then(response => {
+        let jwt = localStorage.getItem('jwt');
+        return fetch(urls.URL_JOSE + '/configuration/getConfiguration', {
+            headers: {
+                'x-access-token': jwt,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        }).then(response => {
             return response.json();
         }).catch(error => {
             return error;
@@ -10,10 +17,11 @@ class ConfApi {
     }
 
     static editConf(newConf) {
-        console.log("Edit conf api", newConf);
-        return fetch(urls.URL_JOSE+'/configuration/editConfiguration', {
+        let jwt = localStorage.getItem('jwt');
+        return fetch(urls.URL_JOSE + '/configuration/editConfiguration', {
             method: 'put',
             headers: {
+                'x-access-token': jwt,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },

@@ -32,7 +32,12 @@ class App extends Component {
         auth.onAuthStateChanged((user) => {
             console.log("APP COMPONENT -- USER -- ", user)
             if (user) {
-                authApi.createJWT(user.uid).then(result => console.log("LOGIN COMPONENT TOKEN -- ", result.data.token)).then(() => this.props.editUser(user))
+                auth.currentUser.getIdToken(true).then(idToken => {
+                    console.log("LOGIN COMPONENT ID TOKEN -- ", idToken);
+                    authApi.createJWT(idToken)
+                        .then(result => localStorage.setItem('jwt', result.data.token))
+                        .then(() => this.props.editUser(user))
+                }).catch(err => this.setState({ "err": err.message }))
             }
         });
     }
