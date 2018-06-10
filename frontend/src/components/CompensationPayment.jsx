@@ -9,6 +9,7 @@ import "react-table/react-table.css";
 import * as compensationAction from '../actions/compensationAction';
 import * as eventAction from '../actions/calendarActions'
 import * as configurationsActions from '../actions/configurationsActions';
+import * as workersActions from '../actions/workersActions';
 
 import { formatDate, compareHours } from '../global_functions/global_function'
 import moment from "moment";
@@ -34,7 +35,8 @@ class CompensationPayment extends Component {
             payment: {
                 value: 0,
                 type: ''
-            }
+            },
+            workersOptions: []
         }
     }
 
@@ -48,11 +50,12 @@ class CompensationPayment extends Component {
     componentDidMount() {
         console.log("COMPENSATIONSPAYMENT COMPONENT -- COMPONENT DID MOUNT -- ", this.props.config)
         this.loadConfigState();
-        this.loadEventsState();
+        //this.loadEventsState();
+        this.loadWorkersState();
     }
 
-    loadEventsState() {
-        this.props.loadEventsByWorker('5b03ed9685c16d306c24cdeb').then((result) => {
+    loadEventsState(workerId) {
+        this.props.loadEventsByWorker(workerId).then((result) => {
             //Obtenemos los eventos por trabajador y por cada evento, sacamos el id de sus compensaciones y la fecha del evento
             //_.flatten se utiliza para evitar que se nos genere un array con demasiadas profundidades
             Promise.all(_.flatten(result.data.map(event => {
@@ -69,6 +72,20 @@ class CompensationPayment extends Component {
                         return { startDate: compensation.startDate, compenData: compensation.compenData.compensation }
                     });
                 }).then(compensationsArray => this.setState({ compensations: compensationsArray }, () => console.log('COMPENSATIONS COMPONENT -- COMPENSATIONS STATE -- ', this.state.compensations)))
+        })
+    }
+
+    loadWorkersState = () => {
+        this.props.loadAllWorkers().then(() => {
+            this.setState({
+                workersOptions: this.props.workers.filter((item) => item.inactive === false).map((itemMap) => {
+                    return {
+                        key: itemMap._id,
+                        text: itemMap.name,
+                        value: itemMap._id,
+                    }
+                })
+            });
         })
     }
 
@@ -182,6 +199,12 @@ class CompensationPayment extends Component {
         }).then(() => this.setState({ 'modalOpen': false, 'payment': { 'value': 0, 'type': '' } }, () => this.loadEventsState()));
     }
 
+    handleOnChangeDeveloperSelection = (e, { value }) => {
+        this.setState({ workerId: value }, () =>{
+            this.loadEventsState(this.state.workerId);
+        });
+    }
+
     render() {
         return (
             <Grid columns={2}>
@@ -189,6 +212,12 @@ class CompensationPayment extends Component {
                     <Grid.Column>
                         <Header as="h3">Compensations</Header>
                         <Divider />
+                        <Form>
+                            <Form.Field >
+                                <label>Developer</label>
+                                <Form.Dropdown placeholder='Worker' onChange={this.handleOnChangeDeveloperSelection} fluid search selection options={this.state.workersOptions} />
+                            </Form.Field>
+                        </Form>
                         <ReactTable
                             filterable
                             getTdProps={(state, rowInfo, column, instance) => {
@@ -289,7 +318,10 @@ const mapStateToProps = (state, ownProps) => {
         events: state.calendarReducer.eventWorker,
 
         //CONFIG
-        config: state.configurationsReducer.configCompensations
+        config: state.configurationsReducer.configCompensations,
+
+        //WORKERS
+        workers: state.workersReducer.workers,
     };
 }
 
@@ -305,7 +337,10 @@ const mapDispatchToProps = (dispatch) => {
         loadEventsByWorker: workerId => dispatch(eventAction.findEventsByWorker(workerId)),
 
         //CONFIG
-        loadAllConfig: () => dispatch(configurationsActions.loadConf())
+        loadAllConfig: () => dispatch(configurationsActions.loadConf()),
+
+        //WORKERS
+        loadAllWorkers: () => dispatch(workersActions.loadWorkers()),
 
     }
 }
