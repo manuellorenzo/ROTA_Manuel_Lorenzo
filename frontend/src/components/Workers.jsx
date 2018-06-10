@@ -277,7 +277,6 @@ class Workers extends Component {
                         <Grid.Row>
                             <Grid.Column>
                                 <Button floated="left" onClick={() => this.setState({ modals: { ...this.state.modals, showModalAddWorker: true } })}>Add new worker</Button>
-                                <Button floated="right" onClick={() => this.props.addWorker({ _id: Math.random(), name: 'Manuel Lorenzo' + Math.random() * 100, role: 'Admin' })}>Add employee</Button>
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row>
@@ -325,7 +324,7 @@ class Workers extends Component {
                                 this.loadWorkerState();
                                 //this.handleChangeMessages("ERROR: Worker not added", toast.TYPE.ERROR);
                             });
-                        }}>Add event</Button>
+                        }}>Add worker</Button>
                     </Modal.Actions>
                 </Modal>
                 <Modal
@@ -356,7 +355,7 @@ class Workers extends Component {
                                 this.loadWorkerState();
                             });
 
-                        }}>Edit event</Button>
+                        }}>Edit worker</Button>
                     </Modal.Actions>
                 </Modal>
                 <Toast message={this.state.messages.CRUDWorkers.text} show={this.state.messages.CRUDWorkers.show} type={this.state.messages.CRUDWorkers.type} />

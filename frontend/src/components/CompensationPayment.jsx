@@ -273,14 +273,14 @@ class CompensationPayment extends Component {
                                                                     <Button.Or />
                                                                     <Button positive onClick={this.handleTimeButton}>Time</Button>
                                                                 </Button.Group>
-                                                                {this.state.payment.type !== '' ? <span>{this.state.payment.value} {this.state.payment.type}</span> : null}
+                                                                {this.state.payment.type !== '' ? <span>    {this.state.payment.value} {this.state.payment.type}</span> : null}
                                                             </Modal.Content>
                                                             <Modal.Actions>
                                                                 <Button color='red' onClick={this.handleClose} inverted>
                                                                     <Icon name='remove' /> Close
                                                                 </Button>
                                                                 <Button disabled={this.state.payment.type === ''} onClick={this.handleAddPayment}>
-                                                                    <Icon name='add' /> Add
+                                                                    <Icon name='add' /> Accept
                                                                 </Button>
                                                             </Modal.Actions>
                                                         </Modal>
